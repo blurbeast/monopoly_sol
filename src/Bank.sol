@@ -16,6 +16,14 @@ import { ERC20 } from "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.so
  */
 contract GameBank is ERC20("GameBank", "GB") {
 
+    struct Property {
+        string name;
+        string description;
+        uint256 buyAmount;
+        uint256 rentAmount;
+        address owner;
+     }
+
     // the tolerance is the extra token minted to cater for player borrowing and community card picked .
     uint256 constant private tolerace = 4;
 

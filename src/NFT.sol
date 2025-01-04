@@ -3,7 +3,11 @@ pragma solidity ^0.8.26;
 
 import "lib/openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 
-contract CollectionNFT is ERC721URIStorage {
+contract GeneralNFT is ERC721URIStorage {
+
+    uint8 public constant MAX_SUPPLY = 30;
+    uint8 public totalSupply;
+
     string private decription;
     string private baseUri;
     mapping(address => uint256) private minterTokenId;
@@ -16,7 +20,9 @@ contract CollectionNFT is ERC721URIStorage {
     }
 
     function mint(address _minter) external {
-        uint256 _tokenId = minterTokenId[_minter];
-        _mint(_minter, ++_tokenId);
+        require(totalSupply < MAX_SUPPLY , "");
+        uint256 tokenId = totalSupply + 1;
+        totalSupply++;
+        _mint(_minter, tokenId);
     }
 }
