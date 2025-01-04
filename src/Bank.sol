@@ -4,7 +4,7 @@
 pragma solidity ^0.8.26;
 
 
-import { ERC20 } from "solmate/tokens/ERC20.sol";
+import { ERC20 } from "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 // import { ERC20 } from "lib/solmate/src/tokens/ERC20.sol";
 
 /**
@@ -14,7 +14,7 @@ import { ERC20 } from "solmate/tokens/ERC20.sol";
  * @dev this is intended to be deployed upon every new creation of a new game.
 
  */
-contract GameBank is ERC20("GameBank", "GB", 4) {
+contract GameBank is ERC20("GameBank", "GB") {
 
     // the tolerance is the extra token minted to cater for player borrowing and community card picked .
     uint256 constant private tolerace = 4;

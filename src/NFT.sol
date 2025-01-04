@@ -1,26 +1,22 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
-import { ERC721 } from "lib/solmate/src/tokens/ERC721.sol";
+import "lib/openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 
-contract NFT is ERC721("", "") {
+contract CollectionNFT is ERC721URIStorage {
+    string private decription;
+    string private baseUri;
+    mapping(address => uint256) private minterTokenId;
 
-
-    struct NFTP {
-        uint8 id ;
-        bytes description;
-        bytes name ;
-        uint256 amount ;
+    constructor(string memory name, string memory symbol, string memory desc, string memory uri)
+    ERC721(name, symbol)
+    {
+        decription = desc;
+        baseUri = uri;
     }
 
-    uint256 public id ;
-
-    function tokenURI(uint256 id) public view override returns (string memory) {
-        return "";
+    function mint(address _minter) external {
+        uint256 _tokenId = minterTokenId[_minter];
+        _mint(_minter, ++_tokenId);
     }
-
-    // function mintNFT() {
-        
-    // }
-
 }
