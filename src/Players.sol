@@ -2,9 +2,23 @@
 pragma solidity ^0.8.26;
 
 contract PlayerS {
+
+    mapping (address => bytes) public playerUsernames;
+    mapping (bytes => bool ) public usernameExists;
+    mapping (address => bool ) public alreadyRegistered;
     constructor() {}
 
-    function registerPlayer(address playerAddress, string memory username) external {}
+    function registerPlayer(address playerAddress, string memory username) external {
+        require(!alreadyRegistered[playerAddress], "player already registered");
+
+        bytes memory _usernameBytes = convertToLowerCase(username);
+
+        require(!usernameExists[_usernameBytes], "username is already taken");
+
+        
+
+
+    }
 
     function joinGame(uint256 gameId) external {}
 
@@ -14,7 +28,7 @@ contract PlayerS {
 
     function rentProperty(uint256 propertyId) external {}
 
-    function convertToLowerCase(string memory username) private pure returns (string memory) {
+    function convertToLowerCase(string memory username) private pure returns (bytes memory) {
         bytes memory recievedUsernameBytes = bytes(username);
         bytes memory convertedUsernameBytes = new bytes(recievedUsernameBytes.length);
 
@@ -24,7 +38,8 @@ contract PlayerS {
             } else {
                 convertedUsernameBytes[i] = recievedUsernameBytes[i];
             }
-            return string(convertedUsernameBytes);
+            return convertedUsernameBytes;
+            // return string(convertedUsernameBytes);
         }
     }
 }
