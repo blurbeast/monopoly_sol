@@ -70,6 +70,5 @@ contract PlayerS {
             }
         }
         return convertedUsernameBytes;
-        // return string(convertedUsernameBytes);
     }
 }
