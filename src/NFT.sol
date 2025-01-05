@@ -22,4 +22,15 @@ contract GeneralNFT is ERC721URIStorage {
         totalSupply++;
         _mint(_minter, tokenId);
     }
+
+    function distributeToken() external view returns (string[] memory) {
+
+        string[] memory tokenIds = new string[](MAX_SUPPLY);
+        for (uint8 i = 0; i < MAX_SUPPLY; i++) {
+            tokenIds[i] = tokenURI(i + uint8(1));
+        }
+
+
+        return tokenIds;
+    }
 }

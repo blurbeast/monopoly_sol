@@ -20,6 +20,7 @@ contract GameBank is ERC20("GameBank", "GB") {
 
     // the tolerance is the extra token minted to cater for player borrowing and community card picked .
     uint256 private constant tolerace = 4;
+    address private nftContract;
 
     /**
      * @dev Initializes the contract with a fixed supply of tokens.
