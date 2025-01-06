@@ -53,10 +53,55 @@ contract PlayerS {
      */
     function createGame() external view returns (uint256 ){}
 
+
+    /**
+        @dev player should be able to buy a property.
+        @dev this function emits an event when a player buys a property.
+
+        @param propertyId The id of the property.
+        @dev player should only be able to buy a property if they have enough money.
+        @dev player should only be able to buy a property when they land on the property
+        @dev player should only be able to buy a property if they are not bankrupt.
+        @dev player should only be able to buy a property if it should owned by the bank
+     */
     
     function buyProperty(uint256 propertyId) external {}
 
+
+    /**
+     @dev player should be able to sell a property.
+     @dev this function emits an event when a player sells a property.
+
+     @param propertyId The id of the property.
+     @dev player should only be able to sell a property if they own the property.
+     */
+    function sellProperty(uint256 propertyId) external {}
+
+
+    /**
+     @dev player should be able to rent a property.
+     @dev this function emits an event when a player rent a property.
+
+     @param propertyId The id of the property.
+
+     @dev property owner should recieve the money for the rent.
+     @dev rent is 20% of the actual price of the property.
+     */
     function rentProperty(uint256 propertyId) external {}
+
+    /**
+        @dev player should be able to upgrade a property.
+        @dev this function emits an event when a player upgrades a property.
+
+        @param propertyId The id of the property.
+        @dev player should only be able to upgrade a property if they own the property.
+        @dev player should only be able to upgrade a property if they have enough money to do so.
+        @dev upgrade cost should be 30% of the present price of the property.
+        @dev upgrade level of a property should be incremented by 1.
+        @dev upgrade level of a property should be limited to 5.
+
+     */
+    function upgradeProperty(uint256 propertyId) external {}
 
     function convertToLowerCase(string memory username) private pure returns (bytes memory) {
         bytes memory recievedUsernameBytes = bytes(username);
