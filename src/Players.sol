@@ -51,7 +51,7 @@ contract PlayerS {
 
         @return the id of the created game.
      */
-    function createGame() external view returns (uint256 ){}
+    function createGame() external returns (uint256 ){}
 
 
     /**
