@@ -8,19 +8,17 @@ contract PlayerS {
 
     constructor() {}
 
-
     /**
-        @dev this function registers a new player to the game.
-        @param playerAddress The address of the player.
-        @param username The username of the player.
-
-        @notice this function checks if an address is already registered.
-        @notice this function call on a helper function which converts the username to lowercase.
-        @notice this function reads from the state to check if the converted lowercase username already exist to avoid duplicacy.
-        @notice this function emits an event when a player is registered.
+     * @dev this function registers a new player to the game.
+     *     @param playerAddress The address of the player.
+     *     @param username The username of the player.
+     *
+     *     @notice this function checks if an address is already registered.
+     *     @notice this function call on a helper function which converts the username to lowercase.
+     *     @notice this function reads from the state to check if the converted lowercase username already exist to avoid duplicacy.
+     *     @notice this function emits an event when a player is registered.
      */
     function registerPlayer(address playerAddress, string memory username) external {
-        
         require(!alreadyRegistered[playerAddress], "player already registered");
 
         bytes memory _usernameBytes = convertToLowerCase(username);
@@ -31,75 +29,69 @@ contract PlayerS {
         usernameExists[_usernameBytes] = true;
         playerUsernames[playerAddress] = _usernameBytes;
 
-        //emit an event 
+        //emit an event
     }
 
-
     /**
-        @dev when this function is called, user should be able to join game via the provided gamesid if the game has been created but not ended yet.
-        @dev this function should make a call to the game contract to check if provided gamesid is valid and not ended.
-        @dev if the gamesid is valid and not ended, player should be added to the game.
-        @dev this function emits an event when a player joins a game.
-
-        @param gameId The id of the game.
+     * @dev when this function is called, user should be able to join game via the provided gamesid if the game has been created but not ended yet.
+     *     @dev this function should make a call to the game contract to check if provided gamesid is valid and not ended.
+     *     @dev if the gamesid is valid and not ended, player should be added to the game.
+     *     @dev this function emits an event when a player joins a game.
+     *
+     *     @param gameId The id of the game.
      */
     function joinGame(uint256 gameId) external {}
 
     /**
-        @dev player should be able to create a new game .
-        @dev this function emits an event when a game is created.
-
-        @return the id of the created game.
+     * @dev player should be able to create a new game .
+     *     @dev this function emits an event when a game is created.
+     *
+     *     @return the id of the created game.
      */
-    function createGame() external returns (uint256 ){}
-
+    function createGame() external returns (uint256) {}
 
     /**
-        @dev player should be able to buy a property.
-        @dev this function emits an event when a player buys a property.
-
-        @param propertyId The id of the property.
-        @dev player should only be able to buy a property if they have enough money.
-        @dev player should only be able to buy a property when they land on the property
-        @dev player should only be able to buy a property if they are not bankrupt.
-        @dev player should only be able to buy a property if it should owned by the bank
+     * @dev player should be able to buy a property.
+     *     @dev this function emits an event when a player buys a property.
+     *
+     *     @param propertyId The id of the property.
+     *     @dev player should only be able to buy a property if they have enough money.
+     *     @dev player should only be able to buy a property when they land on the property
+     *     @dev player should only be able to buy a property if they are not bankrupt.
+     *     @dev player should only be able to buy a property if it should owned by the bank
      */
-    
     function buyProperty(uint256 propertyId) external {}
 
-
     /**
-     @dev player should be able to sell a property.
-     @dev this function emits an event when a player sells a property.
-
-     @param propertyId The id of the property.
-     @dev player should only be able to sell a property if they own the property.
+     * @dev player should be able to sell a property.
+     *  @dev this function emits an event when a player sells a property.
+     *
+     *  @param propertyId The id of the property.
+     *  @dev player should only be able to sell a property if they own the property.
      */
     function sellProperty(uint256 propertyId) external {}
 
-
     /**
-     @dev player should be able to rent a property.
-     @dev this function emits an event when a player rent a property.
-
-     @param propertyId The id of the property.
-
-     @dev property owner should recieve the money for the rent.
-     @dev rent is 20% of the actual price of the property.
+     * @dev player should be able to rent a property.
+     *  @dev this function emits an event when a player rent a property.
+     *
+     *  @param propertyId The id of the property.
+     *
+     *  @dev property owner should recieve the money for the rent.
+     *  @dev rent is 20% of the actual price of the property.
      */
     function rentProperty(uint256 propertyId) external {}
 
     /**
-        @dev player should be able to upgrade a property.
-        @dev this function emits an event when a player upgrades a property.
-
-        @param propertyId The id of the property.
-        @dev player should only be able to upgrade a property if they own the property.
-        @dev player should only be able to upgrade a property if they have enough money to do so.
-        @dev upgrade cost should be 30% of the present price of the property.
-        @dev upgrade level of a property should be incremented by 1.
-        @dev upgrade level of a property should be limited to 5.
-
+     * @dev player should be able to upgrade a property.
+     *     @dev this function emits an event when a player upgrades a property.
+     *
+     *     @param propertyId The id of the property.
+     *     @dev player should only be able to upgrade a property if they own the property.
+     *     @dev player should only be able to upgrade a property if they have enough money to do so.
+     *     @dev upgrade cost should be 30% of the present price of the property.
+     *     @dev upgrade level of a property should be incremented by 1.
+     *     @dev upgrade level of a property should be limited to 5.
      */
     function upgradeProperty(uint256 propertyId) external {}
 
