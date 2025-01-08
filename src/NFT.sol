@@ -28,9 +28,8 @@ contract GeneralNFT is ERC721URIStorage {
 
     constructor(string memory uri) ERC721("MonoPoly", "MNP") {
         baseUri = uri;
+        createNftProperties();
     }
-
-    function createProperties() private {}
 
     function mint(address _minter) external {
         require(totalSupply <= MAX_SUPPLY, "");
