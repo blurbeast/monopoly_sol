@@ -13,7 +13,7 @@ import "lib/openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721URISt
  *     @dev the URI of each NFT is fetched from the bank contract using the tokenId.
  */
 contract GeneralNFT is ERC721URIStorage {
-    uint8 public constant MAX_SUPPLY = 30;
+    uint8 public constant MAX_SUPPLY = 40;
     uint8 public totalSupply;
     string private baseUri;
 
