@@ -1,8 +1,16 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
+import { GameBank } from "./Bank.sol";
 
 contract Game {
-    address public gameBank;
+    GameBank gameBank;
+    uint8 numberOfPlayers ;
+
+
+    constructor(address _nftContract, uint8 _numberOfPlayers) {
+        gameBank = new GameBank(_numberOfPlayers, _nftContract);
+        numberOfPlayers = _numberOfPlayers;
+    }
 
     /**
      * @dev this function initializes the game with the provided players.
