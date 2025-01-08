@@ -32,7 +32,5 @@ contract GameBank is ERC20("GameBank", "GB") {
         _mint(address(this), amountToMint);
     }
 
-    function gameProperty() private {
-        
-    }
+    function gameProperty() private {}
 }
