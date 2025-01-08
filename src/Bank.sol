@@ -27,8 +27,9 @@ contract GameBank is ERC20("GameBank", "GB") {
      * @param numberOfPlayers the total number of players.
      * @dev _mint an internal function that mints the total token needed for the game.
      */
-    constructor(uint8 numberOfPlayers) {
+    constructor(uint8 numberOfPlayers, address _nftContract) {
         uint256 amountToMint = numberOfPlayers + tolerace;
+        nftContract = _nftContract;
         _mint(address(this), amountToMint);
     }
 

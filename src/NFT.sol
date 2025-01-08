@@ -36,6 +36,9 @@ contract GeneralNFT is ERC721URIStorage {
         uint256 tokenId = totalSupply + 1;
         _mint(_minter, tokenId);
         totalSupply++;
+
+
+        populatePropertyUri();
     }
 
     // okay but like this when getproperties() function , the uri should follow as well .
@@ -103,7 +106,7 @@ contract GeneralNFT is ERC721URIStorage {
         properties[39] = Property(bytes("Luxury Tax"), 0, bytes(""), 0);
     }
 
-    function populatePropertyUri() external {
+    function populatePropertyUri() private {
         require(totalSupply > 0, "no property minted yet");
         for (uint8 i = 1; i <= totalSupply; i++) {
             string memory onChainUri = tokenURI(i);
