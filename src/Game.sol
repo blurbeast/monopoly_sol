@@ -7,9 +7,13 @@ contract Game {
     uint8 numberOfPlayers ;
 
 
-    constructor(address _nftContract, uint8 _numberOfPlayers) {
-        gameBank = new GameBank(_numberOfPlayers, _nftContract);
-        numberOfPlayers = _numberOfPlayers;
+    constructor(address _nftContract, address[] memory players) {
+        require(players.length > 0 && players.length < 10, "exceed the allowed number of players");
+        for(uint8 i =0; i < players.length; i++) {
+            require(players[i].code.length == 0, "player address must be an EOA");
+        }
+        gameBank = new GameBank(uint8(players.length), _nftContract);
+        numberOfPlayers = uint8(players.length);
     }
 
     /**
@@ -19,5 +23,7 @@ contract Game {
      *
      *     @dev this function should emit an event
      */
-    function startGame(address[] memory players) external {}
+    function startGame(address[] memory players) external {
+
+    }
 }
