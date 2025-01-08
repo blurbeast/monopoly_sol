@@ -4,9 +4,8 @@ pragma solidity ^0.8.26;
 import "lib/openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 
 /**
- * @dev this is the generalized version of NFT contract.
+ *     @dev this is the generalized version of NFT contract.
  *     @notice this is a generalized version of NFT contract that can be used for any ERC721 token.
- *
  *     @dev this contract has the total supply of 30 NFT to be used across all the games played on this platform.
  *     @dev Each NFT has a unique tokenId, and the tokenId is mapped to the owner's address.
  *     @dev The mint function is used to create new NFTs which is not more than 30 .
@@ -16,21 +15,28 @@ import "lib/openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721URISt
 contract GeneralNFT is ERC721URIStorage {
     uint8 public constant MAX_SUPPLY = 30;
     uint8 public totalSupply;
-
-    string private decription;
     string private baseUri;
-    mapping(address => uint256) private minterTokenId;
 
-    constructor(string memory name, string memory symbol, string memory desc, string memory uri) ERC721(name, symbol) {
-        decription = desc;
+    struct Property {
+        string name;
+        uint256 rentAmount;
+        uint256 buyAmount;
+
+    }
+
+    constructor(string memory uri) ERC721("MonoPoly", "MNP") {
         baseUri = uri;
     }
 
+    function createProperties() private {
+
+    }
+
     function mint(address _minter) external {
-        require(totalSupply < MAX_SUPPLY, "");
+        require(totalSupply  <= MAX_SUPPLY, "");
         uint256 tokenId = totalSupply + 1;
-        totalSupply++;
         _mint(_minter, tokenId);
+        totalSupply++;
     }
 
     function distributeToken() external view returns (string[] memory) {
