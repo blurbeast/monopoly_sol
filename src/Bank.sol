@@ -31,4 +31,8 @@ contract GameBank is ERC20("GameBank", "GB") {
         uint256 amountToMint = numberOfPlayers + tolerace;
         _mint(address(this), amountToMint);
     }
+
+    function gameProperty() private {
+        
+    }
 }

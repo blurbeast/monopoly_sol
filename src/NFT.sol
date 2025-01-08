@@ -18,12 +18,13 @@ contract GeneralNFT is ERC721URIStorage {
     string private baseUri;
 
     struct Property {
-        string name;
+        bytes name;
         uint256 rentAmount;
+        bytes uri; 
         uint256 buyAmount;
 
     }
-
+    Property[] private properties;
     constructor(string memory uri) ERC721("MonoPoly", "MNP") {
         baseUri = uri;
     }
@@ -37,6 +38,172 @@ contract GeneralNFT is ERC721URIStorage {
         uint256 tokenId = totalSupply + 1;
         _mint(_minter, tokenId);
         totalSupply++;
+    }
+
+    function createNftProperties() private {
+        properties[1] = Property(
+            bytes("Park Place"),
+            100,
+            bytes(""),
+            1000
+        );
+        properties[2] = Property(
+            bytes("Boardwalk"),
+            100,
+            bytes(""),
+            1000
+        );
+        properties[3] = Property(
+            bytes("Baltic Avenue"),
+            100,
+            bytes(""),
+            1000
+        );
+        properties[4] = Property(
+            bytes("Atlantic Avenue"),
+            100,
+            bytes(""),
+            1000
+        );
+        properties[5] = Property(
+            bytes("Marvin Gardens"),
+            100,
+            bytes(""),
+            1000
+        );
+        properties[6] = Property(
+            bytes("Pacific Avenue"),
+            100,
+            bytes(""),
+            1000
+        );
+        properties[7] = Property(
+            bytes("North Carolina Avenue"),
+            100,
+            bytes(""),
+            1000
+        );
+        properties[8] = Property(
+            bytes("Pennsylvania Avenue"),
+            100,
+            bytes(""),
+            1000
+        );
+        properties[9] = Property(
+            bytes("Short Line"),
+            100,
+            bytes(""),
+            1000
+        );
+        properties[10] = Property(
+            bytes("Reading Railroad"),
+            100,
+            bytes(""),
+            1000
+        );
+        properties[11] = Property(
+            bytes("B&O Railroad"),
+            100,
+            bytes(""),
+            1000
+        );
+        properties[12] = Property(
+            bytes("Pennsylvania Railroad"),
+            100,
+            bytes(""),
+            1000
+        );
+        properties[13] = Property(
+            bytes("Electric Company"),
+            100,
+            bytes(""),
+            1000
+        );
+        properties[14] = Property(
+            bytes("Water Works"),
+            100,
+            bytes(""),
+            1000
+        );
+        properties[15] = Property(
+            bytes("Connecticut Avenue"),
+            100,
+            bytes(""),
+            1000
+        );
+        properties[16] = Property(
+            bytes("Vermont Avenue"),
+            100,
+            bytes(""),
+            1000
+        );
+        properties[17] = Property(
+            bytes("Oriental Avenue"),
+            100,
+            bytes(""),
+            1000
+        );
+        properties[18] = Property(
+            bytes("St. Charles Place"),
+            100,
+            bytes(""),
+            1000
+        );
+        properties[19] = Property(
+            bytes("States Avenue"),
+            100,
+            bytes(""),
+            1000
+        );
+        properties[20] = Property(
+            bytes("Virginia Avenue"),
+            100,
+            bytes(""),
+            1000
+        );
+        properties[21] = Property(
+            bytes("St. James Place"),
+            100,
+            bytes(""),
+            1000
+        );
+        properties[22] = Property(
+            bytes("Tennessee Avenue"),
+            100,
+            bytes(""),
+            1000
+        );
+        properties[23] = Property(
+            bytes("New York Avenue"),
+            100,
+            bytes(""),
+            1000
+        );
+        properties[24] = Property(
+            bytes("Kentucky Avenue"),
+            100,
+            bytes(""),
+            1000
+        );
+        properties[25] = Property(
+            bytes("Indiana Avenue"),
+            100,
+            bytes(""),
+            1000
+        );
+        properties[26] = Property(
+            bytes("Illinois Avenue"),
+            100,
+            bytes(""),
+            1000
+        );
+        properties[27] = Property(
+            bytes("Atlantic Avenue"),
+            100,
+            bytes(""),
+            1000
+        );
+        
     }
 
     function distributeToken() external view returns (string[] memory) {
