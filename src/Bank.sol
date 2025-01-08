@@ -4,15 +4,27 @@ pragma solidity ^0.8.26;
 import {ERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 // import { ERC20 } from "lib/solmate/src/tokens/ERC20.sol";
 
+  struct Property {
+        bytes name;
+        uint256 rentAmount;
+        bytes uri;
+        uint256 buyAmount;
+    }
+
+
+interface NFTContract {
+    function getAllProperties() external view returns (Property[] memory);
+}
 /**
  * @title GameBank
  * @dev A simple ERC20 token representing a game bank.
  * @dev this is intended to be deployed upon every new creation of a new game.
  */
+
 contract GameBank is ERC20("GameBank", "GB") {
-    struct Property {
+    struct PropertyG {
         string name;
-        string description;
+        string uri;
         uint256 buyAmount;
         uint256 rentAmount;
         address owner;
@@ -20,7 +32,8 @@ contract GameBank is ERC20("GameBank", "GB") {
 
     // the tolerance is the extra token minted to cater for player borrowing and community card picked .
     uint256 private constant tolerace = 4;
-    address private nftContract;
+    NFTContract private nftContract;
+    PropertyG[] gamePropertiesG;
 
     /**
      * @dev Initializes the contract with a fixed supply of tokens.
@@ -29,9 +42,21 @@ contract GameBank is ERC20("GameBank", "GB") {
      */
     constructor(uint8 numberOfPlayers, address _nftContract) {
         uint256 amountToMint = numberOfPlayers + tolerace;
-        nftContract = _nftContract;
+        nftContract = NFTContract(_nftContract);
         _mint(address(this), amountToMint);
     }
 
-    function gameProperty() private {}
+    function gameProperties() private {
+        uint256 size = nftContract.getAllProperties().length;
+        for(uint8 i = 1; i <= size; i++) {
+            Property memory property = nftContract.getAllProperties()[i];
+            gamePropertiesG[i] = PropertyG (
+                string(property.name),
+                string(property.uri),
+                property.buyAmount,
+                property.rentAmount,
+                address(this)
+            );
+        }
+    }
 }

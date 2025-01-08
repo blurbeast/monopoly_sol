@@ -37,7 +37,6 @@ contract GeneralNFT is ERC721URIStorage {
         _mint(_minter, tokenId);
         totalSupply++;
 
-
         populatePropertyUri();
     }
 
