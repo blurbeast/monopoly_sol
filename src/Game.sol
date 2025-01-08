@@ -1,15 +1,15 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
-import { GameBank } from "./Bank.sol";
+
+import {GameBank} from "./Bank.sol";
 
 contract Game {
     GameBank gameBank;
-    uint8 numberOfPlayers ;
-
+    uint8 numberOfPlayers;
 
     constructor(address _nftContract, address[] memory players) {
         require(players.length > 0 && players.length < 10, "exceed the allowed number of players");
-        for(uint8 i =0; i < players.length; i++) {
+        for (uint8 i = 0; i < players.length; i++) {
             require(players[i].code.length == 0, "player address must be an EOA");
         }
         gameBank = new GameBank(uint8(players.length), _nftContract);
@@ -23,7 +23,5 @@ contract Game {
      *
      *     @dev this function should emit an event
      */
-    function startGame(address[] memory players) external {
-
-    }
+    function startGame(address[] memory players) external {}
 }

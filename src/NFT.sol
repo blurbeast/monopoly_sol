@@ -8,7 +8,7 @@ import "lib/openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721URISt
  *     @notice this is a generalized version of NFT contract that can be used for any ERC721 token.
  *     @dev this contract has the total supply of 30 NFT to be used across all the games played on this platform.
  *     @dev Each NFT has a unique tokenId, and the tokenId is mapped to the owner's address.
- *     @dev The mint function is used to create new NFTs which is not more than 30 .
+ *     @dev The mint function is used to create new NFTs which is not more than 40 .
  *     @dev this contract is called upon on every new game created and it NFT URI is sent to the bank contract which then creates a property for each of the NFTs.
  *     @dev the URI of each NFT is fetched from the bank contract using the tokenId.
  */
@@ -24,7 +24,8 @@ contract GeneralNFT is ERC721URIStorage {
         uint256 buyAmount;
     }
 
-    Property[] private properties;
+    // Property[] private properties = new Property[](MAX_SUPPLY);
+    mapping(uint8 => Property) private properties ; 
 
     constructor(string memory uri) ERC721("MonoPoly", "MNP") {
         baseUri = uri;
@@ -32,11 +33,12 @@ contract GeneralNFT is ERC721URIStorage {
     }
 
     function mint(address _minter) external {
-        require(totalSupply <= MAX_SUPPLY, "");
-        uint256 tokenId = totalSupply + 1;
+        require(totalSupply < MAX_SUPPLY, "Max supply reached");
+        uint256 tokenId = totalSupply;
         _mint(_minter, tokenId);
+        string memory tokenUri = string(abi.encodePacked(baseUri, "/", Strings.toString(tokenId)));
+        _setTokenURI(tokenId, tokenUri);
         totalSupply++;
-
         populatePropertyUri();
     }
 
@@ -115,16 +117,11 @@ contract GeneralNFT is ERC721URIStorage {
     }
 
     function getAllProperties() external view returns (Property[] memory) {
-        require(totalSupply > 0, "no property minted yet");
-        return properties;
-    }
-
-    function distributeToken() external view returns (string[] memory) {
-        string[] memory tokenIds = new string[](MAX_SUPPLY);
-        for (uint8 i = 0; i < MAX_SUPPLY; i++) {
-            tokenIds[i] = tokenURI(i + uint8(1));
+        require(totalSupply > 0, "No properties minted yet");
+        Property[] memory prop = new Property[](MAX_SUPPLY);
+        for (uint8 i = 0; i < totalSupply; i++) {
+            prop[i] = properties[i + 1];
         }
-
-        return tokenIds;
+        return prop;
     }
 }

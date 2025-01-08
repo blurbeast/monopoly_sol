@@ -51,9 +51,8 @@ contract GameBank is ERC20("GameBank", "GB") {
         uint256 size = nftContract.getAllProperties().length;
         for (uint8 i = 1; i <= size; i++) {
             Property memory property = nftContract.getAllProperties()[i];
-            gameProperties[i] = PropertyG(
-                property.name, property.uri, property.buyAmount, property.rentAmount, address(this)
-            );
+            gameProperties[i] =
+                PropertyG(property.name, property.uri, property.buyAmount, property.rentAmount, address(this));
         }
     }
 }
