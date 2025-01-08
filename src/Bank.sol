@@ -27,12 +27,14 @@ contract GameBank is ERC20("GameBank", "GB") {
         uint256 buyAmount;
         uint256 rentAmount;
         address owner;
+        uint8 numberOfUpgrade;
     }
 
     // the tolerance is the extra token minted to cater for player borrowing and community card picked .
     uint256 private constant tolerace = 4;
     NFTContract private nftContract;
-    PropertyG[] gameProperties;
+    uint8 private propertySize;
+    mapping(uint8 => PropertyG) gameProperties;
     /**
      * @dev Initializes the contract with a fixed supply of tokens.
      * @param numberOfPlayers the total number of players.
@@ -49,10 +51,10 @@ contract GameBank is ERC20("GameBank", "GB") {
 
     function _gameProperties() private {
         uint256 size = nftContract.getAllProperties().length;
-        for (uint8 i = 1; i <= size; i++) {
+        for (uint8 i = 0; i < size; i++) {
             Property memory property = nftContract.getAllProperties()[i];
             gameProperties[i] =
-                PropertyG(property.name, property.uri, property.buyAmount, property.rentAmount, address(this));
+                PropertyG(property.name, property.uri, property.buyAmount, property.rentAmount, address(this), 0);
         }
     }
 }
