@@ -17,6 +17,8 @@ struct Property {
     uint noOfHouses;
     bool hotel;
     uint costOfHouse;
+    uint noOfCompany;
+    uint companyRent;
 }
 
 interface NFTContract {
@@ -63,6 +65,8 @@ contract GameBank is ERC20("GameBank", "GB") {
         uint propertyPrice,
         address owner
     );
+    event PropertyUpGraded(uint propertyId);
+    event PropertyDownGraded(uint propertyId);
 
     // the tolerance is the extra token minted to cater for player borrowing and community card picked .
     uint256 private constant tolerace = 4;
@@ -264,6 +268,7 @@ contract GameBank is ERC20("GameBank", "GB") {
             // Increment the house count
             property.noOfHouses++;
         }
+        emit PropertyUpGraded(propertyId);
     }
 
     function downgradeProperty(uint256 propertyId) external {
@@ -304,5 +309,6 @@ contract GameBank is ERC20("GameBank", "GB") {
             // Property has no upgrades to downgrade
             revert("Property has no houses or hotel to downgrade");
         }
+        emit PropertyDownGraded(propertyId);
     }
 }
