@@ -25,7 +25,7 @@ contract GeneralNFT is ERC721URIStorage {
     }
 
     // Property[] private properties = new Property[](MAX_SUPPLY);
-    mapping(uint8 => Property) private properties ; 
+    mapping(uint8 => Property) private properties;
 
     constructor(string memory uri) ERC721("MonoPoly", "MNP") {
         baseUri = uri;
