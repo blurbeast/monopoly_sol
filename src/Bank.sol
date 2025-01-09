@@ -35,6 +35,8 @@ contract GameBank is ERC20("GameBank", "GB") {
     NFTContract private nftContract;
     uint8 private propertySize;
     mapping(uint8 => PropertyG) public gameProperties;
+    uint8 constant private upgradePercentage = 7;
+    uint8 constant private upgradeRentPercentage = 3;
     /**
      * @dev Initializes the contract with a fixed supply of tokens.
      * @param numberOfPlayers the total number of players.
@@ -70,10 +72,29 @@ contract GameBank is ERC20("GameBank", "GB") {
     function transferOwnership(address newOwner, uint8 propertyId ) external {
         require(propertyId <= propertySize, "no property with the id" ); // to create a function or modifeir later on
         PropertyG storage foundProperty = gameProperties[propertyId];
-        require(balanceOf(newOwner) >= foundProperty.rentAmount, "insufficient funds to pay rent");
-        bool success = transferFrom(newOwner, foundProperty.owner, foundProperty.rentAmount);
+        require(balanceOf(newOwner) >= foundProperty.buyAmount, "insufficient funds to pay rent");
+        bool success = transferFrom(newOwner, foundProperty.owner, foundProperty.buyAmount);
         require(success, "Transfer failed");
         foundProperty.owner = newOwner;
         // to emit an event later on 
+    }
+
+
+    /**
+        @dev looked this through , i think i am not getting the summation of the amount but formula is correct
+     */
+    function handlePropertyUpgrade(address owner, uint8 propertyId) external {
+        require(propertyId <= propertySize, "no property with the id" ); // to create a function or modifeir later on
+        PropertyG storage foundProperty = gameProperties[propertyId];
+        require(foundProperty.numberOfUpgrade <= 5, "reach peak upgrade");
+        require(foundProperty.owner == owner, "you are not the owner of the property");
+        uint256 newUpgradeAmount = (foundProperty.buyAmount * upgradePercentage) / 100;
+        require(balanceOf(owner) >= newUpgradeAmount, "insufficient funds to upgrade property");
+        bool success = transferFrom(owner, address(this), newUpgradeAmount);
+        require(success, "Transfer failed");
+        foundProperty.numberOfUpgrade += 1;
+        foundProperty.buyAmount = newUpgradeAmount;
+        uint256 gottenRentAmount = foundProperty.rentAmount;
+        foundProperty.rentAmount = gottenRentAmount + ((gottenRentAmount * upgradeRentPercentage) / 100);
     }
 }
