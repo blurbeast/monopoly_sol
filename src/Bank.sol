@@ -10,6 +10,13 @@ struct Property {
     uint256 rentAmount;
     bytes uri;
     uint256 buyAmount;
+    address owner;
+    uint noOfTimesSold;
+    bool isMortgaged;
+    uint mortgageAmount;
+    uint noOfHouses;
+    bool hotel;
+    uint costOfHouse;
 }
 
 interface NFTContract {
@@ -32,6 +39,8 @@ contract GameBank is ERC20("GameBank", "GB") {
         uint noOfTimesSold;
         bool isMortgaged;
         uint mortgageAmount;
+        uint noOfHouses;
+        bool hotel;
     }
 
     mapping(uint => Property) public properties;
@@ -41,7 +50,7 @@ contract GameBank is ERC20("GameBank", "GB") {
         address tenant,
         address landlord,
         uint rentPrice,
-        string property
+        bytes property
     );
     event PropertyMortgaged(
         uint propertyId,
@@ -68,7 +77,7 @@ contract GameBank is ERC20("GameBank", "GB") {
     constructor(uint8 numberOfPlayers, address _nftContract) {
         uint256 amountToMint = numberOfPlayers + tolerace;
         require(_nftContract.code.length > 0, "not a contract address");
-        nftContract = NFTContract(_nftContract);
+        // nftContract = NFTContract(_nftContract);
         _mint(address(this), amountToMint);
     }
 
@@ -208,5 +217,92 @@ contract GameBank is ERC20("GameBank", "GB") {
         property.isMortgaged = false;
     }
 
-    function upgradeProperty(uint256 propertyId) external {}
+    /**
+ 
+ * @dev It's important to note that only properties can be upgraded and down graded railstations and companies cannot
+ 
+ */
+
+    function upgradeProperty(uint256 propertyId) external {
+        Property storage property = properties[propertyId];
+
+        require(
+            property.owner == msg.sender,
+            "You are not the owner of this property"
+        );
+        require(!property.isMortgaged, "Property is mortgaged");
+        require(
+            property.noOfHouses <= 4,
+            "Property cannot have more than 4 houses"
+        );
+        require(
+            !property.hotel,
+            "Property is already a hotel cannot be upgraded"
+        );
+
+        // Calculate the cost of one house
+        uint256 costOfHouse = property.costOfHouse;
+
+        // Check if the property is ready to upgrade to a hotel
+        if (property.noOfHouses == 4) {
+            // Ensure the player has enough tokens to upgrade to a hotel
+            require(
+                transfer(address(this), costOfHouse),
+                "Token transfer for hotel failed"
+            );
+
+            // Upgrade to hotel
+            property.hotel = true;
+            property.noOfHouses = 0; // Reset house count after upgrading
+        } else {
+            // Ensure the player has enough tokens to buy a house
+            require(
+                transfer(address(this), costOfHouse),
+                "Token transfer for house failed"
+            );
+
+            // Increment the house count
+            property.noOfHouses++;
+        }
+    }
+
+    function downgradeProperty(uint256 propertyId) external {
+        Property storage property = properties[propertyId];
+
+        // Ensure the caller is the owner of the property
+        require(
+            property.owner == msg.sender,
+            "You are not the owner of this property"
+        );
+
+        // Ensure the property is not mortgaged
+        require(!property.isMortgaged, "Cannot downgrade a mortgaged property");
+
+        // Check if the property has a hotel to downgrade
+        if (property.hotel) {
+            // Downgrade hotel to 4 houses
+            property.hotel = false;
+            property.noOfHouses = 4;
+
+            // Refund the equivalent of one house to the owner
+            uint256 refundAmount = property.costOfHouse / 2;
+            require(
+                transfer(msg.sender, refundAmount),
+                "Token refund for hotel downgrade failed"
+            );
+        } else if (property.noOfHouses > 0) {
+            // Downgrade one house
+            property.noOfHouses--;
+
+            // Refund the cost of one house
+            uint256 refundAmount = property.costOfHouse / 2;
+            require(
+                transfer(msg.sender, refundAmount),
+                "Token refund for house downgrade failed"
+            );
+        } else {
+            // Property has no upgrades to downgrade
+            revert("Property has no houses or hotel to downgrade");
+        }
+    }
 }
