@@ -18,11 +18,23 @@ contract PlayerS {
     }
 
     event PropertySold(uint256 propertyId, address owner, uint256 price);
-    event RentPaid(address tenant, address landlord, uint256 rentPrice, string property);
-    event PropertyMortgaged(uint256 propertyId, uint256 mortgageAmount, address owner);
+    event RentPaid(
+        address tenant,
+        address landlord,
+        uint256 rentPrice,
+        string property
+    );
+    event PropertyMortgaged(
+        uint256 propertyId,
+        uint256 mortgageAmount,
+        address owner
+    );
 
-    event PropertyListedForSale(uint256 propertyId, uint256 propertyPrice, address owner);
-
+    event PropertyListedForSale(
+        uint256 propertyId,
+        uint256 propertyPrice,
+        address owner
+    );
 
     constructor() {}
 
@@ -36,7 +48,10 @@ contract PlayerS {
      *     @notice this function reads from the state to check if the converted lowercase username already exist to avoid duplicacy.
      *     @notice this function emits an event when a player is registered.
      */
-    function registerPlayer(address playerAddress, string memory username) external {
+    function registerPlayer(
+        address playerAddress,
+        string memory username
+    ) external {
         require(!alreadyRegistered[playerAddress], "player already registered");
 
         bytes memory _usernameBytes = convertToLowerCase(username);
@@ -68,11 +83,6 @@ contract PlayerS {
      */
     function createGame() external returns (uint256) {}
 
-<<<<<<< HEAD
-    function convertToLowerCase(
-        string memory username
-    ) private pure returns (bytes memory) {
-=======
     /**
      * @dev player should be able to buy a property.
      *     @dev this function emits an event when a player buys a property.
@@ -86,13 +96,16 @@ contract PlayerS {
     function buyProperty(uint256 propertyId) external payable {
         Property storage property = properties[propertyId];
 
-        require(msg.value == property.price, "Insufficient Ether to buy property");
+        require(
+            msg.value == property.price,
+            "Insufficient Ether to buy property"
+        );
         require(property.owner != msg.sender, "You already own the property");
 
         // If previously sold, transfer funds to the current owner
         if (property.noOfTimesSold > 0) {
             // require(property.owner != address(0), "Invalid current owner");
-            (bool success,) = property.owner.call{value: property.price}("");
+            (bool success, ) = property.owner.call{value: property.price}("");
             require(success, "Transfer failed");
         }
 
@@ -114,8 +127,14 @@ contract PlayerS {
     function sellProperty(uint256 propertyId) external {
         Property storage property = properties[propertyId];
 
-        require(property.owner == msg.sender, "You are not the owner of this property");
-        require(!property.isMortgaged, "Property is mortgaged and cannot be sold");
+        require(
+            property.owner == msg.sender,
+            "You are not the owner of this property"
+        );
+        require(
+            !property.isMortgaged,
+            "Property is mortgaged and cannot be sold"
+        );
 
         emit PropertyListedForSale(propertyId, property.price, msg.sender);
     }
@@ -132,9 +151,14 @@ contract PlayerS {
     function rentProperty(uint256 propertyId) external {
         Property storage property = properties[propertyId];
         require(property.owner != address(0), "Invalid current owner");
-        (bool success,) = property.owner.call{value: property.price}("");
+        (bool success, ) = property.owner.call{value: property.price}("");
         require(success, "Transfer failed");
-        emit RentPaid(msg.sender, property.owner, property.price, property.name);
+        emit RentPaid(
+            msg.sender,
+            property.owner,
+            property.price,
+            property.name
+        );
     }
 
     /**
@@ -153,7 +177,10 @@ contract PlayerS {
     function mortgageProperty(uint256 propertyId) external {
         Property storage property = properties[propertyId];
 
-        require(property.owner == msg.sender, "You are not the owner of this property");
+        require(
+            property.owner == msg.sender,
+            "You are not the owner of this property"
+        );
         require(!property.isMortgaged, "Property is already mortgaged");
 
         property.isMortgaged = true;
@@ -168,7 +195,10 @@ contract PlayerS {
     function releaseMortgage(uint256 propertyId) external payable {
         Property storage property = properties[propertyId];
 
-        require(property.owner == msg.sender, "You are not the owner of this property");
+        require(
+            property.owner == msg.sender,
+            "You are not the owner of this property"
+        );
         require(property.isMortgaged, "Property is not mortgaged");
         require(msg.value > 0, "Payment must be greater than zero");
 
@@ -181,14 +211,22 @@ contract PlayerS {
 
     function upgradeProperty(uint256 propertyId) external {}
 
-    function convertToLowerCase(string memory username) private pure returns (bytes memory) {
->>>>>>> upstream/main
+    function convertToLowerCase(
+        string memory username
+    ) private pure returns (bytes memory) {
         bytes memory recievedUsernameBytes = bytes(username);
-        bytes memory convertedUsernameBytes = new bytes(recievedUsernameBytes.length);
+        bytes memory convertedUsernameBytes = new bytes(
+            recievedUsernameBytes.length
+        );
 
         for (uint256 i = 0; i < recievedUsernameBytes.length; i++) {
-            if ((uint8(recievedUsernameBytes[i]) >= 65) && (uint8(recievedUsernameBytes[i]) <= 90)) {
-                convertedUsernameBytes[i] = bytes1(uint8(recievedUsernameBytes[i]) + 32);
+            if (
+                (uint8(recievedUsernameBytes[i]) >= 65) &&
+                (uint8(recievedUsernameBytes[i]) <= 90)
+            ) {
+                convertedUsernameBytes[i] = bytes1(
+                    uint8(recievedUsernameBytes[i]) + 32
+                );
             } else {
                 convertedUsernameBytes[i] = recievedUsernameBytes[i];
             }
