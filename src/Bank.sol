@@ -5,15 +5,27 @@ import {ERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol"
 
 // import { ERC20 } from "lib/solmate/src/tokens/ERC20.sol";
 
+struct Property {
+    bytes name;
+    uint256 rentAmount;
+    bytes uri;
+    uint256 buyAmount;
+}
+
+interface NFTContract {
+    function getAllProperties() external view returns (Property[] memory);
+}
+
 /**
  * @title GameBank
  * @dev A simple ERC20 token representing a game bank.
  * @dev this is intended to be deployed upon every new creation of a new game.
  */
+
 contract GameBank is ERC20("GameBank", "GB") {
-    struct Property {
-        string name;
-        string description;
+    struct PropertyG {
+        bytes name;
+        bytes uri;
         uint256 buyAmount;
         uint256 rentAmount;
         address owner;
@@ -52,8 +64,11 @@ contract GameBank is ERC20("GameBank", "GB") {
      * @param numberOfPlayers the total number of players.
      * @dev _mint an internal function that mints the total token needed for the game.
      */
-    constructor(uint8 numberOfPlayers) {
+
+    constructor(uint8 numberOfPlayers, address _nftContract) {
         uint256 amountToMint = numberOfPlayers + tolerace;
+        require(_nftContract.code.length > 0, "not a contract address");
+        nftContract = NFTContract(_nftContract);
         _mint(address(this), amountToMint);
     }
 
