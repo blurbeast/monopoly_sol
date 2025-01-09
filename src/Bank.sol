@@ -34,7 +34,7 @@ contract GameBank is ERC20("GameBank", "GB") {
     uint256 private constant tolerace = 4;
     NFTContract private nftContract;
     uint8 private propertySize;
-    mapping(uint8 => PropertyG) gameProperties;
+    mapping(uint8 => PropertyG) public gameProperties;
     /**
      * @dev Initializes the contract with a fixed supply of tokens.
      * @param numberOfPlayers the total number of players.
@@ -53,8 +53,27 @@ contract GameBank is ERC20("GameBank", "GB") {
         uint256 size = nftContract.getAllProperties().length;
         for (uint8 i = 0; i < size; i++) {
             Property memory property = nftContract.getAllProperties()[i];
-            gameProperties[i] =
+            gameProperties[i + 1] =
                 PropertyG(property.name, property.uri, property.buyAmount, property.rentAmount, address(this), 0);
         }
+    }
+
+    function handleRent(address player , uint8 propertyId) external {
+        require(propertyId <= propertySize, "no property with the id" );
+        PropertyG memory foundProperty = gameProperties[propertyId];
+        require(foundProperty.owner != address(0), "invalid property id provided "); //reduncdant
+        require(balanceOf(player) >= foundProperty.rentAmount, "insufficient funds to pay rent");
+        bool success = transferFrom(player, foundProperty.owner, foundProperty.rentAmount);
+        require(success, "Transfer failed");
+    }
+
+    function transferOwnership(address newOwner, uint8 propertyId ) external {
+        require(propertyId <= propertySize, "no property with the id" ); // to create a function or modifeir later on
+        PropertyG storage foundProperty = gameProperties[propertyId];
+        require(balanceOf(newOwner) >= foundProperty.rentAmount, "insufficient funds to pay rent");
+        bool success = transferFrom(newOwner, foundProperty.owner, foundProperty.rentAmount);
+        require(success, "Transfer failed");
+        foundProperty.owner = newOwner;
+        // to emit an event later on 
     }
 }
