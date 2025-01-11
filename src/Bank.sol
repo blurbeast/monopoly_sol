@@ -110,8 +110,8 @@ event PropertySold(uint8 indexed propertyId, address indexed newOwner, uint256 a
         // Determine PropertyType based on index
         if (i == 13 || i == 29) {
             propertyType = PropertyType.Utility;
-        } else if (i == 6 || i == 16 || i == 36) {
-            propertyType = PropertyType.Utility;
+        } else if (i == 6 || i == 16 || i == 26 || i == 36) {
+            propertyType = PropertyType.RailStation;
         } else if (
             i == 1 || i == 3 || i == 5 || i == 8 || i == 11 ||
             i == 18 || i == 21 || i == 23 || i == 31 || 
@@ -148,7 +148,7 @@ function buyProperty(uint8 propertyId, uint256 bidAmount) external {
     require(balanceOf(msg.sender) >= bidAmount, "Insufficient funds for bid");
 
 
-    if(property.owner == address(0)){
+    if(property.owner == address(this)){
     bool success = transfer(address(this), property.buyAmount);
             require(success, "Token transfer failed");
 
@@ -186,7 +186,7 @@ function sellProperty(uint8 propertyId) external {
 
     // Update ownership
     property.owner = bid.bidder;
-    propertyOwner[propertyId] = msg.sender;
+    propertyOwner[propertyId] = bid.bidder;
 
     // Clear the bid
     delete bids[propertyId];
@@ -243,7 +243,7 @@ function handleRent(address player, uint8 propertyId, uint256 diceRolled) extern
     require(propertyId <= propertySize, "No property with the given ID");
     require(!mortgagedProperties[propertyId], "Property is Mortgaged no rent");
     PropertyG storage foundProperty = gameProperties[propertyId];
-    require(foundProperty.owner != address(0), "Property does not have an owner");
+    require(foundProperty.owner != address(this), "Property does not have an owner");
 
     uint256 rentAmount;
 
@@ -335,6 +335,8 @@ function handleRent(address player, uint8 propertyId, uint256 diceRolled) extern
     /**
  
  * @dev It's important to note that only properties can be upgraded and down graded railstations and companies cannot
+ a 2d mapping of string to address to number 
+ we can upgrade the three at once
  
  */
  
@@ -346,6 +348,7 @@ function handleRent(address player, uint8 propertyId, uint256 diceRolled) extern
             "You are not the owner of this property"
         );
         require(!mortgagedProperties[propertyId], "Property is Mortgaged cannot upgrade");
+        require(property.propertyType == PropertyType.Property, "Only properties can be upgraded");
         require(
             noOfHouses[propertyId] <= 5,
             "Property at Max upgrade"
