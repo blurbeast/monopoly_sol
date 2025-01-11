@@ -10,37 +10,25 @@ struct Property {
     bytes uri;
     uint256 buyAmount;
     PropertyType propertyType;
-    
 }
 
- enum PropertyType {
-        Property,
-        RailStation,
-        Utility,
-        Special
-    }
-    
+enum PropertyType {
+    Property,
+    RailStation,
+    Utility,
+    Special
+}
 
-    
-    event RentPaid(
-        address tenant,
-        address landlord,
-        uint rentPrice,
-        bytes property
-    );
-    event PropertyMortgaged(
-        uint propertyId,
-        uint mortgageAmount,
-        address owner
-    );
+event RentPaid(address tenant, address landlord, uint256 rentPrice, bytes property);
 
-    event PropertyListedForSale(
-        uint propertyId,
-        uint propertyPrice,
-        address owner
-    );
-    event PropertyUpGraded(uint propertyId);
-    event PropertyDownGraded(uint propertyId);
+event PropertyMortgaged(uint256 propertyId, uint256 mortgageAmount, address owner);
+
+event PropertyListedForSale(uint256 propertyId, uint256 propertyPrice, address owner);
+
+event PropertyUpGraded(uint256 propertyId);
+
+event PropertyDownGraded(uint256 propertyId);
+
 interface NFTContract {
     function getAllProperties() external view returns (Property[] memory);
 }
@@ -50,7 +38,6 @@ interface NFTContract {
  * @dev A simple ERC20 token representing a game bank.
  * @dev this is intended to be deployed upon every new creation of a new game.
  */
-
 contract GameBank is ERC20("GameBank", "GB") {
     struct PropertyG {
         bytes name;
@@ -63,19 +50,17 @@ contract GameBank is ERC20("GameBank", "GB") {
     }
 
     struct Bid {
-    address bidder;
-    uint256 bidAmount;
-}
+        address bidder;
+        uint256 bidAmount;
+    }
 
-mapping(uint8 => Bid) public bids;
-mapping(uint8 => address) propertyOwner;
-mapping(uint => bool) mortgagedProperties;
-mapping (uint8 => uint8) noOfHouses;
+    mapping(uint8 => Bid) public bids;
+    mapping(uint8 => address) propertyOwner;
+    mapping(uint256 => bool) mortgagedProperties;
+    mapping(uint8 => uint8) noOfHouses;
 
-
-event PropertyBid(uint8 indexed propertyId, address indexed bidder, uint256 bidAmount);
-event PropertySold(uint8 indexed propertyId, address indexed newOwner, uint256 amount);
-
+    event PropertyBid(uint8 indexed propertyId, address indexed bidder, uint256 bidAmount);
+    event PropertySold(uint8 indexed propertyId, address indexed newOwner, uint256 amount);
 
     // the tolerance is the extra token minted to cater for player borrowing and community card picked .
     uint256 private constant tolerace = 4;
@@ -90,7 +75,6 @@ event PropertySold(uint8 indexed propertyId, address indexed newOwner, uint256 a
      * @param numberOfPlayers the total number of players.
      * @dev _mint an internal function that mints the total token needed for the game.
      */
-
     constructor(uint8 numberOfPlayers, address _nftContract) {
         uint256 amountToMint = numberOfPlayers + tolerace;
         require(_nftContract.code.length > 0, "not a contract address");
@@ -100,187 +84,164 @@ event PropertySold(uint8 indexed propertyId, address indexed newOwner, uint256 a
     }
 
     function _gameProperties() private {
-    Property[] memory allProperties = nftContract.getAllProperties();
-    uint256 size = allProperties.length;
+        Property[] memory allProperties = nftContract.getAllProperties();
+        uint256 size = allProperties.length;
 
-    for (uint8 i = 0; i < size; i++) {
-        Property memory property = allProperties[i];
-        PropertyType propertyType;
+        for (uint8 i = 0; i < size; i++) {
+            Property memory property = allProperties[i];
+            PropertyType propertyType;
 
-        // Determine PropertyType based on index
-        if (i == 13 || i == 29) {
-            propertyType = PropertyType.Utility;
-        } else if (i == 6 || i == 16 || i == 26 || i == 36) {
-            propertyType = PropertyType.RailStation;
-        } else if (
-            i == 1 || i == 3 || i == 5 || i == 8 || i == 11 ||
-            i == 18 || i == 21 || i == 23 || i == 31 || 
-            i == 34 || i == 37 || i == 39
-        ) {
-            propertyType = PropertyType.Special; // Ensure this enum exists
-        } else {
-            propertyType = PropertyType.Property;
+            // Determine PropertyType based on index
+            if (i == 13 || i == 29) {
+                propertyType = PropertyType.Utility;
+            } else if (i == 6 || i == 16 || i == 26 || i == 36) {
+                propertyType = PropertyType.RailStation;
+            } else if (
+                i == 1 || i == 3 || i == 5 || i == 8 || i == 11 || i == 18 || i == 21 || i == 23 || i == 31 || i == 34
+                    || i == 37 || i == 39
+            ) {
+                propertyType = PropertyType.Special; // Ensure this enum exists
+            } else {
+                propertyType = PropertyType.Property;
+            }
+
+            // Create and store the game property
+            gameProperties[i + 1] = PropertyG(
+                property.name, property.uri, property.buyAmount, property.rentAmount, address(this), 0, propertyType
+            );
         }
-
-        // Create and store the game property
-        gameProperties[i + 1] = PropertyG(
-            property.name,
-            property.uri,
-            property.buyAmount,
-            property.rentAmount,
-            address(this),
-            0,
-            propertyType
-        );
     }
-}
 
+    function buyProperty(uint8 propertyId, uint256 bidAmount) external {
+        PropertyG storage property = gameProperties[propertyId];
+        require(property.propertyType != PropertyType.Special, "Invalid property");
+        require(property.owner != msg.sender, "You already own the property");
+        require(property.buyAmount > 0, "Property price must be greater than zero");
+        require(bidAmount >= property.buyAmount, "Bid amount must be at least the property price");
+        require(!mortgagedProperties[propertyId], "Property is Mortgaged and cannot be bought");
 
-function buyProperty(uint8 propertyId, uint256 bidAmount) external {
-    PropertyG storage property = gameProperties[propertyId];
-    require(property.propertyType != PropertyType.Special, "Invalid property");
-    require(property.owner != msg.sender, "You already own the property");
-    require(property.buyAmount > 0, "Property price must be greater than zero");
-    require(bidAmount >= property.buyAmount, "Bid amount must be at least the property price");
-    require(!mortgagedProperties[propertyId], 'Property is Mortgaged and cannot be bought');
+        // Approve contract to spend bid amount (requires user to call `approve` beforehand)
+        require(balanceOf(msg.sender) >= bidAmount, "Insufficient funds for bid");
 
-    // Approve contract to spend bid amount (requires user to call `approve` beforehand)
-    require(balanceOf(msg.sender) >= bidAmount, "Insufficient funds for bid");
-
-
-    if(property.owner == address(this)){
-    bool success = transfer(address(this), property.buyAmount);
+        if (property.owner == address(this)) {
+            bool success = transfer(address(this), property.buyAmount);
             require(success, "Token transfer failed");
 
             // Update ownership and increment sales count
             property.owner = msg.sender;
             propertyOwner[propertyId] = msg.sender;
-    }
-
-     else{// Call the ERC20 approve function
-    bool success = approve(property.owner, bidAmount);
-    require(success, "Token approval failed");
-
-    // Store the bid information
-    bids[propertyId] = Bid({
-        bidder: msg.sender,
-        bidAmount: bidAmount
-    });}
-
-    // Emit a bid event
-    emit PropertyBid(propertyId, msg.sender, bidAmount);
-}
-
-function sellProperty(uint8 propertyId) external {
-    PropertyG storage property = gameProperties[propertyId];
-    require(!mortgagedProperties[propertyId], 'Property is Mortgaged and cannot be sold');
-    Bid memory bid = bids[propertyId];
-
-    require(property.propertyType != PropertyType.Special, "Invalid property");
-    require(property.owner == msg.sender, "You do not own this property");
-    require(bid.bidder != address(0), "No valid bid found for this property");
-
-    // Transfer funds from bidder to seller
-    bool success = transferFrom(bid.bidder, msg.sender, bid.bidAmount);
-    require(success, "Token transfer failed");
-
-    // Update ownership
-    property.owner = bid.bidder;
-    propertyOwner[propertyId] = bid.bidder;
-
-    // Clear the bid
-    delete bids[propertyId];
-
-    // Emit a property sold event
-    emit PropertySold(propertyId, bid.bidder, bid.bidAmount);
-}
-
-function _checkRailStationRent(uint8 propertyId) private view returns (uint) {
-    uint rent = 0;
-     address railOwner = propertyOwner[propertyId];
-    // Count how many railway stations are owned by the player
-    uint ownedRailways = 0;
-    
-    if (propertyOwner[6] == railOwner) ownedRailways++;
-    if (propertyOwner[16] == railOwner) ownedRailways++;
-    if (propertyOwner[26] == railOwner) ownedRailways++;
-    if (propertyOwner[36] == railOwner) ownedRailways++;
-    
-    // Set rent based on the number of owned railway stations
-    if (ownedRailways == 4) {
-        rent = 200;  // Rent for owning all 4
-    } else if (ownedRailways == 3) {
-        rent = 100;  // Rent for owning 3
-    } else if (ownedRailways == 2) {
-        rent = 50;   // Rent for owning 2
-    } else if (ownedRailways == 1) {
-        rent = 25;   // Rent for owning 1
-    }
-
-    return rent;
-}
-
-
-function _checkUtilityRent(uint8 propertyId, uint diceRolled) private view returns (uint) {
-    uint rentAmount = 0;
-    
-    // Check if the property is either 13 or 29 (the utility properties)
-    if (propertyId == 13 || propertyId == 29) {
-        // Check if both utility properties are owned by the same player
-        if (propertyOwner[13] == propertyOwner[29]) {
-            rentAmount = diceRolled * 10;  // Rent when both utilities are owned by the same player
         } else {
-            rentAmount = diceRolled * 4;   // Rent when utilities are owned by different players
+            // Call the ERC20 approve function
+            bool success = approve(property.owner, bidAmount);
+            require(success, "Token approval failed");
+
+            // Store the bid information
+            bids[propertyId] = Bid({bidder: msg.sender, bidAmount: bidAmount});
         }
+
+        // Emit a bid event
+        emit PropertyBid(propertyId, msg.sender, bidAmount);
     }
 
-    return rentAmount;
-}
+    function sellProperty(uint8 propertyId) external {
+        PropertyG storage property = gameProperties[propertyId];
+        require(!mortgagedProperties[propertyId], "Property is Mortgaged and cannot be sold");
+        Bid memory bid = bids[propertyId];
 
+        require(property.propertyType != PropertyType.Special, "Invalid property");
+        require(property.owner == msg.sender, "You do not own this property");
+        require(bid.bidder != address(0), "No valid bid found for this property");
 
+        // Transfer funds from bidder to seller
+        bool success = transferFrom(bid.bidder, msg.sender, bid.bidAmount);
+        require(success, "Token transfer failed");
 
-function handleRent(address player, uint8 propertyId, uint256 diceRolled) external {
-    require(propertyId <= propertySize, "No property with the given ID");
-    require(!mortgagedProperties[propertyId], "Property is Mortgaged no rent");
-    PropertyG storage foundProperty = gameProperties[propertyId];
-    require(foundProperty.owner != address(this), "Property does not have an owner");
+        // Update ownership
+        property.owner = bid.bidder;
+        propertyOwner[propertyId] = bid.bidder;
 
-    uint256 rentAmount;
+        // Clear the bid
+        delete bids[propertyId];
 
-    // Check if the property is a Utility
-    if (foundProperty.propertyType == PropertyType.Utility) {
-        rentAmount = _checkUtilityRent(propertyId, diceRolled);
-    }
-    // Check if the property is a Rail Station
-    else if (foundProperty.propertyType == PropertyType.RailStation) {
-        rentAmount = _checkRailStationRent(propertyId);
-    }
-    // Regular Property Rent
-    else {
-        rentAmount = foundProperty.rentAmount;
+        // Emit a property sold event
+        emit PropertySold(propertyId, bid.bidder, bid.bidAmount);
     }
 
-    // Ensure player has enough funds to pay rent
-    require(balanceOf(player) >= rentAmount, "Insufficient funds to pay rent");
+    function _checkRailStationRent(uint8 propertyId) private view returns (uint256) {
+        uint256 rent = 0;
+        address railOwner = propertyOwner[propertyId];
+        // Count how many railway stations are owned by the player
+        uint256 ownedRailways = 0;
 
-    // Transfer the rent to the owner
-    bool success = transferFrom(player, foundProperty.owner, rentAmount);
-    require(success, "Transfer failed");
-}
+        if (propertyOwner[6] == railOwner) ownedRailways++;
+        if (propertyOwner[16] == railOwner) ownedRailways++;
+        if (propertyOwner[26] == railOwner) ownedRailways++;
+        if (propertyOwner[36] == railOwner) ownedRailways++;
 
+        // Set rent based on the number of owned railway stations
+        if (ownedRailways == 4) {
+            rent = 200; // Rent for owning all 4
+        } else if (ownedRailways == 3) {
+            rent = 100; // Rent for owning 3
+        } else if (ownedRailways == 2) {
+            rent = 50; // Rent for owning 2
+        } else if (ownedRailways == 1) {
+            rent = 25; // Rent for owning 1
+        }
+
+        return rent;
+    }
+
+    function _checkUtilityRent(uint8 propertyId, uint256 diceRolled) private view returns (uint256) {
+        uint256 rentAmount = 0;
+
+        // Check if the property is either 13 or 29 (the utility properties)
+        if (propertyId == 13 || propertyId == 29) {
+            // Check if both utility properties are owned by the same player
+            if (propertyOwner[13] == propertyOwner[29]) {
+                rentAmount = diceRolled * 10; // Rent when both utilities are owned by the same player
+            } else {
+                rentAmount = diceRolled * 4; // Rent when utilities are owned by different players
+            }
+        }
+
+        return rentAmount;
+    }
+
+    function handleRent(address player, uint8 propertyId, uint256 diceRolled) external {
+        require(propertyId <= propertySize, "No property with the given ID");
+        require(!mortgagedProperties[propertyId], "Property is Mortgaged no rent");
+        PropertyG storage foundProperty = gameProperties[propertyId];
+        require(foundProperty.owner != address(this), "Property does not have an owner");
+
+        uint256 rentAmount;
+
+        // Check if the property is a Utility
+        if (foundProperty.propertyType == PropertyType.Utility) {
+            rentAmount = _checkUtilityRent(propertyId, diceRolled);
+        }
+        // Check if the property is a Rail Station
+        else if (foundProperty.propertyType == PropertyType.RailStation) {
+            rentAmount = _checkRailStationRent(propertyId);
+        }
+        // Regular Property Rent
+        else {
+            rentAmount = foundProperty.rentAmount;
+        }
+
+        // Ensure player has enough funds to pay rent
+        require(balanceOf(player) >= rentAmount, "Insufficient funds to pay rent");
+
+        // Transfer the rent to the owner
+        bool success = transferFrom(player, foundProperty.owner, rentAmount);
+        require(success, "Transfer failed");
+    }
 
     function transferOwnership(address newOwner, uint8 propertyId) external {
         require(propertyId <= propertySize, "no property with the id"); // to create a function or modifeir later on
         PropertyG storage foundProperty = gameProperties[propertyId];
-        require(
-            balanceOf(newOwner) >= foundProperty.buyAmount,
-            "insufficient funds to pay rent"
-        );
-        bool success = transferFrom(
-            newOwner,
-            foundProperty.owner,
-            foundProperty.buyAmount
-        );
+        require(balanceOf(newOwner) >= foundProperty.buyAmount, "insufficient funds to pay rent");
+        bool success = transferFrom(newOwner, foundProperty.owner, foundProperty.buyAmount);
         require(success, "Transfer failed");
         foundProperty.owner = newOwner;
         // to emit an event later on
@@ -295,20 +256,12 @@ function handleRent(address player, uint8 propertyId, uint256 diceRolled) extern
         PropertyG storage property = gameProperties[propertyId];
         require(!mortgagedProperties[propertyId], "Property is already Mortgaged");
 
-        require(
-            property.owner == msg.sender,
-            "You are not the owner of this property"
-        );
-        mortgagedProperties[propertyId]= true;
+        require(property.owner == msg.sender, "You are not the owner of this property");
+        mortgagedProperties[propertyId] = true;
 
-        
-        uint mortgageAmount = property.buyAmount / 2;
+        uint256 mortgageAmount = property.buyAmount / 2;
         // Transfer funds to the owner
-        bool success = transferFrom(
-            address(this),
-            msg.sender,
-            mortgageAmount
-        );
+        bool success = transferFrom(address(this), msg.sender, mortgageAmount);
         require(success, "Token transfer failed");
 
         emit PropertyMortgaged(propertyId, mortgageAmount, msg.sender);
@@ -318,10 +271,7 @@ function handleRent(address player, uint8 propertyId, uint256 diceRolled) extern
     function releaseMortgage(uint8 propertyId) external {
         PropertyG storage property = gameProperties[propertyId];
 
-        require(
-            property.owner == msg.sender,
-            "You are not the owner of this property"
-        );
+        require(property.owner == msg.sender, "You are not the owner of this property");
         require(mortgagedProperties[propertyId], "Property is not Mortgaged");
 
         // Transfer the repaid funds to the contract owner or use it for future logic
@@ -333,27 +283,17 @@ function handleRent(address player, uint8 propertyId, uint256 diceRolled) extern
     }
 
     /**
- 
- * @dev It's important to note that only properties can be upgraded and down graded railstations and companies cannot
- a 2d mapping of string to address to number 
- we can upgrade the three at once
- 
- */
- 
+     * @dev It's important to note that only properties can be upgraded and down graded railstations and companies cannot
+     *  a 2d mapping of string to address to number 
+     *  we can upgrade the three at once
+     */
     function upgradeProperty(uint8 propertyId) external {
         PropertyG memory property = gameProperties[propertyId];
 
-        require(
-            property.owner == msg.sender,
-            "You are not the owner of this property"
-        );
+        require(property.owner == msg.sender, "You are not the owner of this property");
         require(!mortgagedProperties[propertyId], "Property is Mortgaged cannot upgrade");
         require(property.propertyType == PropertyType.Property, "Only properties can be upgraded");
-        require(
-            noOfHouses[propertyId] <= 5,
-            "Property at Max upgrade"
-        );
-      
+        require(noOfHouses[propertyId] <= 5, "Property at Max upgrade");
 
         // Calculate the cost of one house
         uint256 costOfHouse = property.buyAmount;
@@ -361,20 +301,14 @@ function handleRent(address player, uint8 propertyId, uint256 diceRolled) extern
         // Check if the property is ready to upgrade to a hotel
         if (property.noOfHouses == 4) {
             // Ensure the player has enough tokens to upgrade to a hotel
-            require(
-                transfer(address(this), costOfHouse),
-                "Token transfer for hotel failed"
-            );
+            require(transfer(address(this), costOfHouse), "Token transfer for hotel failed");
 
             // Upgrade to hotel
             // property.hotel = true;
             property.noOfHouses = 0; // Reset house count after upgrading
         } else {
             // Ensure the player has enough tokens to buy a house
-            require(
-                transfer(address(this), costOfHouse),
-                "Token transfer for house failed"
-            );
+            require(transfer(address(this), costOfHouse), "Token transfer for house failed");
 
             // Increment the house count
             property.noOfHouses++;
@@ -386,36 +320,27 @@ function handleRent(address player, uint8 propertyId, uint256 diceRolled) extern
         PropertyG memory property = gameProperties[propertyId];
 
         // Ensure the caller is the owner of the property
-        require(
-            property.owner == msg.sender,
-            "You are not the owner of this property"
-        );
+        require(property.owner == msg.sender, "You are not the owner of this property");
 
         // Ensure the property is not mortgaged
         // require(!property.isMortgaged, "Cannot downgrade a mortgaged property");
 
         // Check if the property has a hotel to downgrade
-        if (property.noOfHouses ==5) {
+        if (property.noOfHouses == 5) {
             // Downgrade hotel to 4 houses
             // property.hotel = false;
             property.noOfHouses = 4;
 
             // Refund the equivalent of one house to the owner
             uint256 refundAmount = property.buyAmount / 2;
-            require(
-                transfer(msg.sender, refundAmount),
-                "Token refund for hotel downgrade failed"
-            );
+            require(transfer(msg.sender, refundAmount), "Token refund for hotel downgrade failed");
         } else if (property.noOfHouses > 0) {
             // Downgrade one house
             property.noOfHouses--;
 
             // Refund the cost of one house
             uint256 refundAmount = property.buyAmount / 2;
-            require(
-                transfer(msg.sender, refundAmount),
-                "Token refund for house downgrade failed"
-            );
+            require(transfer(msg.sender, refundAmount), "Token refund for house downgrade failed");
         } else {
             // Property has no upgrades to downgrade
             revert("Property has no houses or hotel to downgrade");
