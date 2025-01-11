@@ -104,12 +104,13 @@ contract GameBank is ERC20("GameBank", "GB") {
             } else {
                 propertyType = PropertyType.Property;
             }
-
-            // Create and store the game property
-            gameProperties[i + 1] = PropertyG(
-                property.name, property.uri, property.buyAmount, property.rentAmount, address(this), 0, propertyType
-            );
+            distributePropertyType(property, propertyType, i);
         }
+    }
+
+    function distributePropertyType(Property memory prop, PropertyType propType, uint8 position) private {
+        gameProperties[position + 1] =
+            PropertyG(prop.name, prop.uri, prop.buyAmount, prop.rentAmount, address(this), 0, propType);
     }
 
     function buyProperty(uint8 propertyId, uint256 bidAmount) external {
@@ -284,7 +285,7 @@ contract GameBank is ERC20("GameBank", "GB") {
 
     /**
      * @dev It's important to note that only properties can be upgraded and down graded railstations and companies cannot
-     *  a 2d mapping of string to address to number 
+     *  a 2d mapping of string to address to number
      *  we can upgrade the three at once
      */
     function upgradeProperty(uint8 propertyId) external {
