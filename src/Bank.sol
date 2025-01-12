@@ -110,6 +110,7 @@ contract GameBank is ERC20("GameBank", "GB") {
         }
     }
     //helper function
+
     function _setNumberForColoredPropertyNumber() private {
         upgradeUserPropertyColorOwnedNumber[PropertyColors.PINK] = 3;
         upgradeUserPropertyColorOwnedNumber[PropertyColors.YELLOW] = 3;
@@ -147,6 +148,14 @@ contract GameBank is ERC20("GameBank", "GB") {
             // Update ownership and increment sales count
             property.owner = msg.sender;
             propertyOwner[propertyId] = msg.sender;
+
+            noOfColorGroupOwnedByUser[property.propertyColor][msg.sender] += 1;
+
+            uint8 numberOfUserOwnedRailway = numberOfOwnedRailways[msg.sender];
+
+            property.propertyType == PropertyType.RailStation
+                ? numberOfOwnedRailways[msg.sender] += 1
+                : numberOfUserOwnedRailway;
         } else {
             // Call the ERC20 approve function
             bool success = approve(property.owner, bidAmount);
@@ -155,12 +164,6 @@ contract GameBank is ERC20("GameBank", "GB") {
             // Store the bid information
             bids[propertyId] = Bid({bidder: msg.sender, bidAmount: bidAmount});
         }
-
-        noOfColorGroupOwnedByUser[property.propertyColor][msg.sender] += 1;
-
-        uint8 numberOfUserOwnedRailway = numberOfOwnedRailways[msg.sender];
-
-        property.propertyType == PropertyType.RailStation ? numberOfOwnedRailways[msg.sender] += 1 : numberOfUserOwnedRailway;
 
         // Emit a bid event
         emit PropertyBid(propertyId, msg.sender, bidAmount);
@@ -176,7 +179,7 @@ contract GameBank is ERC20("GameBank", "GB") {
         require(property.owner == msg.sender, "You do not own this property");
         // require(bid.bidder != address(0), "No valid bid found for this property");
 
-          Bid memory bid = bids[propertyId];
+        Bid memory bid = bids[propertyId];
 
         // Transfer funds from bidder to seller
         bool success = transferFrom(bid.bidder, msg.sender, bid.bidAmount);
@@ -207,11 +210,9 @@ contract GameBank is ERC20("GameBank", "GB") {
     }
 
     function _checkUtilityRent(uint8 propertyId, uint256 diceRolled) private view returns (uint256) {
-    
         require(propertyId == 13 || propertyId == 29, "");
 
         return propertyOwner[13] == propertyOwner[29] ? (diceRolled * 10) : (diceRolled * 4);
-
     }
 
     function handleRent(address player, uint8 propertyId, uint256 diceRolled) external {
@@ -219,7 +220,7 @@ contract GameBank is ERC20("GameBank", "GB") {
         require(!mortgagedProperties[propertyId], "Property is Mortgaged no rent");
         PropertyG storage foundProperty = gameProperties[propertyId];
         require(foundProperty.owner != address(this), "Property does not have an owner");
-        require(foundProperty.owner != player , "player cannot pay rent for self");
+        require(foundProperty.owner != player, "player cannot pay rent for self");
 
         uint256 rentAmount;
 
@@ -233,8 +234,9 @@ contract GameBank is ERC20("GameBank", "GB") {
         }
         // Regular Property Rent
         else {
-            rentAmount = foundProperty.noOfUpgrades > 0 ? 
-                foundProperty.rentAmount * ( 2 ** (foundProperty.noOfUpgrades - 1)) : foundProperty.rentAmount;
+            rentAmount = foundProperty.noOfUpgrades > 0
+                ? foundProperty.rentAmount * (2 ** (foundProperty.noOfUpgrades - 1))
+                : foundProperty.rentAmount;
         }
 
         // Ensure player has enough funds to pay rent
@@ -245,15 +247,15 @@ contract GameBank is ERC20("GameBank", "GB") {
         require(success, "Transfer failed");
     }
 
-    function transferOwnership(address newOwner, uint8 propertyId) external {
-        require(propertyId <= propertySize, "no property with the id"); // to create a function or modifeir later on
-        PropertyG storage foundProperty = gameProperties[propertyId];
-        require(balanceOf(newOwner) >= foundProperty.buyAmount, "insufficient funds to pay rent");
-        bool success = transferFrom(newOwner, foundProperty.owner, foundProperty.buyAmount);
-        require(success, "Transfer failed");
-        foundProperty.owner = newOwner;
-        // to emit an event later on
-    }
+    // function transferOwnership(address newOwner, uint8 propertyId) external {
+    //     require(propertyId <= propertySize, "no property with the id"); // to create a function or modifeir later on
+    //     PropertyG storage foundProperty = gameProperties[propertyId];
+    //     require(balanceOf(newOwner) >= foundProperty.buyAmount, "insufficient funds to pay rent");
+    //     bool success = transferFrom(newOwner, foundProperty.owner, foundProperty.buyAmount);
+    //     require(success, "Transfer failed");
+    //     foundProperty.owner = newOwner;
+    //     // to emit an event later on
+    // }
 
     /**
      * @dev looked this through , i think i am not getting the summation of the amount but formula is correct
@@ -283,7 +285,7 @@ contract GameBank is ERC20("GameBank", "GB") {
         require(mortgagedProperties[propertyId], "Property is not Mortgaged");
 
         // Transfer the repaid funds to the contract owner or use it for future logic
-        bool success = transfer(address(this), property.buyAmount);
+        bool success = transfer(address(this), property.buyAmount / 2);
         require(success, "Token transfer failed");
 
         // Release the mortgage
@@ -295,12 +297,13 @@ contract GameBank is ERC20("GameBank", "GB") {
      *  a 2d mapping of string to address to number
      *  we can upgrade the three at once
      */
-    function upgradeProperty(uint8 propertyId) external {
+    function upgradeProperty(uint8 propertyId, uint8 _noOfUpgrade) external {
         PropertyG storage property = gameProperties[propertyId];
 
         require(property.owner == msg.sender, "You are not the owner of this property");
         require(!mortgagedProperties[propertyId], "Property is Mortgaged cannot upgrade");
         require(property.propertyType == PropertyType.Property, "Only properties can be upgraded");
+        require(_noOfUpgrade > 0 && _noOfUpgrade <= 5, "");
         // require(noOfUpgrades[propertyId] <= 5, "Property at Max upgrade");
 
         uint8 mustOwnedNumberOfSiteColor = upgradeUserPropertyColorOwnedNumber[property.propertyColor];
@@ -310,7 +313,9 @@ contract GameBank is ERC20("GameBank", "GB") {
 
         require(userColorGroupOwned >= mustOwnedNumberOfSiteColor, "must own at least two site with same color ");
         require(property.noOfUpgrades < 5, "reach the peak upgrade for this property ");
-        uint8 noOfUpgrade = property.noOfUpgrades + 1;
+        uint8 noOfUpgrade = property.noOfUpgrades + _noOfUpgrade;
+
+        require(noOfUpgrade <= 5, "upgrade exceed peak ");
 
         uint256 amountToPay = property.buyAmount * (2 * (2 ** (noOfUpgrade - 1)));
 
@@ -331,7 +336,7 @@ contract GameBank is ERC20("GameBank", "GB") {
 
         // Ensure the caller is the owner of the property
         require(property.owner == msg.sender, "You are not the owner of this property");
-        require(property.noOfUpgrades > 0 , "cannot downgrade site");
+        require(property.noOfUpgrades > 0, "cannot downgrade site");
         require(noOfDowngrade > 0 && noOfDowngrade <= property.noOfUpgrades, "cannot downgrade");
 
         // Ensure the property is not mortgaged
