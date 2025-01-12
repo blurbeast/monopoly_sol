@@ -45,7 +45,7 @@ contract GameBank is ERC20("GameBank", "GB") {
         uint256 buyAmount;
         uint256 rentAmount;
         address owner;
-        uint8 noOfHouses;
+        uint8 noOfUpgrades;
         PropertyType propertyType;
     }
 
@@ -57,7 +57,7 @@ contract GameBank is ERC20("GameBank", "GB") {
     mapping(uint8 => Bid) public bids;
     mapping(uint8 => address) propertyOwner;
     mapping(uint256 => bool) mortgagedProperties;
-    mapping(uint8 => uint8) noOfHouses;
+    mapping(uint8 => uint8) noOfUpgrades;
 
     event PropertyBid(uint8 indexed propertyId, address indexed bidder, uint256 bidAmount);
     event PropertySold(uint8 indexed propertyId, address indexed newOwner, uint256 amount);
@@ -125,7 +125,8 @@ contract GameBank is ERC20("GameBank", "GB") {
         require(balanceOf(msg.sender) >= bidAmount, "Insufficient funds for bid");
 
         if (property.owner == address(this)) {
-            bool success = transfer(address(this), property.buyAmount);
+            // bool success = transfer(address(this), property.buyAmount);
+            bool success = transferFrom(msg.sender, address(this), property.buyAmount);
             require(success, "Token transfer failed");
 
             // Update ownership and increment sales count
@@ -289,30 +290,30 @@ contract GameBank is ERC20("GameBank", "GB") {
      *  we can upgrade the three at once
      */
     function upgradeProperty(uint8 propertyId) external {
-        PropertyG memory property = gameProperties[propertyId];
+        PropertyG storage property = gameProperties[propertyId];
 
         require(property.owner == msg.sender, "You are not the owner of this property");
         require(!mortgagedProperties[propertyId], "Property is Mortgaged cannot upgrade");
         require(property.propertyType == PropertyType.Property, "Only properties can be upgraded");
-        require(noOfHouses[propertyId] <= 5, "Property at Max upgrade");
+        require(noOfUpgrades[propertyId] <= 5, "Property at Max upgrade");
 
         // Calculate the cost of one house
         uint256 costOfHouse = property.buyAmount;
 
         // Check if the property is ready to upgrade to a hotel
-        if (property.noOfHouses == 4) {
+        if (property.noOfUpgrades == 4) {
             // Ensure the player has enough tokens to upgrade to a hotel
             require(transfer(address(this), costOfHouse), "Token transfer for hotel failed");
 
             // Upgrade to hotel
             // property.hotel = true;
-            property.noOfHouses = 0; // Reset house count after upgrading
+            property.noOfUpgrades = 0; // Reset house count after upgrading
         } else {
             // Ensure the player has enough tokens to buy a house
             require(transfer(address(this), costOfHouse), "Token transfer for house failed");
 
             // Increment the house count
-            property.noOfHouses++;
+            property.noOfUpgrades++;
         }
         emit PropertyUpGraded(propertyId);
     }
@@ -327,17 +328,17 @@ contract GameBank is ERC20("GameBank", "GB") {
         // require(!property.isMortgaged, "Cannot downgrade a mortgaged property");
 
         // Check if the property has a hotel to downgrade
-        if (property.noOfHouses == 5) {
+        if (property.noOfUpgrades == 5) {
             // Downgrade hotel to 4 houses
             // property.hotel = false;
-            property.noOfHouses = 4;
+            property.noOfUpgrades = 4;
 
             // Refund the equivalent of one house to the owner
             uint256 refundAmount = property.buyAmount / 2;
             require(transfer(msg.sender, refundAmount), "Token refund for hotel downgrade failed");
-        } else if (property.noOfHouses > 0) {
+        } else if (property.noOfUpgrades > 0) {
             // Downgrade one house
-            property.noOfHouses--;
+            property.noOfUpgrades--;
 
             // Refund the cost of one house
             uint256 refundAmount = property.buyAmount / 2;
