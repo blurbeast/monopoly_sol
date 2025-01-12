@@ -100,6 +100,7 @@ contract GameBank is ERC20("GameBank", "GB") {
         _setNumberForColoredPropertyNumber();
     }
 
+    //helper function
     function _gameProperties() private {
         Property[] memory allProperties = nftContract.getAllProperties();
         uint256 size = allProperties.length;
@@ -108,7 +109,7 @@ contract GameBank is ERC20("GameBank", "GB") {
             _distributePropertyType(property, i);
         }
     }
-
+    //helper function
     function _setNumberForColoredPropertyNumber() private {
         upgradeUserPropertyColorOwnedNumber[PropertyColors.PINK] = 3;
         upgradeUserPropertyColorOwnedNumber[PropertyColors.YELLOW] = 3;
@@ -156,8 +157,6 @@ contract GameBank is ERC20("GameBank", "GB") {
         }
 
         noOfColorGroupOwnedByUser[property.propertyColor][msg.sender] += 1;
-        // mapping(address => uint8) private numberOfOwnedRailways;
-        // bool private allRailwaysOwned;
 
         uint8 numberOfUserOwnedRailway = numberOfOwnedRailways[msg.sender];
 
@@ -219,6 +218,7 @@ contract GameBank is ERC20("GameBank", "GB") {
         require(!mortgagedProperties[propertyId], "Property is Mortgaged no rent");
         PropertyG storage foundProperty = gameProperties[propertyId];
         require(foundProperty.owner != address(this), "Property does not have an owner");
+        require(foundProperty.owner != player , "player cannot pay rent for self");
 
         uint256 rentAmount;
 
@@ -232,7 +232,8 @@ contract GameBank is ERC20("GameBank", "GB") {
         }
         // Regular Property Rent
         else {
-            rentAmount = foundProperty.rentAmount;
+            rentAmount = foundProperty.noOfUpgrades > 0 ? 
+                foundProperty.rentAmount * ( 2 ** (foundProperty.noOfUpgrades - 1)) : foundProperty.rentAmount;
         }
 
         // Ensure player has enough funds to pay rent
