@@ -5,24 +5,24 @@ import {ERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol"
 // import { ERC20 } from "lib/solmate/src/tokens/ERC20.sol";
 
 struct Property {
-        bytes name;
-        uint256 rentAmount;
-        bytes uri;
-        uint256 buyAmount;
-        PropertyType propertyType;
-        PropertyColors color;
-    }
+    bytes name;
+    uint256 rentAmount;
+    bytes uri;
+    uint256 buyAmount;
+    PropertyType propertyType;
+    PropertyColors color;
+}
 
-   enum PropertyColors {
-        PINK,
-        YELLOW,
-        BLUE,
-        ORANGE,
-        RED,
-        GREEN,
-        PURPLE,
-        BROWN
-    }
+enum PropertyColors {
+    PINK,
+    YELLOW,
+    BLUE,
+    ORANGE,
+    RED,
+    GREEN,
+    PURPLE,
+    BROWN
+}
 
 enum PropertyType {
     Property,
@@ -100,16 +100,17 @@ contract GameBank is ERC20("GameBank", "GB") {
     function _gameProperties() private {
         Property[] memory allProperties = nftContract.getAllProperties();
         uint256 size = allProperties.length;
-
         for (uint8 i = 0; i < size; i++) {
             Property memory property = allProperties[i];
-            distributePropertyType(property, i);
+            _distributePropertyType(property, i);
         }
     }
 
-    function distributePropertyType(Property memory prop, uint8 position) private {
-        gameProperties[position + 1] =
-            PropertyG(prop.name, prop.uri, prop.buyAmount, prop.rentAmount, address(this), 0, prop.propertyType, prop.color);
+    //helper function
+    function _distributePropertyType(Property memory prop, uint8 position) private {
+        gameProperties[position + 1] = PropertyG(
+            prop.name, prop.uri, prop.buyAmount, prop.rentAmount, address(this), 0, prop.propertyType, prop.color
+        );
     }
 
     function buyProperty(uint8 propertyId, uint256 bidAmount) external {
@@ -169,7 +170,6 @@ contract GameBank is ERC20("GameBank", "GB") {
     }
 
     function _checkRailStationRent(uint8 propertyId) private view returns (uint256) {
-        uint256 rent = 0;
         address railOwner = propertyOwner[propertyId];
         // Count how many railway stations are owned by the player
         uint256 ownedRailways = 0;
@@ -179,22 +179,12 @@ contract GameBank is ERC20("GameBank", "GB") {
         if (propertyOwner[26] == railOwner) ownedRailways++;
         if (propertyOwner[36] == railOwner) ownedRailways++;
 
-        // Set rent based on the number of owned railway stations
-        if (ownedRailways == 4) {
-            rent = 200; // Rent for owning all 4
-        } else if (ownedRailways == 3) {
-            rent = 100; // Rent for owning 3
-        } else if (ownedRailways == 2) {
-            rent = 50; // Rent for owning 2
-        } else if (ownedRailways == 1) {
-            rent = 25; // Rent for owning 1
-        }
-
-        return rent;
+        return 25 * (2 ** (ownedRailways - 1));
     }
 
     function _checkUtilityRent(uint8 propertyId, uint256 diceRolled) private view returns (uint256) {
         uint256 rentAmount = 0;
+        uint8 numberOfOwned = 0;
 
         // Check if the property is either 13 or 29 (the utility properties)
         if (propertyId == 13 || propertyId == 29) {
@@ -205,6 +195,8 @@ contract GameBank is ERC20("GameBank", "GB") {
                 rentAmount = diceRolled * 4; // Rent when utilities are owned by different players
             }
         }
+
+        rentAmount = numberOfOwned == 1 ? (diceRolled * 4) : (diceRolled * 10);
 
         return rentAmount;
     }
@@ -298,8 +290,6 @@ contract GameBank is ERC20("GameBank", "GB") {
 
         // Calculate the cost of one house
         uint256 costOfHouse = property.buyAmount;
-
-
 
         // Check if the property is ready to upgrade to a hotel
         if (property.noOfUpgrades == 4) {
