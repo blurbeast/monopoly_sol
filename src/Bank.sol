@@ -156,13 +156,12 @@ contract GameBank is ERC20("GameBank", "GB") {
         }
 
         noOfColorGroupOwnedByUser[property.propertyColor][msg.sender] += 1;
-            // mapping(address => uint8) private numberOfOwnedRailways;
-            // bool private allRailwaysOwned;
+        // mapping(address => uint8) private numberOfOwnedRailways;
+        // bool private allRailwaysOwned;
 
-            uint8 numberOfUserOwnedRailway = numberOfOwnedRailways[msg.sender];
-            
-            property.propertyType == PropertyType.RailStation ? 
-                numberOfUserOwnedRailway += 1 : numberOfUserOwnedRailway;
+        uint8 numberOfUserOwnedRailway = numberOfOwnedRailways[msg.sender];
+
+        property.propertyType == PropertyType.RailStation ? numberOfOwnedRailways[msg.sender] += 1 : numberOfUserOwnedRailway;
 
         // Emit a bid event
         emit PropertyBid(propertyId, msg.sender, bidAmount);
@@ -187,6 +186,10 @@ contract GameBank is ERC20("GameBank", "GB") {
         property.owner = bid.bidder;
         propertyOwner[propertyId] = bid.bidder;
 
+
+        noOfColorGroupOwnedByUser[property.propertyColor][msg.sender] -= 1;
+        noOfColorGroupOwnedByUser[property.propertyColor][bid.bidder] += 1;
+
         // Clear the bid
         delete bids[propertyId];
 
@@ -195,17 +198,11 @@ contract GameBank is ERC20("GameBank", "GB") {
     }
 
     mapping(address => uint8) private numberOfOwnedRailways;
-    bool private allRailwaysOwned;
 
     function _checkRailStationRent(uint8 propertyId) private view returns (uint256) {
         address railOwner = propertyOwner[propertyId];
         // Count how many railway stations are owned by the player
-        uint256 ownedRailways = 0;
-
-        if (propertyOwner[6] == railOwner) ownedRailways++;
-        if (propertyOwner[16] == railOwner) ownedRailways++;
-        if (propertyOwner[26] == railOwner) ownedRailways++;
-        if (propertyOwner[36] == railOwner) ownedRailways++;
+        uint256 ownedRailways = numberOfOwnedRailways[railOwner];
 
         return 25 * (2 ** (ownedRailways - 1));
     }
