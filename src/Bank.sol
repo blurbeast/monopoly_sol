@@ -336,28 +336,11 @@ contract GameBank is ERC20("GameBank", "GB") {
         // Ensure the property is not mortgaged
         require(!mortgagedProperties[propertyId], "Cannot downgrade a mortgaged property");
 
-        // Check if the property has a hotel to downgrade
-        // if (property.noOfUpgrades == 5) {
-        //     // Downgrade hotel to 4 houses
-        //     // property.hotel = false;
-        //     property.noOfUpgrades = 4;
+        uint256 amountToRecieve = property.buyAmount * (2 ** (noOfDowngrade - 1));
 
-        //     // Refund the equivalent of one house to the owner
-        //     uint256 refundAmount = property.buyAmount / 2;
-        //     require(transfer(msg.sender, refundAmount), "Token refund for hotel downgrade failed");
-        // } else if (property.noOfUpgrades > 0) {
-        //     // Downgrade one house
-        //     property.noOfUpgrades--;
-
-        //     // Refund the cost of one house
-        //     uint256 refundAmount = property.buyAmount / 2;
-        //     require(transfer(msg.sender, refundAmount), "Token refund for house downgrade failed");
-        // } else {
-        //     // Property has no upgrades to downgrade
-        //     revert("Property has no houses or hotel to downgrade");
-        // }
-
-        
+        bool success = transfer(msg.sender, amountToRecieve);
+        require(success, "");
+        property.noOfUpgrades -= noOfDowngrade;
         emit PropertyDownGraded(propertyId);
     }
 }
