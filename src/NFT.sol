@@ -12,17 +12,6 @@ import "lib/openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721URISt
  *     @dev this contract is called upon on every new game created and it NFT URI is sent to the bank contract which then creates a property for each of the NFTs.
  *     @dev the URI of each NFT is fetched from the bank contract using the tokenId.
  */
-
-//   enum PropertyColors {
-//         PINK,
-//         YELLOW,
-//         BLUE,
-//         ORANGE,
-//         RED,
-//         GREEN,
-//         PURPLE,
-//         BROWN
-//     }
 contract GeneralNFT is ERC721URIStorage {
     uint8 public constant MAX_SUPPLY = 40;
     uint8 public totalSupply;

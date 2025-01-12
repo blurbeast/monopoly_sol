@@ -71,7 +71,9 @@ contract GameBank is ERC20("GameBank", "GB") {
     mapping(uint8 => address) propertyOwner;
     mapping(uint256 => bool) mortgagedProperties;
     mapping(uint8 => uint8) noOfUpgrades;
+    //
     mapping(PropertyColors => mapping(address => uint8)) public noOfColorGroupOwned;
+    mapping (PropertyColors => uint8) private upgradeUserPropertyColorOwnedNumber;
 
     event PropertyBid(uint8 indexed propertyId, address indexed bidder, uint256 bidAmount);
     event PropertySold(uint8 indexed propertyId, address indexed newOwner, uint256 amount);
@@ -95,6 +97,7 @@ contract GameBank is ERC20("GameBank", "GB") {
         nftContract = NFTContract(_nftContract);
         _mint(address(this), amountToMint);
         _gameProperties();
+        _setNumberForColoredPropertyNumber();
     }
 
     function _gameProperties() private {
@@ -104,6 +107,17 @@ contract GameBank is ERC20("GameBank", "GB") {
             Property memory property = allProperties[i];
             _distributePropertyType(property, i);
         }
+    }
+
+    function _setNumberForColoredPropertyNumber() private {
+        upgradeUserPropertyColorOwnedNumber[PropertyColors.PINK] = 3;
+        upgradeUserPropertyColorOwnedNumber[PropertyColors.YELLOW] = 3;
+        upgradeUserPropertyColorOwnedNumber[PropertyColors.BLUE] = 3;
+        upgradeUserPropertyColorOwnedNumber[PropertyColors.ORANGE] = 3;
+        upgradeUserPropertyColorOwnedNumber[PropertyColors.RED] = 3;
+        upgradeUserPropertyColorOwnedNumber[PropertyColors.GREEN] = 3;
+        upgradeUserPropertyColorOwnedNumber[PropertyColors.PURPLE] = 3;
+        upgradeUserPropertyColorOwnedNumber[PropertyColors.BROWN] = 2;
     }
 
     //helper function
@@ -168,6 +182,9 @@ contract GameBank is ERC20("GameBank", "GB") {
         // Emit a property sold event
         emit PropertySold(propertyId, bid.bidder, bid.bidAmount);
     }
+
+    mapping(address => uint8) private numberOfOwnedRailways;
+    bool private allRailwaysOwned;
 
     function _checkRailStationRent(uint8 propertyId) private view returns (uint256) {
         address railOwner = propertyOwner[propertyId];
@@ -289,19 +306,22 @@ contract GameBank is ERC20("GameBank", "GB") {
         // require(noOfUpgrades[propertyId] <= 5, "Property at Max upgrade");
 
         // Calculate the cost of one house
-        uint256 costOfHouse = property.buyAmount;
+        uint8 noOfUpgrade = property.noOfUpgrades;
+        uint8 userColorGroupOwned = noOfColorGroupOwned[property.propertyColor][msg.sender];
+
+
 
         // Check if the property is ready to upgrade to a hotel
         if (property.noOfUpgrades == 4) {
             // Ensure the player has enough tokens to upgrade to a hotel
-            require(transfer(address(this), costOfHouse), "Token transfer for hotel failed");
+            require(transfer(address(this), 0), "Token transfer for hotel failed");
 
             // Upgrade to hotel
             // property.hotel = true;
             property.noOfUpgrades = 0; // Reset house count after upgrading
         } else {
             // Ensure the player has enough tokens to buy a house
-            require(transfer(address(this), costOfHouse), "Token transfer for house failed");
+            require(transfer(address(this), 0), "Token transfer for house failed");
 
             // Increment the house count
             property.noOfUpgrades++;
