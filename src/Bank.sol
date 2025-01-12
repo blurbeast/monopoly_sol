@@ -175,11 +175,11 @@ contract GameBank is ERC20("GameBank", "GB") {
         PropertyG storage property = gameProperties[propertyId];
         require(!mortgagedProperties[propertyId], "Property is Mortgaged and cannot be sold");
 
+        Bid memory bid = bids[propertyId]; 
+
         require(property.propertyType != PropertyType.Special, "Invalid property");
         require(property.owner == msg.sender, "You do not own this property");
-        // require(bid.bidder != address(0), "No valid bid found for this property");
-
-        Bid memory bid = bids[propertyId];
+        require(bid.bidder != address(0), "No valid bid found for this property");
 
         // Transfer funds from bidder to seller
         bool success = transferFrom(bid.bidder, msg.sender, bid.bidAmount);
@@ -246,16 +246,6 @@ contract GameBank is ERC20("GameBank", "GB") {
         bool success = transferFrom(player, foundProperty.owner, rentAmount);
         require(success, "Transfer failed");
     }
-
-    // function transferOwnership(address newOwner, uint8 propertyId) external {
-    //     require(propertyId <= propertySize, "no property with the id"); // to create a function or modifeir later on
-    //     PropertyG storage foundProperty = gameProperties[propertyId];
-    //     require(balanceOf(newOwner) >= foundProperty.buyAmount, "insufficient funds to pay rent");
-    //     bool success = transferFrom(newOwner, foundProperty.owner, foundProperty.buyAmount);
-    //     require(success, "Transfer failed");
-    //     foundProperty.owner = newOwner;
-    //     // to emit an event later on
-    // }
 
     /**
      * @dev looked this through , i think i am not getting the summation of the amount but formula is correct
