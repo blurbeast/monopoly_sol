@@ -73,7 +73,7 @@ contract GameBank is ERC20("GameBank", "GB") {
     mapping(uint8 => uint8) noOfUpgrades;
     //
     mapping(PropertyColors => mapping(address => uint8)) public noOfColorGroupOwnedByUser;
-    mapping (PropertyColors => uint8) private upgradeUserPropertyColorOwnedNumber;
+    mapping(PropertyColors => uint8) private upgradeUserPropertyColorOwnedNumber;
 
     event PropertyBid(uint8 indexed propertyId, address indexed bidder, uint256 bidAmount);
     event PropertySold(uint8 indexed propertyId, address indexed newOwner, uint256 amount);
@@ -146,6 +146,7 @@ contract GameBank is ERC20("GameBank", "GB") {
             // Update ownership and increment sales count
             property.owner = msg.sender;
             propertyOwner[propertyId] = msg.sender;
+            noOfColorGroupOwnedByUser[property.propertyColor][msg.sender] += 1;
         } else {
             // Call the ERC20 approve function
             bool success = approve(property.owner, bidAmount);
