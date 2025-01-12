@@ -3,6 +3,8 @@ pragma solidity ^0.8.26;
 
 import {ERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 // import { ERC20 } from "lib/solmate/src/tokens/ERC20.sol";
+import "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
+
 
 struct Property {
     bytes name;
@@ -51,7 +53,7 @@ interface NFTContract {
  * @dev this is intended to be deployed upon every new creation of a new game.
  */
 
-contract GameBank is ERC20("GameBank", "GB") {
+contract GameBank is ERC20 ("GameBank", "GB")  {
     struct PropertyG {
         bytes name;
         bytes uri;
@@ -97,6 +99,10 @@ event PropertySold(uint8 indexed propertyId, address indexed newOwner, uint256 a
         nftContract = NFTContract(_nftContract);
         _mint(address(this), amountToMint);
         _gameProperties();
+    }
+
+     function mint(address to, uint256 amount) external  {
+        _mint(to, amount);
     }
 
     function _gameProperties() private {
