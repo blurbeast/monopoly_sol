@@ -308,29 +308,26 @@ contract GameBank is ERC20("GameBank", "GB") {
         uint8 mustOwnedNumberOfSiteColor = upgradeUserPropertyColorOwnedNumber[property.propertyColor];
 
         // Calculate the cost of one house
-        uint8 noOfUpgrade = property.noOfUpgrades;
         uint8 userColorGroupOwned = noOfColorGroupOwnedByUser[property.propertyColor][msg.sender];
 
         require(userColorGroupOwned >= mustOwnedNumberOfSiteColor, "must own at least two site with same color ");
-        require(noOfUpgrade < 5, "reach the peak upgrade for this property ");
-        // Check if the property is ready to upgrade to a hotel
-        if (property.noOfUpgrades == 4) {
-            // Ensure the player has enough tokens to upgrade to a hotel
-            require(transfer(address(this), 0), "Token transfer for hotel failed");
+        require(property.noOfUpgrades < 5, "reach the peak upgrade for this property ");
+        uint8 noOfUpgrade = property.noOfUpgrades + 1;
 
-            // Upgrade to hotel
-            // property.hotel = true;
-            property.noOfUpgrades = 0; // Reset house count after upgrading
-        } else {
-            // Ensure the player has enough tokens to buy a house
-            require(transfer(address(this), 0), "Token transfer for house failed");
+        uint256 amountToPay = property.buyAmount * (2 * (2 ** (noOfUpgrade - 1)));
 
-            // Increment the house count
-            property.noOfUpgrades++;
-        }
+        require(balanceOf(msg.sender) >= amountToPay, "Insufficient funds to upgrade property");
+
+        bool success = transferFrom(msg.sender, address(this), amountToPay);
+
+        require(success, "Insufficient funds to transfer");
+
+        property.noOfUpgrades += 1;
+
         emit PropertyUpGraded(propertyId);
     }
 
+    // make the game owner of the bank and hence owns the token
     function downgradeProperty(uint8 propertyId) external {
         PropertyG memory property = gameProperties[propertyId];
 
