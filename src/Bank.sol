@@ -186,7 +186,6 @@ contract GameBank is ERC20("GameBank", "GB") {
         property.owner = bid.bidder;
         propertyOwner[propertyId] = bid.bidder;
 
-
         noOfColorGroupOwnedByUser[property.propertyColor][msg.sender] -= 1;
         noOfColorGroupOwnedByUser[property.propertyColor][bid.bidder] += 1;
 
@@ -208,22 +207,11 @@ contract GameBank is ERC20("GameBank", "GB") {
     }
 
     function _checkUtilityRent(uint8 propertyId, uint256 diceRolled) private view returns (uint256) {
-        uint256 rentAmount = 0;
-        uint8 numberOfOwned = 0;
+    
+        require(propertyId == 13 || propertyId == 29, "");
 
-        // Check if the property is either 13 or 29 (the utility properties)
-        if (propertyId == 13 || propertyId == 29) {
-            // Check if both utility properties are owned by the same player
-            if (propertyOwner[13] == propertyOwner[29]) {
-                rentAmount = diceRolled * 10; // Rent when both utilities are owned by the same player
-            } else {
-                rentAmount = diceRolled * 4; // Rent when utilities are owned by different players
-            }
-        }
+        return propertyOwner[13] == propertyOwner[29] ? (diceRolled * 10) : (diceRolled * 4);
 
-        rentAmount = numberOfOwned == 1 ? (diceRolled * 4) : (diceRolled * 10);
-
-        return rentAmount;
     }
 
     function handleRent(address player, uint8 propertyId, uint256 diceRolled) external {
