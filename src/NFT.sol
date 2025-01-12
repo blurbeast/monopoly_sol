@@ -32,6 +32,17 @@ contract GeneralNFT is ERC721URIStorage {
         Special
     }
 
+    enum PropertyColors {
+        PINK,
+        YELLOW,
+        BLUE,
+        ORANGE,
+        RED,
+        GREEN,
+        PURPLE,
+        BROWN
+    }
+
     // Property[] private properties = new Property[](MAX_SUPPLY);
     mapping(uint8 => Property) private properties;
 

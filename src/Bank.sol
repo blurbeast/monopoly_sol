@@ -47,6 +47,7 @@ contract GameBank is ERC20("GameBank", "GB") {
         address owner;
         uint8 noOfUpgrades;
         PropertyType propertyType;
+        PropertyColors propertyColor;
     }
 
     struct Bid {
@@ -54,10 +55,22 @@ contract GameBank is ERC20("GameBank", "GB") {
         uint256 bidAmount;
     }
 
+    enum PropertyColors {
+        PINK,
+        YELLOW,
+        BLUE,
+        ORANGE,
+        RED,
+        GREEN,
+        PURPLE,
+        BROWN
+    }
+
     mapping(uint8 => Bid) public bids;
     mapping(uint8 => address) propertyOwner;
     mapping(uint256 => bool) mortgagedProperties;
     mapping(uint8 => uint8) noOfUpgrades;
+    mapping(PropertyColors => mapping(address => uint8)) public noOfColorGroupOwned;
 
     event PropertyBid(uint8 indexed propertyId, address indexed bidder, uint256 bidAmount);
     event PropertySold(uint8 indexed propertyId, address indexed newOwner, uint256 amount);
@@ -295,10 +308,12 @@ contract GameBank is ERC20("GameBank", "GB") {
         require(property.owner == msg.sender, "You are not the owner of this property");
         require(!mortgagedProperties[propertyId], "Property is Mortgaged cannot upgrade");
         require(property.propertyType == PropertyType.Property, "Only properties can be upgraded");
-        require(noOfUpgrades[propertyId] <= 5, "Property at Max upgrade");
+        // require(noOfUpgrades[propertyId] <= 5, "Property at Max upgrade");
 
         // Calculate the cost of one house
         uint256 costOfHouse = property.buyAmount;
+
+
 
         // Check if the property is ready to upgrade to a hotel
         if (property.noOfUpgrades == 4) {
