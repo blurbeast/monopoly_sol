@@ -5,12 +5,24 @@ import {ERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol"
 // import { ERC20 } from "lib/solmate/src/tokens/ERC20.sol";
 
 struct Property {
-    bytes name;
-    uint256 rentAmount;
-    bytes uri;
-    uint256 buyAmount;
-    PropertyType propertyType;
-}
+        bytes name;
+        uint256 rentAmount;
+        bytes uri;
+        uint256 buyAmount;
+        PropertyType propertyType;
+        PropertyColors color;
+    }
+
+   enum PropertyColors {
+        PINK,
+        YELLOW,
+        BLUE,
+        ORANGE,
+        RED,
+        GREEN,
+        PURPLE,
+        BROWN
+    }
 
 enum PropertyType {
     Property,
@@ -55,17 +67,6 @@ contract GameBank is ERC20("GameBank", "GB") {
         uint256 bidAmount;
     }
 
-    enum PropertyColors {
-        PINK,
-        YELLOW,
-        BLUE,
-        ORANGE,
-        RED,
-        GREEN,
-        PURPLE,
-        BROWN
-    }
-
     mapping(uint8 => Bid) public bids;
     mapping(uint8 => address) propertyOwner;
     mapping(uint256 => bool) mortgagedProperties;
@@ -102,28 +103,13 @@ contract GameBank is ERC20("GameBank", "GB") {
 
         for (uint8 i = 0; i < size; i++) {
             Property memory property = allProperties[i];
-            PropertyType propertyType;
-
-            // Determine PropertyType based on index
-            if (i == 13 || i == 29) {
-                propertyType = PropertyType.Utility;
-            } else if (i == 6 || i == 16 || i == 26 || i == 36) {
-                propertyType = PropertyType.RailStation;
-            } else if (
-                i == 1 || i == 3 || i == 5 || i == 8 || i == 11 || i == 18 || i == 21 || i == 23 || i == 31 || i == 34
-                    || i == 37 || i == 39
-            ) {
-                propertyType = PropertyType.Special; // Ensure this enum exists
-            } else {
-                propertyType = PropertyType.Property;
-            }
-            distributePropertyType(property, propertyType, i);
+            distributePropertyType(property, i);
         }
     }
 
-    function distributePropertyType(Property memory prop, PropertyType propType, uint8 position) private {
+    function distributePropertyType(Property memory prop, uint8 position) private {
         gameProperties[position + 1] =
-            PropertyG(prop.name, prop.uri, prop.buyAmount, prop.rentAmount, address(this), 0, propType);
+            PropertyG(prop.name, prop.uri, prop.buyAmount, prop.rentAmount, address(this), 0, prop.propertyType, prop.color);
     }
 
     function buyProperty(uint8 propertyId, uint256 bidAmount) external {
@@ -312,6 +298,8 @@ contract GameBank is ERC20("GameBank", "GB") {
 
         // Calculate the cost of one house
         uint256 costOfHouse = property.buyAmount;
+
+
 
         // Check if the property is ready to upgrade to a hotel
         if (property.noOfUpgrades == 4) {
