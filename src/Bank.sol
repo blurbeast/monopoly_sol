@@ -72,7 +72,7 @@ contract GameBank is ERC20("GameBank", "GB") {
     mapping(uint256 => bool) mortgagedProperties;
     mapping(uint8 => uint8) noOfUpgrades;
     //
-    mapping(PropertyColors => mapping(address => uint8)) public noOfColorGroupOwned;
+    mapping(PropertyColors => mapping(address => uint8)) public noOfColorGroupOwnedByUser;
     mapping (PropertyColors => uint8) private upgradeUserPropertyColorOwnedNumber;
 
     event PropertyBid(uint8 indexed propertyId, address indexed bidder, uint256 bidAmount);
@@ -305,12 +305,14 @@ contract GameBank is ERC20("GameBank", "GB") {
         require(property.propertyType == PropertyType.Property, "Only properties can be upgraded");
         // require(noOfUpgrades[propertyId] <= 5, "Property at Max upgrade");
 
+        uint8 mustOwnedNumberOfSiteColor = upgradeUserPropertyColorOwnedNumber[property.propertyColor];
+
         // Calculate the cost of one house
         uint8 noOfUpgrade = property.noOfUpgrades;
-        uint8 userColorGroupOwned = noOfColorGroupOwned[property.propertyColor][msg.sender];
+        uint8 userColorGroupOwned = noOfColorGroupOwnedByUser[property.propertyColor][msg.sender];
 
-
-
+        require(userColorGroupOwned >= mustOwnedNumberOfSiteColor, "must own at least two site with same color ");
+        require(noOfUpgrade < 5, "reach the peak upgrade for this property ");
         // Check if the property is ready to upgrade to a hotel
         if (property.noOfUpgrades == 4) {
             // Ensure the player has enough tokens to upgrade to a hotel
