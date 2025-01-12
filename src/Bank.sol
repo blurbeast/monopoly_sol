@@ -146,7 +146,6 @@ contract GameBank is ERC20("GameBank", "GB") {
             // Update ownership and increment sales count
             property.owner = msg.sender;
             propertyOwner[propertyId] = msg.sender;
-            noOfColorGroupOwnedByUser[property.propertyColor][msg.sender] += 1;
         } else {
             // Call the ERC20 approve function
             bool success = approve(property.owner, bidAmount);
@@ -156,9 +155,20 @@ contract GameBank is ERC20("GameBank", "GB") {
             bids[propertyId] = Bid({bidder: msg.sender, bidAmount: bidAmount});
         }
 
+        noOfColorGroupOwnedByUser[property.propertyColor][msg.sender] += 1;
+            // mapping(address => uint8) private numberOfOwnedRailways;
+            // bool private allRailwaysOwned;
+
+            uint8 numberOfUserOwnedRailway = numberOfOwnedRailways[msg.sender];
+            
+            property.propertyType == PropertyType.RailStation ? 
+                numberOfUserOwnedRailway += 1 : numberOfUserOwnedRailway;
+
         // Emit a bid event
         emit PropertyBid(propertyId, msg.sender, bidAmount);
     }
+
+    // to refactor this function
 
     function sellProperty(uint8 propertyId) external {
         PropertyG storage property = gameProperties[propertyId];
