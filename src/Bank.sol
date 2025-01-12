@@ -313,8 +313,6 @@ contract GameBank is ERC20("GameBank", "GB") {
         // Calculate the cost of one house
         uint256 costOfHouse = property.buyAmount;
 
-
-
         // Check if the property is ready to upgrade to a hotel
         if (property.noOfUpgrades == 4) {
             // Ensure the player has enough tokens to upgrade to a hotel
