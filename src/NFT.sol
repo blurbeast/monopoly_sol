@@ -23,6 +23,7 @@ contract GeneralNFT is ERC721URIStorage {
         bytes uri;
         uint256 buyAmount;
         PropertyType propertyType;
+        PropertyColors color;
     }
 
     enum PropertyType {
@@ -30,6 +31,17 @@ contract GeneralNFT is ERC721URIStorage {
         RailStation,
         Utility,
         Special
+    }
+
+    enum PropertyColors {
+        PINK,
+        YELLOW,
+        BLUE,
+        ORANGE,
+        RED,
+        GREEN,
+        PURPLE,
+        BROWN
     }
 
     // Property[] private properties = new Property[](MAX_SUPPLY);
@@ -44,9 +56,7 @@ contract GeneralNFT is ERC721URIStorage {
         require(totalSupply < MAX_SUPPLY, "Max supply reached");
         uint256 tokenId = totalSupply;
         _mint(_minter, tokenId);
-        string memory tokenUri = string(
-            abi.encodePacked(baseUri, "/", Strings.toString(tokenId))
-        );
+        string memory tokenUri = string(abi.encodePacked(baseUri, "/", Strings.toString(tokenId)));
         _setTokenURI(tokenId, tokenUri);
         totalSupply++;
         populatePropertyUri();
@@ -54,307 +64,373 @@ contract GeneralNFT is ERC721URIStorage {
 
     // okay but like this when getproperties() function , the uri should follow as well .
     function createNftProperties() private {
-        // Brown (Dark Purple) Properties
-        properties[2] = Property(
-            bytes("Mediterranean Avenue"),
-            2,
-            bytes(""),
-            60,
-            PropertyType.Property
-        );
-        properties[4] = Property(
-            bytes("Baltic Avenue"),
-            4,
-            bytes(""),
-            60,
-            PropertyType.Property
-        );
+        properties[1] = Property({
+            name: "GO",
+            rentAmount: 0,
+            uri: "",
+            buyAmount: 0,
+            propertyType: PropertyType.Special,
+            color: PropertyColors.PURPLE
+        });
+
+        // Brown Properties
+        properties[2] = Property({
+            name: "Mediterranean Avenue",
+            rentAmount: 2,
+            uri: "",
+            buyAmount: 60,
+            propertyType: PropertyType.Property,
+            color: PropertyColors.BROWN
+        });
+
+        properties[3] = Property({
+            name: "Community Chest 1",
+            rentAmount: 0,
+            uri: "",
+            buyAmount: 0,
+            propertyType: PropertyType.Special,
+            color: PropertyColors.PURPLE
+        });
+
+        properties[4] = Property({
+            name: "Baltic Avenue",
+            rentAmount: 4,
+            uri: "",
+            buyAmount: 60,
+            propertyType: PropertyType.Property,
+            color: PropertyColors.BROWN
+        });
+
+        properties[5] = Property({
+            name: "Income Tax",
+            rentAmount: 0,
+            uri: "",
+            buyAmount: 0,
+            propertyType: PropertyType.Special,
+            color: PropertyColors.PURPLE
+        });
+
+        properties[6] = Property({
+            name: "Reading Railroad",
+            rentAmount: 25,
+            uri: "",
+            buyAmount: 200,
+            propertyType: PropertyType.RailStation,
+            color: PropertyColors.PURPLE
+        });
 
         // Light Blue Properties
-        properties[7] = Property(
-            bytes("Connecticut Avenue"),
-            8,
-            bytes(""),
-            120,
-            PropertyType.Property
-        );
-        properties[9] = Property(
-            bytes("Vermont Avenue"),
-            6,
-            bytes(""),
-            100,
-            PropertyType.Property
-        );
-        properties[10] = Property(
-            bytes("Oriental Avenue"),
-            6,
-            bytes(""),
-            100,
-            PropertyType.Property
-        );
+        properties[7] = Property({
+            name: "Connecticut Avenue",
+            rentAmount: 8,
+            uri: "",
+            buyAmount: 120,
+            propertyType: PropertyType.Property,
+            color: PropertyColors.BLUE
+        });
 
-        // Pink (Magenta) Properties
-        properties[12] = Property(
-            bytes("St. Charles Place"),
-            10,
-            bytes(""),
-            140,
-            PropertyType.Property
-        );
-        properties[14] = Property(
-            bytes("States Avenue"),
-            10,
-            bytes(""),
-            140,
-            PropertyType.Property
-        );
-        properties[15] = Property(
-            bytes("Virginia Avenue"),
-            12,
-            bytes(""),
-            160,
-            PropertyType.Property
-        );
+        properties[8] = Property({
+            name: "Chance 1",
+            rentAmount: 0,
+            uri: "",
+            buyAmount: 0,
+            propertyType: PropertyType.Special,
+            color: PropertyColors.PURPLE
+        });
+
+        properties[9] = Property({
+            name: "Vermont Avenue",
+            rentAmount: 6,
+            uri: "",
+            buyAmount: 100,
+            propertyType: PropertyType.Property,
+            color: PropertyColors.BLUE
+        });
+
+        properties[10] = Property({
+            name: "Oriental Avenue",
+            rentAmount: 6,
+            uri: "",
+            buyAmount: 100,
+            propertyType: PropertyType.Property,
+            color: PropertyColors.BLUE
+        });
+
+        properties[11] = Property({
+            name: "Jail",
+            rentAmount: 0,
+            uri: "",
+            buyAmount: 0,
+            propertyType: PropertyType.Special,
+            color: PropertyColors.PURPLE
+        });
+
+        // Pink Properties
+        properties[12] = Property({
+            name: "St. Charles Place",
+            rentAmount: 10,
+            uri: "",
+            buyAmount: 140,
+            propertyType: PropertyType.Property,
+            color: PropertyColors.PINK
+        });
+
+        properties[13] = Property({
+            name: "Electric Company",
+            rentAmount: 0,
+            uri: "",
+            buyAmount: 150,
+            propertyType: PropertyType.Utility,
+            color: PropertyColors.PURPLE
+        });
+
+        properties[14] = Property({
+            name: "States Avenue",
+            rentAmount: 10,
+            uri: "",
+            buyAmount: 140,
+            propertyType: PropertyType.Property,
+            color: PropertyColors.PINK
+        });
+
+        properties[15] = Property({
+            name: "Virginia Avenue",
+            rentAmount: 12,
+            uri: "",
+            buyAmount: 160,
+            propertyType: PropertyType.Property,
+            color: PropertyColors.PINK
+        });
+
+        properties[16] = Property({
+            name: "Pennsylvania Railroad",
+            rentAmount: 25,
+            uri: "",
+            buyAmount: 200,
+            propertyType: PropertyType.RailStation,
+            color: PropertyColors.PURPLE
+        });
 
         // Orange Properties
-        properties[17] = Property(
-            bytes("St. James Place"),
-            14,
-            bytes(""),
-            180,
-            PropertyType.Property
-        );
-        properties[19] = Property(
-            bytes("Tennessee Avenue"),
-            14,
-            bytes(""),
-            180,
-            PropertyType.Property
-        );
-        properties[20] = Property(
-            bytes("New York Avenue"),
-            16,
-            bytes(""),
-            200,
-            PropertyType.Property
-        );
+        properties[17] = Property({
+            name: "St. James Place",
+            rentAmount: 14,
+            uri: "",
+            buyAmount: 180,
+            propertyType: PropertyType.Property,
+            color: PropertyColors.ORANGE
+        });
+
+        properties[18] = Property({
+            name: "Community Chest 2",
+            rentAmount: 0,
+            uri: "",
+            buyAmount: 0,
+            propertyType: PropertyType.Special,
+            color: PropertyColors.PURPLE
+        });
+
+        properties[19] = Property({
+            name: "Tennessee Avenue",
+            rentAmount: 14,
+            uri: "",
+            buyAmount: 180,
+            propertyType: PropertyType.Property,
+            color: PropertyColors.ORANGE
+        });
+
+        properties[20] = Property({
+            name: "New York Avenue",
+            rentAmount: 16,
+            uri: "",
+            buyAmount: 200,
+            propertyType: PropertyType.Property,
+            color: PropertyColors.ORANGE
+        });
+
+        properties[21] = Property({
+            name: "Free Parking",
+            rentAmount: 0,
+            uri: "",
+            buyAmount: 0,
+            propertyType: PropertyType.Special,
+            color: PropertyColors.PURPLE
+        });
 
         // Red Properties
-        properties[22] = Property(
-            bytes("Kentucky Avenue"),
-            18,
-            bytes(""),
-            220,
-            PropertyType.Property
-        );
-        properties[24] = Property(
-            bytes("Indiana Avenue"),
-            18,
-            bytes(""),
-            220,
-            PropertyType.Property
-        );
-        properties[25] = Property(
-            bytes("Illinois Avenue"),
-            20,
-            bytes(""),
-            240,
-            PropertyType.Property
-        );
+        properties[22] = Property({
+            name: "Kentucky Avenue",
+            rentAmount: 18,
+            uri: "",
+            buyAmount: 220,
+            propertyType: PropertyType.Property,
+            color: PropertyColors.RED
+        });
+
+        properties[23] = Property({
+            name: "Chance 2",
+            rentAmount: 0,
+            uri: "",
+            buyAmount: 0,
+            propertyType: PropertyType.Special,
+            color: PropertyColors.PURPLE
+        });
+
+        properties[24] = Property({
+            name: "Indiana Avenue",
+            rentAmount: 18,
+            uri: "",
+            buyAmount: 220,
+            propertyType: PropertyType.Property,
+            color: PropertyColors.RED
+        });
+
+        properties[25] = Property({
+            name: "Illinois Avenue",
+            rentAmount: 20,
+            uri: "",
+            buyAmount: 240,
+            propertyType: PropertyType.Property,
+            color: PropertyColors.RED
+        });
+
+        properties[26] = Property({
+            name: "B&O Railroad",
+            rentAmount: 25,
+            uri: "",
+            buyAmount: 200,
+            propertyType: PropertyType.RailStation,
+            color: PropertyColors.PURPLE
+        });
 
         // Yellow Properties
-        properties[27] = Property(
-            bytes("Atlantic Avenue"),
-            22,
-            bytes(""),
-            260,
-            PropertyType.Property
-        );
-        properties[28] = Property(
-            bytes("Ventnor Avenue"),
-            22,
-            bytes(""),
-            260,
-            PropertyType.Property
-        );
-        properties[30] = Property(
-            bytes("Marvin Gardens"),
-            24,
-            bytes(""),
-            280,
-            PropertyType.Property
-        );
+        properties[27] = Property({
+            name: "Atlantic Avenue",
+            rentAmount: 22,
+            uri: "",
+            buyAmount: 260,
+            propertyType: PropertyType.Property,
+            color: PropertyColors.YELLOW
+        });
+
+        properties[28] = Property({
+            name: "Ventnor Avenue",
+            rentAmount: 22,
+            uri: "",
+            buyAmount: 260,
+            propertyType: PropertyType.Property,
+            color: PropertyColors.YELLOW
+        });
+
+        properties[29] = Property({
+            name: "Water Works",
+            rentAmount: 0,
+            uri: "",
+            buyAmount: 150,
+            propertyType: PropertyType.Utility,
+            color: PropertyColors.PURPLE
+        });
+
+        properties[30] = Property({
+            name: "Marvin Gardens",
+            rentAmount: 24,
+            uri: "",
+            buyAmount: 280,
+            propertyType: PropertyType.Property,
+            color: PropertyColors.YELLOW
+        });
+
+        properties[31] = Property({
+            name: "Go To Jail",
+            rentAmount: 0,
+            uri: "",
+            buyAmount: 0,
+            propertyType: PropertyType.Special,
+            color: PropertyColors.PURPLE
+        });
 
         // Green Properties
-        properties[32] = Property(
-            bytes("Pacific Avenue"),
-            26,
-            bytes(""),
-            300,
-            PropertyType.Property
-        );
-        properties[33] = Property(
-            bytes("North Carolina Avenue"),
-            26,
-            bytes(""),
-            300,
-            PropertyType.Property
-        );
-        properties[35] = Property(
-            bytes("Pennsylvania Avenue"),
-            28,
-            bytes(""),
-            320,
-            PropertyType.Property
-        );
+        properties[32] = Property({
+            name: "Pacific Avenue",
+            rentAmount: 26,
+            uri: "",
+            buyAmount: 300,
+            propertyType: PropertyType.Property,
+            color: PropertyColors.GREEN
+        });
+
+        properties[33] = Property({
+            name: "North Carolina Avenue",
+            rentAmount: 26,
+            uri: "",
+            buyAmount: 300,
+            propertyType: PropertyType.Property,
+            color: PropertyColors.GREEN
+        });
+
+        properties[34] = Property({
+            name: "Community Chest 3",
+            rentAmount: 0,
+            uri: "",
+            buyAmount: 0,
+            propertyType: PropertyType.Special,
+            color: PropertyColors.PURPLE
+        });
+
+        properties[35] = Property({
+            name: "Pennsylvania Avenue",
+            rentAmount: 28,
+            uri: "",
+            buyAmount: 320,
+            propertyType: PropertyType.Property,
+            color: PropertyColors.GREEN
+        });
+
+        properties[36] = Property({
+            name: "Short Line",
+            rentAmount: 25,
+            uri: "",
+            buyAmount: 200,
+            propertyType: PropertyType.RailStation,
+            color: PropertyColors.PURPLE
+        });
+
+        properties[37] = Property({
+            name: "Chance 3",
+            rentAmount: 0,
+            uri: "",
+            buyAmount: 0,
+            propertyType: PropertyType.Special,
+            color: PropertyColors.PURPLE
+        });
 
         // Dark Blue Properties
-        properties[38] = Property(
-            bytes("Park Place"),
-            35,
-            bytes(""),
-            350,
-            PropertyType.Property
-        );
-        properties[40] = Property(
-            bytes("Boardwalk"),
-            50,
-            bytes(""),
-            400,
-            PropertyType.Property
-        );
+        properties[38] = Property({
+            name: "Park Place",
+            rentAmount: 35,
+            uri: "",
+            buyAmount: 350,
+            propertyType: PropertyType.Property,
+            color: PropertyColors.BLUE
+        });
 
-        // Railroads
-        properties[6] = Property(
-            bytes("Reading Railroad"),
-            25,
-            bytes(""),
-            200,
-            PropertyType.RailStation
-        );
-        properties[16] = Property(
-            bytes("Pennsylvania Railroad"),
-            25,
-            bytes(""),
-            200,
-            PropertyType.RailStation
-        );
-        properties[26] = Property(
-            bytes("B&O Railroad"),
-            25,
-            bytes(""),
-            200,
-            PropertyType.RailStation
-        );
-        properties[36] = Property(
-            bytes("Short Line"),
-            25,
-            bytes(""),
-            200,
-            PropertyType.RailStation
-        );
+        properties[39] = Property({
+            name: "Luxury Tax",
+            rentAmount: 0,
+            uri: "",
+            buyAmount: 0,
+            propertyType: PropertyType.Special,
+            color: PropertyColors.PURPLE
+        });
 
-        // Utilities
-        properties[13] = Property(
-            bytes("Electric Company"),
-            0,
-            bytes(""),
-            150,
-            PropertyType.Utility
-        );
-        properties[29] = Property(
-            bytes("Water Works"),
-            0,
-            bytes(""),
-            150,
-            PropertyType.Utility
-        );
-
-        // Special Spaces (Non-properties but important for game logic)
-        properties[1] = Property(
-            bytes("GO"),
-            0,
-            bytes(""),
-            0,
-            PropertyType.Special
-        );
-        properties[3] = Property(
-            bytes("Community Chest 1"),
-            0,
-            bytes(""),
-            0,
-            PropertyType.Special
-        );
-        properties[5] = Property(
-            bytes("Income Tax"),
-            0,
-            bytes(""),
-            0,
-            PropertyType.Special
-        );
-        properties[8] = Property(
-            bytes("Chance 1"),
-            0,
-            bytes(""),
-            0,
-            PropertyType.Special
-        );
-        properties[11] = Property(
-            bytes("Jail"),
-            0,
-            bytes(""),
-            0,
-            PropertyType.Special
-        );
-        properties[18] = Property(
-            bytes("Community Chest 2"),
-            0,
-            bytes(""),
-            0,
-            PropertyType.Special
-        );
-        properties[21] = Property(
-            bytes("Free Parking"),
-            0,
-            bytes(""),
-            0,
-            PropertyType.Special
-        );
-        properties[23] = Property(
-            bytes("Chance 2"),
-            0,
-            bytes(""),
-            0,
-            PropertyType.Special
-        );
-        properties[31] = Property(
-            bytes("Go To Jail"),
-            0,
-            bytes(""),
-            0,
-            PropertyType.Special
-        );
-        properties[34] = Property(
-            bytes("Community Chest 3"),
-            0,
-            bytes(""),
-            0,
-            PropertyType.Special
-        );
-        properties[37] = Property(
-            bytes("Chance 3"),
-            0,
-            bytes(""),
-            0,
-            PropertyType.Special
-        );
-        properties[39] = Property(
-            bytes("Luxury Tax"),
-            0,
-            bytes(""),
-            0,
-            PropertyType.Special
-        );
+        properties[40] = Property({
+            name: "Boardwalk",
+            rentAmount: 50,
+            uri: "",
+            buyAmount: 400,
+            propertyType: PropertyType.Property,
+            color: PropertyColors.BLUE
+        });
     }
 
     function populatePropertyUri() private {
