@@ -171,11 +171,12 @@ contract GameBank is ERC20("GameBank", "GB") {
     function sellProperty(uint8 propertyId) external {
         PropertyG storage property = gameProperties[propertyId];
         require(!mortgagedProperties[propertyId], "Property is Mortgaged and cannot be sold");
-        Bid memory bid = bids[propertyId];
 
         require(property.propertyType != PropertyType.Special, "Invalid property");
         require(property.owner == msg.sender, "You do not own this property");
-        require(bid.bidder != address(0), "No valid bid found for this property");
+        // require(bid.bidder != address(0), "No valid bid found for this property");
+
+          Bid memory bid = bids[propertyId];
 
         // Transfer funds from bidder to seller
         bool success = transferFrom(bid.bidder, msg.sender, bid.bidAmount);
