@@ -325,35 +325,39 @@ contract GameBank is ERC20("GameBank", "GB") {
     }
 
     // make the game owner of the bank and hence owns the token
-    function downgradeProperty(uint8 propertyId) external {
+    function downgradeProperty(uint8 propertyId, uint8 noOfDowngrade) external {
         PropertyG memory property = gameProperties[propertyId];
 
         // Ensure the caller is the owner of the property
         require(property.owner == msg.sender, "You are not the owner of this property");
+        require(property.noOfUpgrades > 0 , "cannot downgrade site");
+        require(noOfDowngrade > 0 && noOfDowngrade <= property.noOfUpgrades, "cannot downgrade");
 
         // Ensure the property is not mortgaged
-        // require(!property.isMortgaged, "Cannot downgrade a mortgaged property");
+        require(!mortgagedProperties[propertyId], "Cannot downgrade a mortgaged property");
 
         // Check if the property has a hotel to downgrade
-        if (property.noOfUpgrades == 5) {
-            // Downgrade hotel to 4 houses
-            // property.hotel = false;
-            property.noOfUpgrades = 4;
+        // if (property.noOfUpgrades == 5) {
+        //     // Downgrade hotel to 4 houses
+        //     // property.hotel = false;
+        //     property.noOfUpgrades = 4;
 
-            // Refund the equivalent of one house to the owner
-            uint256 refundAmount = property.buyAmount / 2;
-            require(transfer(msg.sender, refundAmount), "Token refund for hotel downgrade failed");
-        } else if (property.noOfUpgrades > 0) {
-            // Downgrade one house
-            property.noOfUpgrades--;
+        //     // Refund the equivalent of one house to the owner
+        //     uint256 refundAmount = property.buyAmount / 2;
+        //     require(transfer(msg.sender, refundAmount), "Token refund for hotel downgrade failed");
+        // } else if (property.noOfUpgrades > 0) {
+        //     // Downgrade one house
+        //     property.noOfUpgrades--;
 
-            // Refund the cost of one house
-            uint256 refundAmount = property.buyAmount / 2;
-            require(transfer(msg.sender, refundAmount), "Token refund for house downgrade failed");
-        } else {
-            // Property has no upgrades to downgrade
-            revert("Property has no houses or hotel to downgrade");
-        }
+        //     // Refund the cost of one house
+        //     uint256 refundAmount = property.buyAmount / 2;
+        //     require(transfer(msg.sender, refundAmount), "Token refund for house downgrade failed");
+        // } else {
+        //     // Property has no upgrades to downgrade
+        //     revert("Property has no houses or hotel to downgrade");
+        // }
+
+        
         emit PropertyDownGraded(propertyId);
     }
 }
