@@ -3,6 +3,8 @@ pragma solidity ^0.8.26;
 
 import {ERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 // import { ERC20 } from "lib/solmate/src/tokens/ERC20.sol";
+import "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
+
 
 struct Property {
     bytes name;
@@ -50,6 +52,7 @@ interface NFTContract {
  * @dev A simple ERC20 token representing a game bank.
  * @dev this is intended to be deployed upon every new creation of a new game.
  */
+
 contract GameBank is ERC20("GameBank", "GB") {
     struct PropertyG {
         bytes name;
@@ -66,6 +69,8 @@ contract GameBank is ERC20("GameBank", "GB") {
         address bidder;
         uint256 bidAmount;
     }
+
+    PropertyG[] properties;
 
     mapping(uint8 => Bid) public bids;
     mapping(uint8 => address) propertyOwner;
@@ -93,11 +98,16 @@ contract GameBank is ERC20("GameBank", "GB") {
      */
     constructor(uint8 numberOfPlayers, address _nftContract) {
         uint256 amountToMint = numberOfPlayers + tolerace;
+        
         require(_nftContract.code.length > 0, "not a contract address");
         nftContract = NFTContract(_nftContract);
         _mint(address(this), amountToMint);
         _gameProperties();
         _setNumberForColoredPropertyNumber();
+    }
+
+     function mint(address to, uint256 amount) external  {
+        _mint(to, amount);
     }
 
     //helper function
@@ -141,8 +151,9 @@ contract GameBank is ERC20("GameBank", "GB") {
         require(balanceOf(msg.sender) >= bidAmount, "Insufficient funds for bid");
 
         if (property.owner == address(this)) {
-            // bool success = transfer(address(this), property.buyAmount);
-            bool success = transferFrom(msg.sender, address(this), property.buyAmount);
+            bool success = transfer(address(this), property.buyAmount);
+            
+            // bool success = transferFrom(msg.sender, address(this), property.buyAmount);
             require(success, "Token transfer failed");
 
             // Update ownership and increment sales count
@@ -338,5 +349,11 @@ contract GameBank is ERC20("GameBank", "GB") {
         require(success, "");
         property.noOfUpgrades -= noOfDowngrade;
         emit PropertyDownGraded(propertyId);
+    }
+
+    // for testing purpose
+    function bal (address addr) external view returns(uint){
+        uint a = balanceOf(addr);
+        return a;
     }
 }

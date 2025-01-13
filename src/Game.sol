@@ -1,27 +1,203 @@
-//SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
 import {GameBank} from "./Bank.sol";
 
 contract Game {
-    GameBank gameBank;
-    uint8 numberOfPlayers;
+    GameBank public gameBank;
+    uint8 public numberOfPlayers;
 
-    constructor(address _nftContract, address[] memory players) {
-        require(players.length > 0 && players.length < 10, "exceed the allowed number of players");
-        for (uint8 i = 0; i < players.length; i++) {
-            require(players[i].code.length == 0, "player address must be an EOA");
+    struct Player {
+        string username;
+        address addr;
+        uint8 playerCurrentPosition;
+        bool inJail;
+        uint8 jailAttemptCount;
+        uint256 totalPlayersWorth;
+    }
+
+    mapping(address => bool) public isPlayer;
+    mapping(address => uint8) playersPosition;
+    mapping(address => Player) players;
+    uint8 public currentPlayerIndex;
+    bool gameStarted;
+
+    event PlayerMoved(address indexed player, uint8 newPosition);
+    event TurnChanged(address indexed nextPlayer);
+
+    address[] playerAddresses;
+
+    event GameStarted(uint8 numberOfPlayers, address[] players);
+
+    constructor(address _nftContract, address[] memory _playerAddresses) {
+        require(
+            _playerAddresses.length > 0 && _playerAddresses.length < 10,
+            "Exceeds the allowed number of players"
+        );
+
+        for (uint8 i = 0; i < _playerAddresses.length; i++) {
+            require(
+                _playerAddresses[i].code.length == 0,
+                "Player address must be an EOA"
+            );
+            require(
+                !isPlayer[_playerAddresses[i]],
+                "Duplicate player address detected"
+            );
+            isPlayer[_playerAddresses[i]] = true;
+            players[_playerAddresses[i]] = Player({
+                username: "",
+                addr: _playerAddresses[i],
+                playerCurrentPosition: 0,
+                inJail: false,
+                jailAttemptCount: 0,
+                totalPlayersWorth: 0
+            });
+            playerAddresses.push(_playerAddresses[i]);
         }
-        gameBank = new GameBank(uint8(players.length), _nftContract);
-        numberOfPlayers = uint8(players.length);
+
+        gameBank = new GameBank(uint8(playerAddresses.length), _nftContract);
+        numberOfPlayers = uint8(playerAddresses.length);
     }
 
     /**
-     * @dev this function initializes the game with the provided players.
-     *     @dev this function calls on the bank contract and mint a certain amount of tokens for each player.
-     *     @param players the addresses of the players.
-     *
-     *     @dev this function should emit an event
+     * @dev Initializes the game with the provided players.
+     *      Calls the bank contract to mint tokens for each player and disburses funds.
+     * @return success Returns true if the game starts successfully.
+     * @notice Emits a `GameStarted` event upon successful execution.
      */
-    function startGame(address[] memory players) external {}
+    function startGame() external returns (bool success) {
+        for (uint8 i = 0; i < playerAddresses.length; i++) {
+            require(
+                isPlayer[playerAddresses[i]],
+                "Address is not a registered player"
+            );
+            // Mint tokens for each player via the GameBank
+            gameBank.mint(playerAddresses[i], 1500);
+        }
+        currentPlayerIndex = 0;
+        emit GameStarted(numberOfPlayers, playerAddresses);
+        gameStarted = true;
+        return true;
+    }
+
+    /**
+     * @dev Advance to the next player's turn.
+     */
+    function _nextTurn() private {
+        require(gameStarted, "Game not started yet");
+        require(playerAddresses.length > 0, "No players available");
+
+        // Update the currentPlayerIndex to the next player in a circular manner
+        currentPlayerIndex = uint8(
+            (currentPlayerIndex + 1) % playerAddresses.length
+        );
+
+        // emit TurnChanged(playersPosition[currentPlayerIndex]);
+    }
+
+    function _rollDice() private view returns (uint256) {
+        return
+            (uint256(
+                keccak256(
+                    abi.encodePacked(
+                        block.timestamp,
+                        msg.sender,
+                        blockhash(block.number - 1)
+                    )
+                )
+            ) % 6) + 1;
+    }
+
+    function rollDices() private view returns (uint8, uint8) {
+        uint8 dice1 = uint8(_rollDice());
+        uint8 dice2 = uint8(_rollDice());
+
+        if (dice1 == dice2) {
+            uint8 dice3 = uint8(_rollDice());
+            uint8 dice4 = uint8(_rollDice());
+            return (dice3 + dice1, dice2 + dice4);
+        }
+
+        return (dice1, dice2);
+    }
+
+    function play() external {
+        Player storage player = players[msg.sender];
+        require(gameStarted, "Game not started yet");
+        require(
+            playerAddresses[currentPlayerIndex] == player.addr,
+            "Not your turn"
+        );
+
+        // Roll the dice
+        (uint8 dice1, uint8 dice2) = rollDices();
+        uint8 totalMove = dice1 + dice2;
+
+        // Check if player is in jail
+        if (player.inJail) {
+            // Check if the player rolled doubles
+            if (dice1 != dice2) {
+                player.jailAttemptCount++;
+
+                // If player has failed 3 times, release them from jail
+                if (player.jailAttemptCount >= 3) {
+                    player.inJail = false; // Player is out of jail
+                    player.jailAttemptCount = 0; // Reset attempt count
+                } else {
+                    revert("Failed to roll doubles. Try again.");
+                }
+            } else {
+                // Player rolled doubles and gets out of jail
+                player.inJail = false;
+                player.jailAttemptCount = 0;
+            }
+        }
+
+        // Update player's position
+        player.playerCurrentPosition += totalMove;
+
+        // Check if the player passed 'Go'
+        if (player.playerCurrentPosition > 40) {
+            player.playerCurrentPosition %= 40; // Reset position to within board range
+            gameBank.mint(player.addr, 200); // Reward for passing Go
+        }
+
+        // Emit an event for the move
+        emit PlayerMoved(player.addr, player.playerCurrentPosition);
+
+        // Advance the turn to the next player
+        _nextTurn();
+        emit TurnChanged(playerAddresses[currentPlayerIndex]);
+    }
+
+    /**
+     * @dev Get the current player's address.
+     * @return The address of the current player.
+     */
+    function getCurrentPlayer() external view returns (address) {
+        require(gameStarted, "Game not started yet");
+        return playerAddresses[currentPlayerIndex];
+    }
+
+    function buyProperty(
+        uint8 propertyId,
+        uint256 bidAmount,
+        address buyersAddress
+    ) external {
+        Player storage player = players[msg.sender];
+        require(gameStarted, "Game not started yet");
+        require(
+            playerAddresses[currentPlayerIndex] == player.addr,
+            "Can Only buy Properties During Your Turn"
+        );
+        gameBank.buyProperty(propertyId, bidAmount, buyersAddress);
+    }
+
+    function sellProperty(uint8 propertyId) external {
+        // Player storage player = players[msg.sender];
+        require(gameStarted, "Game not started yet");
+
+        gameBank.sellProperty(propertyId, msg.sender);
+    }
 }
