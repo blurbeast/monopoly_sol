@@ -44,19 +44,24 @@ contract GeneralNFT is ERC721URIStorage {
         BROWN
     }
 
+    Property[] public allProperties;
+
     // Property[] private properties = new Property[](MAX_SUPPLY);
     mapping(uint8 => Property) private properties;
 
     constructor(string memory uri) ERC721("MonoPoly", "MNP") {
         baseUri = uri;
         createNftProperties();
+        _setAllProperties();
     }
 
     function mint(address _minter) external {
         require(totalSupply < MAX_SUPPLY, "Max supply reached");
         uint256 tokenId = totalSupply;
         _mint(_minter, tokenId);
-        string memory tokenUri = string(abi.encodePacked(baseUri, "/", Strings.toString(tokenId)));
+        string memory tokenUri = string(
+            abi.encodePacked(baseUri, "/", Strings.toString(tokenId))
+        );
         _setTokenURI(tokenId, tokenUri);
         totalSupply++;
         populatePropertyUri();
@@ -443,11 +448,39 @@ contract GeneralNFT is ERC721URIStorage {
     }
 
     function getAllProperties() external view returns (Property[] memory) {
+        Property[] memory propertiesInMemory = new Property[](
+            allProperties.length
+        );
+        for (uint256 i = 0; i < allProperties.length; i++) {
+            propertiesInMemory[i] = allProperties[i];
+        }
+        return propertiesInMemory;
+    }
+
+    function _setAllProperties() private {
+        for (uint8 i = 1; i < 40; i++) {
+            allProperties.push(properties[i]);
+        }
+    }
+
+    // i changed your original getAllProperties function to this
+    function getAllPropertiesM() external view returns (Property[] memory) {
         require(totalSupply > 0, "No properties minted yet");
         Property[] memory prop = new Property[](MAX_SUPPLY);
         for (uint8 i = 0; i < totalSupply; i++) {
             prop[i] = properties[i + 1];
         }
         return prop;
+    }
+
+    function returnProperty(
+        uint8 propertyId
+    ) external view returns (Property memory property) {
+        property = properties[propertyId];
+        return property;
+    }
+
+    function returnTotalSupply() external view returns (uint8) {
+        return totalSupply;
     }
 }

@@ -13,6 +13,7 @@ contract Game {
         uint8 playerCurrentPosition;
         bool inJail;
         uint8 jailAttemptCount;
+        uint256 totalPlayersWorth;
     }
 
     mapping(address => bool) public isPlayer;
@@ -49,7 +50,8 @@ contract Game {
                 addr: _playerAddresses[i],
                 playerCurrentPosition: 0,
                 inJail: false,
-                jailAttemptCount: 0
+                jailAttemptCount: 0,
+                totalPlayersWorth: 0
             });
             playerAddresses.push(_playerAddresses[i]);
         }
@@ -120,7 +122,7 @@ contract Game {
         return (dice1, dice2);
     }
 
-    function move() external {
+    function play() external {
         Player storage player = players[msg.sender];
         require(gameStarted, "Game not started yet");
         require(
@@ -176,5 +178,26 @@ contract Game {
     function getCurrentPlayer() external view returns (address) {
         require(gameStarted, "Game not started yet");
         return playerAddresses[currentPlayerIndex];
+    }
+
+    function buyProperty(
+        uint8 propertyId,
+        uint256 bidAmount,
+        address buyersAddress
+    ) external {
+        Player storage player = players[msg.sender];
+        require(gameStarted, "Game not started yet");
+        require(
+            playerAddresses[currentPlayerIndex] == player.addr,
+            "Can Only buy Properties During Your Turn"
+        );
+        gameBank.buyProperty(propertyId, bidAmount, buyersAddress);
+    }
+
+    function sellProperty(uint8 propertyId) external {
+        // Player storage player = players[msg.sender];
+        require(gameStarted, "Game not started yet");
+
+        gameBank.sellProperty(propertyId, msg.sender);
     }
 }
