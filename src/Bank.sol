@@ -82,7 +82,7 @@ contract GameBank is ERC20("GameBank", "GB") {
 
     struct Proposal {
         address user;
-        address biddedUser;
+        // address biddedUser;
         uint8 proposedPropertyId;
         uint8 biddedPropertyId;
         uint256 biddedTokenAmount;
@@ -202,15 +202,23 @@ contract GameBank is ERC20("GameBank", "GB") {
 
         uint8 benefitSize = uint8(benefitValue.length);
 
-        Benefit[] memory benefit = new Benefit[](uint256(benefitSize));
+        Benefit[] memory benefits = new Benefit[](uint256(benefitSize));
 
         for (uint8 i = 0; i < benefitSize; i++) {
-            benefit[i] = Benefit({
+            benefits[i] = Benefit({
                 benefitType : benefitType[i],
                 isActive : false,
                 benefitValue : benefitValue[i]
             });
         }
+
+        Proposal memory proposal = Proposal ({
+            user : address(0),
+            proposedPropertyId : proposedPropertyId,
+            biddedPropertyId : biddedPropertyId,
+            biddedTokenAmount : biddedTokenAmount,
+            benefits : benefits
+        });
     }
 
     // to refactor this function
