@@ -233,8 +233,18 @@ contract GameBank is ERC20("GameBank", "GB") {
     }
 
     function acceptProposal(address _user, uint8 proposalId) external {
-        address realOwner = propertyOwner[proposalId];
+        Proposal storage proposal = inGameProposals[proposalId];
 
+        address realOwner = propertyOwner[proposal.biddedPropertyId];
+
+        require (realOwner == _user , "only owner can perform action");
+        require(!mortgagedProperties[proposal.biddedPropertyId], "property is on mortgage");
+
+        uint8 sizeOfBenefits = proposal.benefits.length;
+
+        for(uint8 i =0; i < sizeOfBenefits ; i ++) {
+            
+        }
     }
 
     // to refactor this function
