@@ -232,6 +232,11 @@ contract GameBank is ERC20("GameBank", "GB") {
 
     }
 
+    function acceptProposal(address _user, uint8 proposalId) external {
+        address realOwner = propertyOwner[proposalId];
+
+    }
+
     // to refactor this function
     // to be private later on .
     function _sellProperty(uint8 propertyId) external {
