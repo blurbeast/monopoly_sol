@@ -199,6 +199,18 @@ contract GameBank is ERC20("GameBank", "GB") {
         require(benefitType.length == benefitValue.length, "");
         address realOwner = propertyOwner[proposedPropertyId];
         require(realOwner == _user, "only property owner can perform this action");
+
+        uint8 benefitSize = uint8(benefitValue.length);
+
+        Benefit[] memory benefit = new Benefit[](uint256(benefitSize));
+
+        for (uint8 i = 0; i < benefitSize; i++) {
+            benefit[i] = Benefit({
+                benefitType : benefitType[i],
+                isActive : false,
+                benefitValue : benefitValue[i]
+            });
+        }
     }
 
     // to refactor this function
