@@ -59,9 +59,7 @@ contract GeneralNFT is ERC721URIStorage {
         require(totalSupply < MAX_SUPPLY, "Max supply reached");
         uint256 tokenId = totalSupply;
         _mint(_minter, tokenId);
-        string memory tokenUri = string(
-            abi.encodePacked(baseUri, "/", Strings.toString(tokenId))
-        );
+        string memory tokenUri = string(abi.encodePacked(baseUri, "/", Strings.toString(tokenId)));
         _setTokenURI(tokenId, tokenUri);
         totalSupply++;
         populatePropertyUri();
@@ -448,9 +446,7 @@ contract GeneralNFT is ERC721URIStorage {
     }
 
     function getAllProperties() external view returns (Property[] memory) {
-        Property[] memory propertiesInMemory = new Property[](
-            allProperties.length
-        );
+        Property[] memory propertiesInMemory = new Property[](allProperties.length);
         for (uint256 i = 0; i < allProperties.length; i++) {
             propertiesInMemory[i] = allProperties[i];
         }
@@ -473,9 +469,7 @@ contract GeneralNFT is ERC721URIStorage {
         return prop;
     }
 
-    function returnProperty(
-        uint8 propertyId
-    ) external view returns (Property memory property) {
+    function returnProperty(uint8 propertyId) external view returns (Property memory property) {
         property = properties[propertyId];
         return property;
     }

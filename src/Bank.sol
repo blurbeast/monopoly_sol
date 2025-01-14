@@ -5,7 +5,6 @@ import {ERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol"
 // import { ERC20 } from "lib/solmate/src/tokens/ERC20.sol";
 import "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 
-
 struct Property {
     bytes name;
     uint256 rentAmount;
@@ -52,7 +51,6 @@ interface NFTContract {
  * @dev A simple ERC20 token representing a game bank.
  * @dev this is intended to be deployed upon every new creation of a new game.
  */
-
 contract GameBank is ERC20("GameBank", "GB") {
     struct PropertyG {
         bytes name;
@@ -98,7 +96,7 @@ contract GameBank is ERC20("GameBank", "GB") {
      */
     constructor(uint8 numberOfPlayers, address _nftContract) {
         uint256 amountToMint = numberOfPlayers + tolerace;
-        
+
         require(_nftContract.code.length > 0, "not a contract address");
         nftContract = NFTContract(_nftContract);
         _mint(address(this), amountToMint);
@@ -106,7 +104,7 @@ contract GameBank is ERC20("GameBank", "GB") {
         _setNumberForColoredPropertyNumber();
     }
 
-     function mint(address to, uint256 amount) external  {
+    function mint(address to, uint256 amount) external {
         _mint(to, amount);
     }
 
@@ -146,39 +144,30 @@ contract GameBank is ERC20("GameBank", "GB") {
         require(property.buyAmount > 0, "Property price must be greater than zero");
         require(bidAmount >= property.buyAmount, "Bid amount must be at least the property price");
         require(!mortgagedProperties[propertyId], "Property is Mortgaged and cannot be bought");
+        require(property.owner == address(this), "already owned by a player");
 
         // Approve contract to spend bid amount (requires user to call `approve` beforehand)
         require(balanceOf(msg.sender) >= bidAmount, "Insufficient funds for bid");
 
-        if (property.owner == address(this)) {
-            bool success = transfer(address(this), property.buyAmount);
-            
-            // bool success = transferFrom(msg.sender, address(this), property.buyAmount);
-            require(success, "Token transfer failed");
+        // if (property.owner == address(this)) {
+        bool success = transfer(address(this), property.buyAmount);
 
-            // Update ownership and increment sales count
-            property.owner = msg.sender;
-            propertyOwner[propertyId] = msg.sender;
+        // bool success = transferFrom(msg.sender, address(this), property.buyAmount);
+        require(success, "Token transfer failed");
 
-            noOfColorGroupOwnedByUser[property.propertyColor][msg.sender] += 1;
+        // Update ownership and increment sales count
+        property.owner = msg.sender;
+        propertyOwner[propertyId] = msg.sender;
 
-            uint8 numberOfUserOwnedRailway = numberOfOwnedRailways[msg.sender];
+        noOfColorGroupOwnedByUser[property.propertyColor][msg.sender] += 1;
 
-            property.propertyType == PropertyType.RailStation
-                ? numberOfOwnedRailways[msg.sender] += 1
-                : numberOfUserOwnedRailway;
-        } else {
-            // Call the ERC20 approve function
-            bool success = approve(property.owner, bidAmount);
-            require(success, "Token approval failed");
-
-            // Store the bid information
-            bids[propertyId] = Bid({bidder: msg.sender, bidAmount: bidAmount});
-        }
+        property.propertyType == PropertyType.RailStation ? numberOfOwnedRailways[msg.sender] += 1 : 0;
 
         // Emit a bid event
         emit PropertyBid(propertyId, msg.sender, bidAmount);
     }
+
+    // function
 
     // to refactor this function
 
@@ -186,7 +175,7 @@ contract GameBank is ERC20("GameBank", "GB") {
         PropertyG storage property = gameProperties[propertyId];
         require(!mortgagedProperties[propertyId], "Property is Mortgaged and cannot be sold");
 
-        Bid memory bid = bids[propertyId]; 
+        Bid memory bid = bids[propertyId];
 
         require(property.propertyType != PropertyType.Special, "Invalid property");
         require(property.owner == msg.sender, "You do not own this property");
@@ -352,8 +341,8 @@ contract GameBank is ERC20("GameBank", "GB") {
     }
 
     // for testing purpose
-    function bal (address addr) external view returns(uint){
-        uint a = balanceOf(addr);
+    function bal(address addr) external view returns (uint256) {
+        uint256 a = balanceOf(addr);
         return a;
     }
 }

@@ -5,6 +5,7 @@ import {Test, console} from "forge-std/Test.sol";
 import {GameBank} from "../src/Bank.sol";
 import {Game} from "../src/Game.sol";
 import {GeneralNFT} from "../src/NFT.sol";
+
 struct Property {
     bytes name;
     uint256 rentAmount;
@@ -13,12 +14,14 @@ struct Property {
     PropertyType propertyType;
     PropertyColors color;
 }
+
 enum PropertyType {
     Property,
     RailStation,
     Utility,
     Special
 }
+
 enum PropertyColors {
     PINK,
     YELLOW,
@@ -66,11 +69,11 @@ contract MonopolyTest is Test {
 
     function testBuyPropertyFromBank(uint8 propertyId) external {
         gamebank.mint(A, 1500);
-        uint bal = gamebank.bal(A);
+        uint256 bal = gamebank.bal(A);
         assert(bal == 1500);
         vm.prank(A);
         gamebank.buyProperty(2, 60);
-        uint bal1 = gamebank.bal(A);
+        uint256 bal1 = gamebank.bal(A);
         assert(bal1 == 1440);
 
         gamebank.mint(B, 1500);
