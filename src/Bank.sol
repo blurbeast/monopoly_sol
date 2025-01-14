@@ -188,9 +188,9 @@ contract GameBank is ERC20("GameBank", "GB") {
 
 
 
-    function makeProposal() external {
+    // function makeProposal(address) external {
 
-    }
+    // }
 
     // to refactor this function
 
