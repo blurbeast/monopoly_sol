@@ -187,6 +187,9 @@ contract GameBank is ERC20("GameBank", "GB") {
         // // Emit an event
     }
 
+    mapping(uint => Proposal) public inGameProposals;
+    uint private proposalIds;
+
     function makeProposal(
         address _user,
         // address _biddedUser,
@@ -199,6 +202,7 @@ contract GameBank is ERC20("GameBank", "GB") {
         require(benefitType.length == benefitValue.length, "");
         address realOwner = propertyOwner[proposedPropertyId];
         require(realOwner == _user, "only property owner can perform this action");
+        require(!mortgagedProperties[proposedPropertyId], "proposed property has been mortgaged ");
 
         uint8 benefitSize = uint8(benefitValue.length);
 
@@ -213,12 +217,19 @@ contract GameBank is ERC20("GameBank", "GB") {
         }
 
         Proposal memory proposal = Proposal ({
-            user : address(0),
+            user : _user,
             proposedPropertyId : proposedPropertyId,
             biddedPropertyId : biddedPropertyId,
             biddedTokenAmount : biddedTokenAmount,
             benefits : benefits
         });
+
+        proposalIds += 1;
+
+        inGameProposals[proposalIds] = proposal;
+
+        // to emit an event here
+
     }
 
     // to refactor this function
