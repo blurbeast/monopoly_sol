@@ -158,6 +158,7 @@ contract GameBank is ERC20("GameBank", "GB") {
         );
     }
 
+    // correct
     function buyProperty(uint8 propertyId, uint256 bidAmount) external {
         PropertyG storage property = gameProperties[propertyId];
         require(property.propertyType != PropertyType.Special, "Invalid property");
@@ -190,6 +191,7 @@ contract GameBank is ERC20("GameBank", "GB") {
     mapping(uint256 => Proposal) public inGameProposals;
     uint256 private proposalIds;
 
+    // correct i think 
     function makeProposal(
         address _user,
         // address _biddedUser,
@@ -225,6 +227,7 @@ contract GameBank is ERC20("GameBank", "GB") {
         // to emit an event here
     }
 
+    // in progress 
     function acceptProposal(address _user, uint8 proposalId) external {
         Proposal storage proposal = inGameProposals[proposalId];
 
