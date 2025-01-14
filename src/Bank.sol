@@ -77,7 +77,7 @@ contract GameBank is ERC20("GameBank", "GB") {
     struct Benefit {
         BenefitType benefitType;
         bool isActive;
-        uint8 benefitValue ;
+        uint8 benefitValue;
     }
 
     struct Proposal {
@@ -86,6 +86,7 @@ contract GameBank is ERC20("GameBank", "GB") {
         uint8 proposedPropertyId;
         uint8 biddedPropertyId;
         uint256 biddedTokenAmount;
+        Benefit[] benefits;
     }
 
     PropertyG[] properties;
@@ -186,15 +187,23 @@ contract GameBank is ERC20("GameBank", "GB") {
         // // Emit an event
     }
 
-
-
-    // function makeProposal(address) external {
-
-    // }
+    function makeProposal(
+        address _user,
+        // address _biddedUser,
+        uint8 proposedPropertyId,
+        uint8 biddedPropertyId,
+        uint8[] calldata benefitValue,
+        BenefitType[] calldata benefitType,
+        uint256 biddedTokenAmount
+    ) external {
+        require(benefitType.length == benefitValue.length, "");
+        address realOwner = propertyOwner[proposedPropertyId];
+        require(realOwner == _user, "only property owner can perform this action");
+    }
 
     // to refactor this function
-
-    function sellProperty(uint8 propertyId) external {
+    // to be private later on .
+    function _sellProperty(uint8 propertyId) external {
         PropertyG storage property = gameProperties[propertyId];
         require(!mortgagedProperties[propertyId], "Property is Mortgaged and cannot be sold");
 

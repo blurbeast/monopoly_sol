@@ -80,7 +80,7 @@ contract MonopolyTest is Test {
         vm.prank(B);
         gamebank.buyProperty(2, 60);
         vm.prank(A);
-        gamebank.sellProperty(2);
+        gamebank._sellProperty(2);
         gamebank.gameProperties(2);
     }
 }
