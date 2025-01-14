@@ -3,7 +3,7 @@ pragma solidity ^0.8.26;
 
 import {ERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 // import { ERC20 } from "lib/solmate/src/tokens/ERC20.sol";
-import "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
+// import "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 
 struct Property {
     bytes name;
@@ -66,6 +66,26 @@ contract GameBank is ERC20("GameBank", "GB") {
     struct Bid {
         address bidder;
         uint256 bidAmount;
+    }
+
+    enum BenefitType {
+        FREE_RENT,
+        RENT_DISCOUNT,
+        PROPERTY_ROYALTY
+    }
+
+    struct Benefit {
+        BenefitType benefitType;
+        bool isActive;
+        uint8 benefitValue ;
+    }
+
+    struct Proposal {
+        address user;
+        address biddedUser;
+        uint8 proposedPropertyId;
+        uint8 biddedPropertyId;
+        uint256 biddedTokenAmount;
     }
 
     PropertyG[] properties;
@@ -163,11 +183,14 @@ contract GameBank is ERC20("GameBank", "GB") {
 
         property.propertyType == PropertyType.RailStation ? numberOfOwnedRailways[msg.sender] += 1 : 0;
 
-        // Emit a bid event
-        emit PropertyBid(propertyId, msg.sender, bidAmount);
+        // // Emit an event
     }
 
-    // function
+
+
+    function makeProposal() external {
+
+    }
 
     // to refactor this function
 
