@@ -259,8 +259,12 @@ contract GameBank is ERC20("GameBank", "GB") {
         PropertyG storage proposedProperty = gameProperties[proposal.proposedPropertyId];
         proposedProperty.owner = realOwner;
 
+        // change the color number for each property 
+        noOfColorGroupOwnedByUser[property.propertyColor][realOwner] -= 1;
+        noOfColorGroupOwnedByUser[property.propertyColor][proposal.user] += 1;
 
-
+        noOfColorGroupOwnedByUser[proposedProperty.propertyColor][realOwner] += 1;
+        noOfColorGroupOwnedByUser[proposedProperty.propertyColor][proposal.user] -= 1;
 
         // to emit an event here
     }
