@@ -225,8 +225,12 @@ contract GameBank is ERC20("GameBank", "GB") {
         proposal.numberOfBenefits = benefitSize;
 
         for (uint8 i = 0; i < benefitSize; i++) {
-            proposal.benefits[i + 1] =
-                Benefit({benefitType: benefitType[i], isActive: false, benefitValue: benefitValue[i], numberOfTurns: numberOfTurns[i]});
+            proposal.benefits[i + 1] = Benefit({
+                benefitType: benefitType[i],
+                isActive: false,
+                benefitValue: benefitValue[i],
+                numberOfTurns: numberOfTurns[i]
+            });
         }
 
         // to emit an event here
@@ -241,9 +245,9 @@ contract GameBank is ERC20("GameBank", "GB") {
         require(realOwner == _user, "only owner can perform action");
         require(!mortgagedProperties[proposal.biddedPropertyId], "property is on mortgage");
 
-        if (proposal.biddedTokenAmount > 0 ){
-            require(balanceOf(proposal.user)  >= proposal.biddedTokenAmount, "");
-            
+        if (proposal.biddedTokenAmount > 0) {
+            require(balanceOf(proposal.user) >= proposal.biddedTokenAmount, "");
+
             _transfer(proposal.user, _user, proposal.biddedTokenAmount);
         }
 
@@ -276,13 +280,15 @@ contract GameBank is ERC20("GameBank", "GB") {
         noOfColorGroupOwnedByUser[proposedProperty.propertyColor][proposal.user] -= 1;
 
         //confirm if it is a rail station
-        property.propertyType == PropertyType.RailStation ? 
-        numberOfOwnedRailways[proposal.user] += 1 : numberOfOwnedRailways[realOwner] -= 1;
+        property.propertyType == PropertyType.RailStation
+            ? numberOfOwnedRailways[proposal.user] += 1
+            : numberOfOwnedRailways[realOwner] -= 1;
 
-        property.propertyType == PropertyType.RailStation ?
-            numberOfOwnedRailways[realOwner] += 1 : numberOfOwnedRailways[proposal.user] -= 1;
+        property.propertyType == PropertyType.RailStation
+            ? numberOfOwnedRailways[realOwner] += 1
+            : numberOfOwnedRailways[proposal.user] -= 1;
 
-            propertyToProposal[proposal.proposedPropertyId] = proposalId;
+        propertyToProposal[proposal.proposedPropertyId] = proposalId;
         // to emit an event here
     }
 
@@ -359,7 +365,7 @@ contract GameBank is ERC20("GameBank", "GB") {
         uint8 proposalId = propertyToProposal[propertyId];
         if (proposalId > 0) {
             Proposal storage proposal = inGameProposals[proposalId];
-            uint numberOfBenefits = proposal.numberOfBenefits;
+            uint256 numberOfBenefits = proposal.numberOfBenefits;
 
             for (uint8 i = 0; i < numberOfBenefits; i++) {
                 if (proposal.benefits[i].isActive) {
@@ -374,7 +380,6 @@ contract GameBank is ERC20("GameBank", "GB") {
             }
         }
 
-        
         // Ensure player has enough funds to pay rent
         require(balanceOf(player) >= rentAmount, "Insufficient funds to pay rent");
 
