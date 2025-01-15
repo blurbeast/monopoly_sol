@@ -73,11 +73,38 @@ contract MonopolyTest is Test {
         game.advanceToNextPlayer();
         vm.prank(B);
         game.play();
+        game.returnPlayer(B);
         uint balb4 = game.playersBalances(B);
         vm.prank(B);
-        game.buyProperty(24, 220);
+        game.buyProperty();
         game.returnPlayer(B);
         uint balAfter = game.playersBalances(B);
+        // Confirming change of balance
         assertEq(balAfter, balb4 - 220);
+        // checking new Ownership
+        address newOwner = game.getPropertyOwner(24);
+        assertEq(B, newOwner);
+        vm.prank(B);
+        game.advanceToNextPlayer();
+        uint cbalb4 = game.playersBalances(C);
+        vm.prank(C);
+        game.play();
+        game.returnPlayer(C);
+        vm.prank(C);
+        game.buyProperty();
+        uint cbalAfter = game.playersBalances(C);
+        assertEq(cbalAfter, cbalb4 - 140);
+        // checking new Ownership
+        address cnewOwner = game.getPropertyOwner(12);
+        assertEq(C, cnewOwner);
+        vm.prank(C);
+        game.advanceToNextPlayer();
+        vm.prank(D);
+        game.play();
+        vm.prank(D);
+        game.advanceToNextPlayer();
+        address currentPlayer = game.getCurrentPlayer();
+        // MAKE SURE THE FIRST PLAYER GETS HIS TURN AFTER THE LAST
+        assertEq(currentPlayer, A);
     }
 }
