@@ -108,7 +108,19 @@ contract MonopolyTest is Test {
         assertEq(currentPlayer, A);
     }
 
-    function testRentPrice() external view {
-        generalNft.returnPropertyRent(22, 4);
+    function testHandleRent() external {
+        gamebank.mint(A, 1500);
+        uint256 bal = gamebank.bal(A);
+        assert(bal == 1500);
+        vm.prank(A);
+        gamebank.buyProperty(13, 150, A);
+        vm.prank(A);
+        gamebank.buyProperty(29, 150, A);
+
+        // uint256 bal1 = gamebank.bal(A);
+        // assert(bal1 == 1440);
+        gamebank.mint(B, 1500);
+        vm.prank(B);
+        gamebank.handleRent(B, 13, 5);
     }
 }
