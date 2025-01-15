@@ -281,6 +281,8 @@ contract GameBank is ERC20("GameBank", "GB") {
 
         property.propertyType == PropertyType.RailStation ?
             numberOfOwnedRailways[realOwner] += 1 : numberOfOwnedRailways[proposal.user] -= 1;
+
+            propertyToProposal[proposal.proposedPropertyId] = proposalId;
         // to emit an event here
     }
 
