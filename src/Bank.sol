@@ -137,7 +137,7 @@ contract GameBank is ERC20("GameBank", "GB") {
     function buyProperty(uint8 propertyId, uint256 bidAmount, address buyer) external {
         MonopolyLibrary.PropertyG storage property = gameProperties[propertyId];
         require(property.propertyType != MonopolyLibrary.PropertyType.Special, "Invalid property");
-        require(property.owner != msg.sender, "You already own the property");
+        require(property.owner != buyer, "You already own the property");
         // require(property.buyAmount > 0, "Property price must be greater than zero");
         require(bidAmount >= property.buyAmount, "Bid amount must be at least the property price");
         require(!mortgagedProperties[propertyId], "Property is Mortgaged and cannot be bought");
@@ -149,10 +149,10 @@ contract GameBank is ERC20("GameBank", "GB") {
          _transfer(buyer, address(this), property.buyAmount);  
         
   // Update ownership and increment sales count
-        property.owner = msg.sender;
-        propertyOwner[propertyId] = msg.sender;
+        property.owner = buyer;
+        propertyOwner[propertyId] =buyer;
 
-        noOfColorGroupOwnedByUser[property.propertyColor][msg.sender] += 1;
+        noOfColorGroupOwnedByUser[property.propertyColor][buyer] += 1;
 
         property.propertyType == MonopolyLibrary.PropertyType.RailStation ? numberOfOwnedRailways[msg.sender] += 1 : 0;
 
@@ -460,5 +460,11 @@ contract GameBank is ERC20("GameBank", "GB") {
     function getProperty(uint8 propertyId) external view returns(MonopolyLibrary.PropertyG memory property){
          property = gameProperties[propertyId];
         return property;
+    }
+
+      function getPropertyOwner(uint8 propertyId) external view returns(address _propertyOwner){
+         MonopolyLibrary.PropertyG memory property = gameProperties[propertyId];
+         _propertyOwner = property.owner;
+        return _propertyOwner;
     }
 }

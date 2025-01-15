@@ -38,4 +38,13 @@ library MonopolyLibrary {
         PropertyType propertyType;
         PropertyColors color;
     }
+
+    struct Player {
+        string username;
+        address addr;
+        uint8 playerCurrentPosition;
+        bool inJail;
+        uint8 jailAttemptCount;
+        uint256 cash;
+    }
 }
