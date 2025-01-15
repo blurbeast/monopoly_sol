@@ -2,10 +2,13 @@
 pragma solidity ^0.8.26;
 
 import {GameBank} from "./Bank.sol";
+import "./libraries/MonopolyLibrary.sol";
 
 contract Game {
     GameBank public gameBank;
     uint8 public numberOfPlayers;
+
+    using MonopolyLibrary for MonopolyLibrary.PropertyG;
 
     struct Player {
         string username;
@@ -13,7 +16,7 @@ contract Game {
         uint8 playerCurrentPosition;
         bool inJail;
         uint8 jailAttemptCount;
-        uint256 totalPlayersWorth;
+        uint256 cash;
     }
 
     mapping(address => bool) public isPlayer;
@@ -30,11 +33,20 @@ contract Game {
     event GameStarted(uint8 numberOfPlayers, address[] players);
 
     constructor(address _nftContract, address[] memory _playerAddresses) {
-        require(_playerAddresses.length > 0 && _playerAddresses.length < 10, "Exceeds the allowed number of players");
+        require(
+            _playerAddresses.length > 0 && _playerAddresses.length < 10,
+            "Exceeds the allowed number of players"
+        );
 
         for (uint8 i = 0; i < _playerAddresses.length; i++) {
-            require(_playerAddresses[i].code.length == 0, "Player address must be an EOA");
-            require(!isPlayer[_playerAddresses[i]], "Duplicate player address detected");
+            require(
+                _playerAddresses[i].code.length == 0,
+                "Player address must be an EOA"
+            );
+            require(
+                !isPlayer[_playerAddresses[i]],
+                "Duplicate player address detected"
+            );
             isPlayer[_playerAddresses[i]] = true;
             players[_playerAddresses[i]] = Player({
                 username: "",
@@ -42,7 +54,7 @@ contract Game {
                 playerCurrentPosition: 0,
                 inJail: false,
                 jailAttemptCount: 0,
-                totalPlayersWorth: 0
+                cash: 0
             });
             playerAddresses.push(_playerAddresses[i]);
         }
@@ -59,7 +71,10 @@ contract Game {
      */
     function startGame() external returns (bool success) {
         for (uint8 i = 0; i < playerAddresses.length; i++) {
-            require(isPlayer[playerAddresses[i]], "Address is not a registered player");
+            require(
+                isPlayer[playerAddresses[i]],
+                "Address is not a registered player"
+            );
             // Mint tokens for each player via the GameBank
             gameBank.mint(playerAddresses[i], 1500);
         }
@@ -77,13 +92,24 @@ contract Game {
         require(playerAddresses.length > 0, "No players available");
 
         // Update the currentPlayerIndex to the next player in a circular manner
-        currentPlayerIndex = uint8((currentPlayerIndex + 1) % playerAddresses.length);
+        currentPlayerIndex = uint8(
+            (currentPlayerIndex + 1) % playerAddresses.length
+        );
 
         // emit TurnChanged(playersPosition[currentPlayerIndex]);
     }
 
     function _rollDice() private view returns (uint256) {
-        return (uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender, blockhash(block.number - 1)))) % 6) + 1;
+        return
+            (uint256(
+                keccak256(
+                    abi.encodePacked(
+                        block.timestamp,
+                        msg.sender,
+                        blockhash(block.number - 1)
+                    )
+                )
+            ) % 6) + 1;
     }
 
     function rollDices() private view returns (uint8, uint8) {
@@ -102,7 +128,10 @@ contract Game {
     function play() external {
         Player storage player = players[msg.sender];
         require(gameStarted, "Game not started yet");
-        require(playerAddresses[currentPlayerIndex] == player.addr, "Not your turn");
+        require(
+            playerAddresses[currentPlayerIndex] == player.addr,
+            "Not your turn"
+        );
 
         // Roll the dice
         (uint8 dice1, uint8 dice2) = rollDices();
@@ -141,8 +170,21 @@ contract Game {
         emit PlayerMoved(player.addr, player.playerCurrentPosition);
 
         // Advance the turn to the next player
+    }
+
+    function advanceToNextPlayer() external {
+        // Advance the turn to the next player
+        Player storage player = players[msg.sender];
+        require(gameStarted, "Game not started yet");
+        require(
+            playerAddresses[currentPlayerIndex] == player.addr,
+            "Not your turn"
+        );
         _nextTurn();
         emit TurnChanged(playerAddresses[currentPlayerIndex]);
+
+        // Emit an event for the move
+        emit PlayerMoved(player.addr, player.playerCurrentPosition);
     }
 
     /**
@@ -154,17 +196,47 @@ contract Game {
         return playerAddresses[currentPlayerIndex];
     }
 
-    function buyProperty(uint8 propertyId, uint256 bidAmount, address buyersAddress) external {
+    function buyProperty(uint8 propertyId, uint256 bidAmount) external {
         Player storage player = players[msg.sender];
         require(gameStarted, "Game not started yet");
-        require(playerAddresses[currentPlayerIndex] == player.addr, "Can Only buy Properties During Your Turn");
-        // gameBank.buyProperty(propertyId, bidAmount, buyersAddress);
+        require(
+            playerAddresses[currentPlayerIndex] == player.addr,
+            "Can Only buy Properties During Your Turn"
+        );
+        // bool success = transfer(address(this), bidAmount);
+        // require(success, "Transaction Failed");
+
+        gameBank.buyProperty(propertyId, bidAmount, msg.sender);
     }
 
-    function sellProperty(uint8 propertyId) external {
-        // Player storage player = players[msg.sender];
-        require(gameStarted, "Game not started yet");
+    // function sellProperty(uint8 propertyId) external view {
+    //     // Player storage player = players[msg.sender];
+    //     require(gameStarted, "Game not started yet");
 
-        // gameBank.sellProperty(propertyId, msg.sender);
+    //     // gameBank.sellProperty(propertyId, msg.sender);
+    // }
+
+    //HELPER FUNCTIONS FOR TESTING
+
+    function returnPlayer(
+        address _playersAddress
+    ) external view returns (Player memory player) {
+        player = players[_playersAddress];
+        player.cash = gameBank.balanceOf(_playersAddress);
+        return player;
+    }
+
+    function playersBalances(
+        address _playersAddress
+    ) external view returns (uint playersBal) {
+        playersBal = gameBank.balanceOf(_playersAddress);
+        return playersBal;
+    }
+
+    function getProperty(
+        uint8 propertyId
+    ) external view returns (MonopolyLibrary.PropertyG memory property) {
+        property = gameBank.getProperty(propertyId);
+        return property;
     }
 }
