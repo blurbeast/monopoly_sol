@@ -107,4 +107,8 @@ contract MonopolyTest is Test {
         // MAKE SURE THE FIRST PLAYER GETS HIS TURN AFTER THE LAST
         assertEq(currentPlayer, A);
     }
+
+    function testRentPrice() external view {
+        generalNft.returnPropertyRent(22, 4);
+    }
 }

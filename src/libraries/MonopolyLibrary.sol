@@ -47,4 +47,14 @@ library MonopolyLibrary {
         uint8 jailAttemptCount;
         uint256 cash;
     }
+    struct PropertyRent {
+        uint8 propertyId;
+        uint site;
+        uint withOneHouse;
+        uint withTwoHouses;
+        uint withThreeHouses;
+        uint withFourHouses;
+        uint withHotel;
+        uint costOfHouse;
+    }
 }
