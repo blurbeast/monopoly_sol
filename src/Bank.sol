@@ -78,8 +78,7 @@ contract GameBank is ERC20("GameBank", "GB") {
         BenefitType benefitType;
         bool isActive;
         uint8 benefitValue;
-        
-
+        uint8 numberOfTurns;
     }
 
     struct Proposal {
@@ -203,9 +202,10 @@ contract GameBank is ERC20("GameBank", "GB") {
         uint8 biddedPropertyId,
         uint8[] calldata benefitValue,
         BenefitType[] calldata benefitType,
+        uint8[] calldata numberOfTurns,
         uint256 biddedTokenAmount
     ) external {
-        require(benefitType.length == benefitValue.length, "");
+        require(benefitType.length == benefitValue.length && benefitValue.length == numberOfTurns.length, "");
         address realOwner = propertyOwner[proposedPropertyId];
         require(realOwner == _user, "only property owner can perform this action");
         require(!mortgagedProperties[proposedPropertyId], "proposed property has been mortgaged ");
@@ -226,7 +226,7 @@ contract GameBank is ERC20("GameBank", "GB") {
 
         for (uint8 i = 0; i < benefitSize; i++) {
             proposal.benefits[i + 1] =
-                Benefit({benefitType: benefitType[i], isActive: false, benefitValue: benefitValue[i]});
+                Benefit({benefitType: benefitType[i], isActive: false, benefitValue: benefitValue[i], numberOfTurns: numberOfTurns[i]});
         }
 
         // to emit an event here
@@ -366,6 +366,8 @@ contract GameBank is ERC20("GameBank", "GB") {
                     } else if (proposal.benefits[i].benefitType == BenefitType.RENT_DISCOUNT) {
                         rentAmount = (rentAmount * proposal.benefits[i].benefitValue) / 100;
                     }
+                    proposal.benefits[i].numberOfTurns -= 1;
+                    proposal.benefits[i].numberOfTurns == 0 ? proposal.benefits[i].isActive = false : true;
                 }
             }
         }
