@@ -2,35 +2,11 @@
 pragma solidity ^0.8.26;
 
 import {ERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
+import "./libraries/MonopolyLibrary.sol";
 // import { ERC20 } from "lib/solmate/src/tokens/ERC20.sol";
 // import "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 
-struct Property {
-    bytes name;
-    uint256 rentAmount;
-    bytes uri;
-    uint256 buyAmount;
-    PropertyType propertyType;
-    PropertyColors color;
-}
 
-enum PropertyColors {
-    PINK,
-    YELLOW,
-    BLUE,
-    ORANGE,
-    RED,
-    GREEN,
-    PURPLE,
-    BROWN
-}
-
-enum PropertyType {
-    Property,
-    RailStation,
-    Utility,
-    Special
-}
 
 event RentPaid(address tenant, address landlord, uint256 rentPrice, bytes property);
 
@@ -43,7 +19,7 @@ event PropertyUpGraded(uint256 propertyId);
 event PropertyDownGraded(uint256 propertyId);
 
 interface NFTContract {
-    function getAllProperties() external view returns (Property[] memory);
+    function getAllProperties() external view returns (MonopolyLibrary.Property[] memory);
 }
 
 /**
@@ -52,16 +28,13 @@ interface NFTContract {
  * @dev this is intended to be deployed upon every new creation of a new game.
  */
 contract GameBank is ERC20("GameBank", "GB") {
-    struct PropertyG {
-        bytes name;
-        bytes uri;
-        uint256 buyAmount;
-        uint256 rentAmount;
-        address owner;
-        uint8 noOfUpgrades;
-        PropertyType propertyType;
-        PropertyColors propertyColor;
-    }
+    using MonopolyLibrary for MonopolyLibrary.PropertyG;
+    using MonopolyLibrary for MonopolyLibrary.Property;
+    using MonopolyLibrary for MonopolyLibrary.PropertyColors;
+    using MonopolyLibrary for MonopolyLibrary.PropertyType;
+
+    // MonopolyLibrary.PropertyG public PropertyG;
+    // MonopolyLibrary.Property public Property;
 
     struct Bid {
         address bidder;
@@ -91,15 +64,15 @@ contract GameBank is ERC20("GameBank", "GB") {
         uint8 numberOfBenefits;
     }
 
-    PropertyG[] properties;
+    MonopolyLibrary.PropertyG[] properties;
 
     mapping(uint8 => Bid) public bids;
     mapping(uint8 => address) propertyOwner;
     mapping(uint256 => bool) mortgagedProperties;
     mapping(uint8 => uint8) noOfUpgrades;
     //
-    mapping(PropertyColors => mapping(address => uint8)) public noOfColorGroupOwnedByUser;
-    mapping(PropertyColors => uint8) private upgradeUserPropertyColorOwnedNumber;
+    mapping(MonopolyLibrary.PropertyColors => mapping(address => uint8)) public noOfColorGroupOwnedByUser;
+    mapping(MonopolyLibrary.PropertyColors => uint8) private upgradeUserPropertyColorOwnedNumber;
 
     event PropertyBid(uint8 indexed propertyId, address indexed bidder, uint256 bidAmount);
     event PropertySold(uint8 indexed propertyId, address indexed newOwner, uint256 amount);
@@ -108,7 +81,7 @@ contract GameBank is ERC20("GameBank", "GB") {
     uint256 private constant tolerace = 4;
     NFTContract private nftContract;
     uint8 private propertySize;
-    mapping(uint8 => PropertyG) public gameProperties;
+    mapping(uint8 => MonopolyLibrary.PropertyG) public gameProperties;
     // uint8 private constant upgradePercentage = 7;
     // uint8 private constant upgradeRentPercentage = 3;
 
@@ -133,59 +106,55 @@ contract GameBank is ERC20("GameBank", "GB") {
 
     //helper function
     function _gameProperties() private {
-        Property[] memory allProperties = nftContract.getAllProperties();
+        MonopolyLibrary.Property[] memory allProperties = nftContract.getAllProperties();
         uint256 size = allProperties.length;
         for (uint8 i = 0; i < size; i++) {
-            Property memory property = allProperties[i];
+            MonopolyLibrary.Property memory property = allProperties[i];
             _distributePropertyType(property, i);
         }
     }
     //helper function
 
     function _setNumberForColoredPropertyNumber() private {
-        upgradeUserPropertyColorOwnedNumber[PropertyColors.PINK] = 3;
-        upgradeUserPropertyColorOwnedNumber[PropertyColors.YELLOW] = 3;
-        upgradeUserPropertyColorOwnedNumber[PropertyColors.BLUE] = 3;
-        upgradeUserPropertyColorOwnedNumber[PropertyColors.ORANGE] = 3;
-        upgradeUserPropertyColorOwnedNumber[PropertyColors.RED] = 3;
-        upgradeUserPropertyColorOwnedNumber[PropertyColors.GREEN] = 3;
-        upgradeUserPropertyColorOwnedNumber[PropertyColors.PURPLE] = 3;
-        upgradeUserPropertyColorOwnedNumber[PropertyColors.BROWN] = 2;
+        upgradeUserPropertyColorOwnedNumber[MonopolyLibrary.PropertyColors.PINK] = 3;
+        upgradeUserPropertyColorOwnedNumber[MonopolyLibrary.PropertyColors.YELLOW] = 3;
+        upgradeUserPropertyColorOwnedNumber[MonopolyLibrary.PropertyColors.BLUE] = 3;
+        upgradeUserPropertyColorOwnedNumber[MonopolyLibrary.PropertyColors.ORANGE] = 3;
+        upgradeUserPropertyColorOwnedNumber[MonopolyLibrary.PropertyColors.RED] = 3;
+        upgradeUserPropertyColorOwnedNumber[MonopolyLibrary.PropertyColors.GREEN] = 3;
+        upgradeUserPropertyColorOwnedNumber[MonopolyLibrary.PropertyColors.PURPLE] = 3;
+        upgradeUserPropertyColorOwnedNumber[MonopolyLibrary.PropertyColors.BROWN] = 2;
     }
 
     //helper function
-    function _distributePropertyType(Property memory prop, uint8 position) private {
-        gameProperties[position + 1] = PropertyG(
+    function _distributePropertyType(MonopolyLibrary.Property memory prop, uint8 position) private {
+        gameProperties[position + 1] = MonopolyLibrary.PropertyG(
             prop.name, prop.uri, prop.buyAmount, prop.rentAmount, address(this), 0, prop.propertyType, prop.color
         );
     }
 
     // correct
-    function buyProperty(uint8 propertyId, uint256 bidAmount) external {
-        PropertyG storage property = gameProperties[propertyId];
-        require(property.propertyType != PropertyType.Special, "Invalid property");
+    function buyProperty(uint8 propertyId, uint256 bidAmount, address buyer) external {
+        MonopolyLibrary.PropertyG storage property = gameProperties[propertyId];
+        require(property.propertyType != MonopolyLibrary.PropertyType.Special, "Invalid property");
         require(property.owner != msg.sender, "You already own the property");
-        require(property.buyAmount > 0, "Property price must be greater than zero");
+        // require(property.buyAmount > 0, "Property price must be greater than zero");
         require(bidAmount >= property.buyAmount, "Bid amount must be at least the property price");
         require(!mortgagedProperties[propertyId], "Property is Mortgaged and cannot be bought");
         require(property.owner == address(this), "already owned by a player");
 
-        // Approve contract to spend bid amount (requires user to call `approve` beforehand)
-        require(balanceOf(msg.sender) >= bidAmount, "Insufficient funds for bid");
+        // // Approve contract to spend bid amount (requires user to call `approve` beforehand)
+        // require(balanceOf(msg.sender) >= bidAmount, "Insufficient funds for bid");
 
-        // if (property.owner == address(this)) {
-        bool success = transfer(address(this), property.buyAmount);
-
-        // bool success = transferFrom(msg.sender, address(this), property.buyAmount);
-        require(success, "Token transfer failed");
-
-        // Update ownership and increment sales count
+         _transfer(buyer, address(this), property.buyAmount);  
+        
+  // Update ownership and increment sales count
         property.owner = msg.sender;
         propertyOwner[propertyId] = msg.sender;
 
         noOfColorGroupOwnedByUser[property.propertyColor][msg.sender] += 1;
 
-        property.propertyType == PropertyType.RailStation ? numberOfOwnedRailways[msg.sender] += 1 : 0;
+        property.propertyType == MonopolyLibrary.PropertyType.RailStation ? numberOfOwnedRailways[msg.sender] += 1 : 0;
 
         // // Emit an event
     }
@@ -263,13 +232,13 @@ contract GameBank is ERC20("GameBank", "GB") {
         // the mapping propertyOwner handles this
         // moving on it should be changed
 
-        PropertyG storage property = gameProperties[proposal.biddedPropertyId];
+        MonopolyLibrary.PropertyG storage property = gameProperties[proposal.biddedPropertyId];
         property.owner = proposal.user;
 
         propertyOwner[proposal.biddedPropertyId] = proposal.user;
         propertyOwner[proposal.proposedPropertyId] = realOwner;
 
-        PropertyG storage proposedProperty = gameProperties[proposal.proposedPropertyId];
+        MonopolyLibrary.PropertyG storage proposedProperty = gameProperties[proposal.proposedPropertyId];
         proposedProperty.owner = realOwner;
 
         // change the color number for each property
@@ -280,11 +249,11 @@ contract GameBank is ERC20("GameBank", "GB") {
         noOfColorGroupOwnedByUser[proposedProperty.propertyColor][proposal.user] -= 1;
 
         //confirm if it is a rail station
-        property.propertyType == PropertyType.RailStation
+        property.propertyType == MonopolyLibrary.PropertyType.RailStation
             ? numberOfOwnedRailways[proposal.user] += 1
             : numberOfOwnedRailways[realOwner] -= 1;
 
-        property.propertyType == PropertyType.RailStation
+        property.propertyType == MonopolyLibrary.PropertyType.RailStation
             ? numberOfOwnedRailways[realOwner] += 1
             : numberOfOwnedRailways[proposal.user] -= 1;
 
@@ -295,12 +264,12 @@ contract GameBank is ERC20("GameBank", "GB") {
     // to refactor this function
     // to be private later on .
     function _sellProperty(uint8 propertyId) external {
-        PropertyG storage property = gameProperties[propertyId];
+        MonopolyLibrary.PropertyG storage property = gameProperties[propertyId];
         require(!mortgagedProperties[propertyId], "Property is Mortgaged and cannot be sold");
 
         Bid memory bid = bids[propertyId];
 
-        require(property.propertyType != PropertyType.Special, "Invalid property");
+        require(property.propertyType != MonopolyLibrary.PropertyType.Special, "Invalid property");
         require(property.owner == msg.sender, "You do not own this property");
         require(bid.bidder != address(0), "No valid bid found for this property");
 
@@ -341,18 +310,18 @@ contract GameBank is ERC20("GameBank", "GB") {
     function handleRent(address player, uint8 propertyId, uint256 diceRolled) external {
         require(propertyId <= propertySize, "No property with the given ID");
         require(!mortgagedProperties[propertyId], "Property is Mortgaged no rent");
-        PropertyG storage foundProperty = gameProperties[propertyId];
+        MonopolyLibrary.PropertyG storage foundProperty = gameProperties[propertyId];
         require(foundProperty.owner != address(this), "Property does not have an owner");
         require(foundProperty.owner != player, "player cannot pay rent for self");
 
         uint256 rentAmount;
 
         // Check if the property is a Utility
-        if (foundProperty.propertyType == PropertyType.Utility) {
+        if (foundProperty.propertyType == MonopolyLibrary.PropertyType.Utility) {
             rentAmount = _checkUtilityRent(propertyId, diceRolled);
         }
         // Check if the property is a Rail Station
-        else if (foundProperty.propertyType == PropertyType.RailStation) {
+        else if (foundProperty.propertyType == MonopolyLibrary.PropertyType.RailStation) {
             rentAmount = _checkRailStationRent(propertyId);
         }
         // Regular Property Rent
@@ -394,7 +363,7 @@ contract GameBank is ERC20("GameBank", "GB") {
 
     // Function to mortgage a property
     function mortgageProperty(uint8 propertyId) external {
-        PropertyG storage property = gameProperties[propertyId];
+        MonopolyLibrary.PropertyG storage property = gameProperties[propertyId];
         require(!mortgagedProperties[propertyId], "Property is already Mortgaged");
 
         require(property.owner == msg.sender, "You are not the owner of this property");
@@ -410,7 +379,7 @@ contract GameBank is ERC20("GameBank", "GB") {
 
     // Function to release a mortgage
     function releaseMortgage(uint8 propertyId) external {
-        PropertyG storage property = gameProperties[propertyId];
+        MonopolyLibrary.PropertyG storage property = gameProperties[propertyId];
 
         require(property.owner == msg.sender, "You are not the owner of this property");
         require(mortgagedProperties[propertyId], "Property is not Mortgaged");
@@ -429,11 +398,11 @@ contract GameBank is ERC20("GameBank", "GB") {
      *  we can upgrade the three at once
      */
     function upgradeProperty(uint8 propertyId, uint8 _noOfUpgrade) external {
-        PropertyG storage property = gameProperties[propertyId];
+        MonopolyLibrary.PropertyG storage property = gameProperties[propertyId];
 
         require(property.owner == msg.sender, "You are not the owner of this property");
         require(!mortgagedProperties[propertyId], "Property is Mortgaged cannot upgrade");
-        require(property.propertyType == PropertyType.Property, "Only properties can be upgraded");
+        require(property.propertyType == MonopolyLibrary.PropertyType.Property, "Only properties can be upgraded");
         require(_noOfUpgrade > 0 && _noOfUpgrade <= 5, "");
         // require(noOfUpgrades[propertyId] <= 5, "Property at Max upgrade");
 
@@ -463,7 +432,7 @@ contract GameBank is ERC20("GameBank", "GB") {
 
     // make the game owner of the bank and hence owns the token
     function downgradeProperty(uint8 propertyId, uint8 noOfDowngrade) external {
-        PropertyG memory property = gameProperties[propertyId];
+        MonopolyLibrary.PropertyG memory property = gameProperties[propertyId];
 
         // Ensure the caller is the owner of the property
         require(property.owner == msg.sender, "You are not the owner of this property");
@@ -485,5 +454,11 @@ contract GameBank is ERC20("GameBank", "GB") {
     function bal(address addr) external view returns (uint256) {
         uint256 a = balanceOf(addr);
         return a;
+    }
+
+
+    function getProperty(uint8 propertyId) external view returns(MonopolyLibrary.PropertyG memory property){
+         property = gameProperties[propertyId];
+        return property;
     }
 }

@@ -5,32 +5,19 @@ import {Test, console} from "forge-std/Test.sol";
 import {GameBank} from "../src/Bank.sol";
 import {Game} from "../src/Game.sol";
 import {GeneralNFT} from "../src/NFT.sol";
+import "../src/libraries/MonopolyLibrary.sol";
 
-struct Property {
-    bytes name;
-    uint256 rentAmount;
-    bytes uri;
-    uint256 buyAmount;
-    PropertyType propertyType;
-    PropertyColors color;
-}
+using MonopolyLibrary for MonopolyLibrary.Property;
+using MonopolyLibrary for MonopolyLibrary.PropertyColors;
+using MonopolyLibrary for MonopolyLibrary.PropertyType;
 
-enum PropertyType {
-    Property,
-    RailStation,
-    Utility,
-    Special
-}
-
-enum PropertyColors {
-    PINK,
-    YELLOW,
-    BLUE,
-    ORANGE,
-    RED,
-    GREEN,
-    PURPLE,
-    BROWN
+struct Player {
+    string username;
+    address addr;
+    uint8 playerCurrentPosition;
+    bool inJail;
+    uint8 jailAttemptCount;
+    uint256 totalPlayersWorth;
 }
 
 contract MonopolyTest is Test {
@@ -52,7 +39,7 @@ contract MonopolyTest is Test {
         generalNft = new GeneralNFT("uri");
 
         gamebank = new GameBank(4, address(generalNft));
-        // game = new Game(address(generalNft), a);
+        game = new Game(address(generalNft), a);
 
         // Log initial states for debugging
         console.log("GeneralNFT deployed at:", address(generalNft));
@@ -67,20 +54,30 @@ contract MonopolyTest is Test {
         // assert(address(game) != address(0));
     }
 
-    function testBuyPropertyFromBank(uint8 propertyId) external {
+    function testBuyPropertyFromBank() external {
         gamebank.mint(A, 1500);
         uint256 bal = gamebank.bal(A);
         assert(bal == 1500);
         vm.prank(A);
-        gamebank.buyProperty(2, 60);
+        gamebank.buyProperty(2, 60, A);
         uint256 bal1 = gamebank.bal(A);
         assert(bal1 == 1440);
+    }
 
-        gamebank.mint(B, 1500);
-        vm.prank(B);
-        gamebank.buyProperty(2, 60);
+    function testBuyPropertyFromGame() external {
         vm.prank(A);
-        gamebank._sellProperty(2);
-        gamebank.gameProperties(2);
+        game.startGame();
+        vm.prank(A);
+        game.play();
+        vm.prank(A);
+        game.advanceToNextPlayer();
+        vm.prank(B);
+        game.play();
+        uint balb4 = game.playersBalances(B);
+        vm.prank(B);
+        game.buyProperty(24, 220);
+        game.returnPlayer(B);
+        uint balAfter = game.playersBalances(B);
+        assertEq(balAfter, balb4 - 220);
     }
 }
