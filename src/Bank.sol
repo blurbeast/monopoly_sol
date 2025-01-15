@@ -78,6 +78,8 @@ contract GameBank is ERC20("GameBank", "GB") {
         BenefitType benefitType;
         bool isActive;
         uint8 benefitValue;
+        
+
     }
 
     struct Proposal {
@@ -190,6 +192,7 @@ contract GameBank is ERC20("GameBank", "GB") {
     }
 
     mapping(uint256 => Proposal) public inGameProposals;
+    mapping(uint8 => uint8) public propertyToProposal;
     uint256 private proposalIds;
 
     // correct i think
@@ -209,7 +212,7 @@ contract GameBank is ERC20("GameBank", "GB") {
 
         uint8 benefitSize = uint8(benefitValue.length);
 
-        require(benefitSize < 4, "the benefit offer should not be more than 3");
+        require(benefitSize < 3, "the benefit offer should not be more than 3");
 
         // mapping (uint8 => Benefit) proposalBenefits;
 
@@ -237,6 +240,12 @@ contract GameBank is ERC20("GameBank", "GB") {
 
         require(realOwner == _user, "only owner can perform action");
         require(!mortgagedProperties[proposal.biddedPropertyId], "property is on mortgage");
+
+        if (proposal.biddedTokenAmount > 0 ){
+            require(balanceOf(proposal.user)  >= proposal.biddedTokenAmount, "");
+            
+            _transfer(proposal.user, _user, proposal.biddedTokenAmount);
+        }
 
         uint8 sizeOfBenefits = uint8(proposal.numberOfBenefits);
 
@@ -266,6 +275,12 @@ contract GameBank is ERC20("GameBank", "GB") {
         noOfColorGroupOwnedByUser[proposedProperty.propertyColor][realOwner] += 1;
         noOfColorGroupOwnedByUser[proposedProperty.propertyColor][proposal.user] -= 1;
 
+        //confirm if it is a rail station
+        property.propertyType == PropertyType.RailStation ? 
+        numberOfOwnedRailways[proposal.user] += 1 : numberOfOwnedRailways[realOwner] -= 1;
+
+        property.propertyType == PropertyType.RailStation ?
+            numberOfOwnedRailways[realOwner] += 1 : numberOfOwnedRailways[proposal.user] -= 1;
         // to emit an event here
     }
 
@@ -339,6 +354,23 @@ contract GameBank is ERC20("GameBank", "GB") {
                 : foundProperty.rentAmount;
         }
 
+        uint8 proposalId = propertyToProposal[propertyId];
+        if (proposalId > 0) {
+            Proposal storage proposal = inGameProposals[proposalId];
+            uint numberOfBenefits = proposal.numberOfBenefits;
+
+            for (uint8 i = 0; i < numberOfBenefits; i++) {
+                if (proposal.benefits[i].isActive) {
+                    if (proposal.benefits[i].benefitType == BenefitType.FREE_RENT) {
+                        rentAmount = 0;
+                    } else if (proposal.benefits[i].benefitType == BenefitType.RENT_DISCOUNT) {
+                        rentAmount = (rentAmount * proposal.benefits[i].benefitValue) / 100;
+                    }
+                }
+            }
+        }
+
+        
         // Ensure player has enough funds to pay rent
         require(balanceOf(player) >= rentAmount, "Insufficient funds to pay rent");
 
