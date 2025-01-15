@@ -192,7 +192,7 @@ contract GameBank is ERC20("GameBank", "GB") {
     mapping(uint256 => Proposal) public inGameProposals;
     uint256 private proposalIds;
 
-    // correct i think 
+    // correct i think
     function makeProposal(
         address _user,
         // address _biddedUser,
@@ -229,7 +229,7 @@ contract GameBank is ERC20("GameBank", "GB") {
         // to emit an event here
     }
 
-    // in progress 
+    // in progress
     function acceptProposal(address _user, uint8 proposalId) external {
         Proposal storage proposal = inGameProposals[proposalId];
 
@@ -240,14 +240,14 @@ contract GameBank is ERC20("GameBank", "GB") {
 
         uint8 sizeOfBenefits = uint8(proposal.numberOfBenefits);
 
-        for(uint8 i = 0; i < sizeOfBenefits ; i ++) {
+        for (uint8 i = 0; i < sizeOfBenefits; i++) {
             proposal.benefits[i].isActive = true;
         }
 
-        // make changes to the property 
+        // make changes to the property
         // i think refactoring the property struct will be okay here as we should only read from the state here
-        // here the owner is vague as it would cost more here 
-        // the mapping propertyOwner handles this 
+        // here the owner is vague as it would cost more here
+        // the mapping propertyOwner handles this
         // moving on it should be changed
 
         PropertyG storage property = gameProperties[proposal.biddedPropertyId];
@@ -259,7 +259,7 @@ contract GameBank is ERC20("GameBank", "GB") {
         PropertyG storage proposedProperty = gameProperties[proposal.proposedPropertyId];
         proposedProperty.owner = realOwner;
 
-        // change the color number for each property 
+        // change the color number for each property
         noOfColorGroupOwnedByUser[property.propertyColor][realOwner] -= 1;
         noOfColorGroupOwnedByUser[property.propertyColor][proposal.user] += 1;
 
