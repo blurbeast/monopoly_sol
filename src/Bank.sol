@@ -108,8 +108,8 @@ contract GameBank is ERC20("GameBank", "GB") {
     NFTContract private nftContract;
     uint8 private propertySize;
     mapping(uint8 => PropertyG) public gameProperties;
-    uint8 private constant upgradePercentage = 7;
-    uint8 private constant upgradeRentPercentage = 3;
+    // uint8 private constant upgradePercentage = 7;
+    // uint8 private constant upgradeRentPercentage = 3;
 
     /**
      * @dev Initializes the contract with a fixed supply of tokens.
@@ -244,7 +244,23 @@ contract GameBank is ERC20("GameBank", "GB") {
             proposal.benefits[i].isActive = true;
         }
 
-        
+        // make changes to the property 
+        // i think refactoring the property struct will be okay here as we should only read from the state here
+        // here the owner is vague as it would cost more here 
+        // the mapping propertyOwner handles this 
+        // moving on it should be changed
+
+        PropertyG storage property = gameProperties[proposal.biddedPropertyId];
+        property.owner = proposal.user;
+
+        propertyOwner[proposal.biddedPropertyId] = proposal.user;
+        propertyOwner[proposal.proposedPropertyId] = realOwner;
+
+        PropertyG storage proposedProperty = gameProperties[proposal.proposedPropertyId];
+        proposedProperty.owner = realOwner;
+
+
+
 
         // to emit an event here
     }
