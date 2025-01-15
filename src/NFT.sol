@@ -54,9 +54,12 @@ contract GeneralNFT is ERC721URIStorage {
     // Property[] private properties = new Property[](MAX_SUPPLY);
     mapping(uint8 => MonopolyLibrary.Property) private properties;
 
+    mapping(uint8 => MonopolyLibrary.PropertyRent) propertyRent;
+
     constructor(string memory uri) ERC721("MonoPoly", "MNP") {
         baseUri = uri;
         createNftProperties();
+        populateRent();
         _setAllProperties();
     }
 
@@ -105,7 +108,7 @@ contract GeneralNFT is ERC721URIStorage {
             name: "Baltic Avenue",
             rentAmount: 4,
             uri: "",
-            buyAmount: 60,
+            buyAmount: 80,
             propertyType: MonopolyLibrary.PropertyType.Property,
             color: MonopolyLibrary.PropertyColors.BROWN
         });
@@ -472,6 +475,248 @@ contract GeneralNFT is ERC721URIStorage {
         }
     }
 
+    function populateRent() public {
+        propertyRent[2] = MonopolyLibrary.PropertyRent({
+            propertyId: 2,
+            site: 2,
+            withOneHouse: 10,
+            withTwoHouses: 30,
+            withThreeHouses: 90,
+            withFourHouses: 160,
+            withHotel: 250,
+            costOfHouse: 50
+        });
+
+        propertyRent[4] = MonopolyLibrary.PropertyRent({
+            propertyId: 4,
+            site: 4,
+            withOneHouse: 20,
+            withTwoHouses: 60,
+            withThreeHouses: 180,
+            withFourHouses: 320,
+            withHotel: 450,
+            costOfHouse: 50
+        });
+        propertyRent[7] = MonopolyLibrary.PropertyRent({
+            propertyId: 7,
+            site: 6,
+            withOneHouse: 30,
+            withTwoHouses: 90,
+            withThreeHouses: 270,
+            withFourHouses: 400,
+            withHotel: 550,
+            costOfHouse: 50
+        });
+
+        propertyRent[9] = MonopolyLibrary.PropertyRent({
+            propertyId: 9,
+            site: 6,
+            withOneHouse: 50,
+            withTwoHouses: 90,
+            withThreeHouses: 270,
+            withFourHouses: 400,
+            withHotel: 550,
+            costOfHouse: 50
+        });
+        propertyRent[10] = MonopolyLibrary.PropertyRent({
+            propertyId: 10,
+            site: 8,
+            withOneHouse: 40,
+            withTwoHouses: 100,
+            withThreeHouses: 300,
+            withFourHouses: 450,
+            withHotel: 600,
+            costOfHouse: 50
+        });
+
+        propertyRent[12] = MonopolyLibrary.PropertyRent({
+            propertyId: 12,
+            site: 10,
+            withOneHouse: 50,
+            withTwoHouses: 150,
+            withThreeHouses: 450,
+            withFourHouses: 625,
+            withHotel: 750,
+            costOfHouse: 100
+        });
+
+        propertyRent[14] = MonopolyLibrary.PropertyRent({
+            propertyId: 14,
+            site: 10,
+            withOneHouse: 50,
+            withTwoHouses: 150,
+            withThreeHouses: 450,
+            withFourHouses: 625,
+            withHotel: 750,
+            costOfHouse: 100
+        });
+
+        propertyRent[15] = MonopolyLibrary.PropertyRent({
+            propertyId: 15,
+            site: 12,
+            withOneHouse: 60,
+            withTwoHouses: 180,
+            withThreeHouses: 500,
+            withFourHouses: 700,
+            withHotel: 900,
+            costOfHouse: 100
+        });
+
+        propertyRent[17] = MonopolyLibrary.PropertyRent({
+            propertyId: 17,
+            site: 14,
+            withOneHouse: 70,
+            withTwoHouses: 200,
+            withThreeHouses: 550,
+            withFourHouses: 750,
+            withHotel: 950,
+            costOfHouse: 100
+        });
+
+        propertyRent[19] = MonopolyLibrary.PropertyRent({
+            propertyId: 19,
+            site: 16,
+            withOneHouse: 80,
+            withTwoHouses: 220,
+            withThreeHouses: 600,
+            withFourHouses: 800,
+            withHotel: 1000,
+            costOfHouse: 100
+        });
+
+        propertyRent[20] = MonopolyLibrary.PropertyRent({
+            propertyId: 20,
+            site: 16,
+            withOneHouse: 80,
+            withTwoHouses: 220,
+            withThreeHouses: 600,
+            withFourHouses: 800,
+            withHotel: 1000,
+            costOfHouse: 100
+        });
+
+        propertyRent[22] = MonopolyLibrary.PropertyRent({
+            propertyId: 22,
+            site: 18,
+            withOneHouse: 90,
+            withTwoHouses: 250,
+            withThreeHouses: 700,
+            withFourHouses: 875,
+            withHotel: 1050,
+            costOfHouse: 150
+        });
+
+        propertyRent[24] = MonopolyLibrary.PropertyRent({
+            propertyId: 24,
+            site: 18,
+            withOneHouse: 90,
+            withTwoHouses: 250,
+            withThreeHouses: 700,
+            withFourHouses: 875,
+            withHotel: 1050,
+            costOfHouse: 150
+        });
+
+        propertyRent[25] = MonopolyLibrary.PropertyRent({
+            propertyId: 25,
+            site: 20,
+            withOneHouse: 100,
+            withTwoHouses: 300,
+            withThreeHouses: 750,
+            withFourHouses: 925,
+            withHotel: 1100,
+            costOfHouse: 150
+        });
+
+        propertyRent[27] = MonopolyLibrary.PropertyRent({
+            propertyId: 27,
+            site: 22,
+            withOneHouse: 110,
+            withTwoHouses: 330,
+            withThreeHouses: 800,
+            withFourHouses: 975,
+            withHotel: 1150,
+            costOfHouse: 150
+        });
+
+        propertyRent[28] = MonopolyLibrary.PropertyRent({
+            propertyId: 28,
+            site: 22,
+            withOneHouse: 110,
+            withTwoHouses: 330,
+            withThreeHouses: 800,
+            withFourHouses: 975,
+            withHotel: 1150,
+            costOfHouse: 150
+        });
+
+        propertyRent[30] = MonopolyLibrary.PropertyRent({
+            propertyId: 30,
+            site: 24,
+            withOneHouse: 120,
+            withTwoHouses: 360,
+            withThreeHouses: 850,
+            withFourHouses: 1025,
+            withHotel: 1200,
+            costOfHouse: 150
+        });
+
+        propertyRent[32] = MonopolyLibrary.PropertyRent({
+            propertyId: 32,
+            site: 26,
+            withOneHouse: 130,
+            withTwoHouses: 390,
+            withThreeHouses: 900,
+            withFourHouses: 1100,
+            withHotel: 1275,
+            costOfHouse: 200
+        });
+
+        propertyRent[33] = MonopolyLibrary.PropertyRent({
+            propertyId: 33,
+            site: 26,
+            withOneHouse: 130,
+            withTwoHouses: 390,
+            withThreeHouses: 900,
+            withFourHouses: 1100,
+            withHotel: 1275,
+            costOfHouse: 200
+        });
+
+        propertyRent[35] = MonopolyLibrary.PropertyRent({
+            propertyId: 35,
+            site: 28,
+            withOneHouse: 150,
+            withTwoHouses: 450,
+            withThreeHouses: 1000,
+            withFourHouses: 1200,
+            withHotel: 1400,
+            costOfHouse: 200
+        });
+
+        propertyRent[38] = MonopolyLibrary.PropertyRent({
+            propertyId: 38,
+            site: 35,
+            withOneHouse: 175,
+            withTwoHouses: 500,
+            withThreeHouses: 1100,
+            withFourHouses: 1300,
+            withHotel: 1500,
+            costOfHouse: 200
+        });
+
+        propertyRent[40] = MonopolyLibrary.PropertyRent({
+            propertyId: 40,
+            site: 50,
+            withOneHouse: 200,
+            withTwoHouses: 600,
+            withThreeHouses: 1400,
+            withFourHouses: 1700,
+            withHotel: 2000,
+            costOfHouse: 200
+        });
+    }
+
     // i changed your original getAllProperties function to this
     function getAllPropertiesM()
         external
@@ -497,5 +742,29 @@ contract GeneralNFT is ERC721URIStorage {
 
     function returnTotalSupply() external view returns (uint8) {
         return totalSupply;
+    }
+
+    function returnPropertyRent(
+        uint8 propertyId,
+        uint8 upgradeStatus
+    ) public view returns (uint rent) {
+        MonopolyLibrary.PropertyRent memory property = propertyRent[propertyId];
+        MonopolyLibrary.Property memory propertyy = properties[propertyId];
+        require(
+            propertyy.propertyType == MonopolyLibrary.PropertyType.Property,
+            "Not a Property"
+        );
+        require(propertyId <= 40 && upgradeStatus <= 5, "invalid Property");
+        uint256[6] memory rents = [
+            property.site,
+            property.withOneHouse,
+            property.withTwoHouses,
+            property.withThreeHouses,
+            property.withFourHouses,
+            property.withHotel
+        ];
+
+        require(upgradeStatus < rents.length, "Invalid upgrade status");
+        rent = rents[upgradeStatus];
     }
 }
