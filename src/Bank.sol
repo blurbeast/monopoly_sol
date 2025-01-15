@@ -87,6 +87,7 @@ contract GameBank is ERC20("GameBank", "GB") {
         uint8 biddedPropertyId;
         uint256 biddedTokenAmount;
         mapping(uint8 => Benefit) benefits;
+        uint8 numberOfBenefits;
     }
 
     PropertyG[] properties;
@@ -218,6 +219,7 @@ contract GameBank is ERC20("GameBank", "GB") {
         proposal.proposedPropertyId = proposedPropertyId;
         proposal.biddedPropertyId = biddedPropertyId;
         proposal.biddedTokenAmount = biddedTokenAmount;
+        proposal.numberOfBenefits = benefitSize;
 
         for (uint8 i = 0; i < benefitSize; i++) {
             proposal.benefits[i + 1] =
@@ -236,11 +238,15 @@ contract GameBank is ERC20("GameBank", "GB") {
         require(realOwner == _user, "only owner can perform action");
         require(!mortgagedProperties[proposal.biddedPropertyId], "property is on mortgage");
 
-        // uint8 sizeOfBenefits = uint8(proposal.benefits.length);
+        uint8 sizeOfBenefits = uint8(proposal.numberOfBenefits);
 
-        // for(uint8 i = 0; i < sizeOfBenefits ; i ++) {
-        //     proposal.benefits[i].isActive = true;
-        // }
+        for(uint8 i = 0; i < sizeOfBenefits ; i ++) {
+            proposal.benefits[i].isActive = true;
+        }
+
+        
+
+        // to emit an event here
     }
 
     // to refactor this function
