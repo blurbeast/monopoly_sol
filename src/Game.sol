@@ -149,6 +149,58 @@ contract Game {
         gameBank.buyProperty(propertyId, bidAmount, msg.sender);
     }
 
+    function openTrade(
+        uint8 usersPropertyId,
+        uint8 teamMatePropertyID,
+        MonopolyLibrary.SWAP_TYPE swapType,
+        uint biddingAmount
+    ) external {
+        MonopolyLibrary.Player storage player = players[msg.sender];
+        MonopolyLibrary.PropertyG memory usersProperty = getProperty(
+            usersPropertyId
+        );
+        require(gameStarted, "Game not started yet");
+        require(
+            playerAddresses[currentPlayerIndex] == player.addr,
+            "Not your turn"
+        );
+
+        gameBank.proposePropertySwap(
+            msg.sender,
+            usersProperty.owner,
+            usersPropertyId,
+            teamMatePropertyID,
+            swapType,
+            biddingAmount
+        );
+    }
+
+    function counterDeal(
+        uint8 usersPropertyId,
+        uint8 teamMatePropertyID,
+        MonopolyLibrary.SWAP_TYPE swapType,
+        uint biddingAmount
+    ) external {
+        require(gameStarted, "Game not started yet");
+        gameBank.counterDeal(
+            msg.sender,
+            usersPropertyId,
+            teamMatePropertyID,
+            swapType,
+            biddingAmount
+        );
+    }
+
+    function acceptTrade() external {
+        require(gameStarted, "Game not started yet");
+        gameBank.acceptDeal(msg.sender);
+    }
+
+    function rejectDeal() external {
+        require(gameStarted, "Game not started yet");
+        gameBank.rejectDeal(msg.sender);
+    }
+
     function handleRent() external {
         MonopolyLibrary.Player storage player = players[msg.sender];
         require(gameStarted, "Game not started yet");
@@ -160,13 +212,6 @@ contract Game {
         uint8 propertyId = player.playerCurrentPosition;
         gameBank.handleRent(msg.sender, propertyId, diceRolled);
     }
-
-    // function sellProperty(uint8 propertyId) external view {
-    //     // MonopolyLibrary.Player storage player = players[msg.sender];
-    //     require(gameStarted, "Game not started yet");
-
-    //     // gameBank.sellProperty(propertyId, msg.sender);
-    // }
 
     /**
      * @dev Advance to the next player's turn.
@@ -259,7 +304,7 @@ contract Game {
 
     function getProperty(
         uint8 propertyId
-    ) external view returns (MonopolyLibrary.PropertyG memory property) {
+    ) public view returns (MonopolyLibrary.PropertyG memory property) {
         property = gameBank.getProperty(propertyId);
         return property;
     }

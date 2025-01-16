@@ -99,7 +99,9 @@ library MonopolyLibrary {
     enum SWAP_TYPE {
         PROPERTY_FOR_PROPERTY,
         PROPERTY_FOR_CASH_AND_PROPERTY,
-        PROPERTY_AND_CASH_FOR_PROPERTY
+        PROPERTY_AND_CASH_FOR_PROPERTY,
+        PROPERTY_FOR_CASH,
+        CASH_FOR_PROPERTY
     }
 
     event PropertySwapProposed(
