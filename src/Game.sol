@@ -53,7 +53,8 @@ contract Game {
                 playerCurrentPosition: 0,
                 inJail: false,
                 jailAttemptCount: 0,
-                cash: 0
+                cash: 0,
+                diceRolled: 0
             });
             playerAddresses.push(_playerAddresses[i]);
         }
@@ -82,6 +83,142 @@ contract Game {
         emit GameStarted(numberOfPlayers, playerAddresses);
         gameStarted = true;
         return true;
+    }
+
+    function play() external {
+        MonopolyLibrary.Player storage player = players[msg.sender];
+        require(gameStarted, "Game not started yet");
+        require(
+            playerAddresses[currentPlayerIndex] == player.addr,
+            "Not your turn"
+        );
+
+        // Roll the dice
+        (uint8 dice1, uint8 dice2) = rollDices();
+        uint8 totalMove = dice1 + dice2;
+        player.diceRolled = totalMove;
+
+        // Check if player is in jail
+        if (player.inJail) {
+            // Check if the player rolled doubles
+            if (dice1 != dice2) {
+                player.jailAttemptCount++;
+
+                // If player has failed 3 times, release them from jail
+                if (player.jailAttemptCount >= 3) {
+                    player.inJail = false; // Player is out of jail
+                    player.jailAttemptCount = 0; // Reset attempt count
+                } else {
+                    revert("Failed to roll doubles. Try again.");
+                }
+            } else {
+                // Player rolled doubles and gets out of jail
+                player.inJail = false;
+                player.jailAttemptCount = 0;
+            }
+        }
+
+        // Update player's position
+        player.playerCurrentPosition += totalMove;
+
+        // Check if the player passed 'Go'
+        if (player.playerCurrentPosition > 40) {
+            player.playerCurrentPosition %= 40; // Reset position to within board range
+            gameBank.mint(player.addr, 200); // Reward for passing Go
+        }
+
+        // Emit an event for the move
+        emit PlayerMoved(player.addr, player.playerCurrentPosition);
+
+        // Advance the turn to the next player
+    }
+
+    function buyProperty() external {
+        MonopolyLibrary.Player storage player = players[msg.sender];
+        uint8 propertyId = player.playerCurrentPosition;
+        MonopolyLibrary.Property memory property = returnPropertyNft(
+            propertyId
+        );
+        uint256 bidAmount = property.buyAmount;
+        require(gameStarted, "Game not started yet");
+        require(
+            playerAddresses[currentPlayerIndex] == player.addr,
+            "Can Only buy Properties During Your Turn"
+        );
+
+        gameBank.buyProperty(propertyId, bidAmount, msg.sender);
+    }
+
+    function openTrade(
+        uint8 usersPropertyId,
+        uint8 teamMatePropertyID,
+        MonopolyLibrary.SWAP_TYPE swapType,
+        uint biddingAmount,
+        address _teamMateAddress
+    ) external {
+        MonopolyLibrary.Player memory player = players[msg.sender];
+
+        MonopolyLibrary.PropertyG memory teamMateProperty = getProperty(
+            teamMatePropertyID
+        );
+        require(gameStarted, "Game not started yet");
+        require(
+            playerAddresses[currentPlayerIndex] == player.addr,
+            "Not your turn"
+        );
+
+        address teamMateAddress;
+        teamMateAddress = teamMateProperty.owner;
+        if (swapType == MonopolyLibrary.SWAP_TYPE.CASH_FOR_PROPERTY) {
+            teamMateAddress = _teamMateAddress;
+        }
+
+        gameBank.proposePropertySwap(
+            msg.sender,
+            teamMateAddress,
+            usersPropertyId,
+            teamMatePropertyID,
+            swapType,
+            biddingAmount
+        );
+    }
+
+    function counterDeal(
+        uint8 usersPropertyId,
+        uint8 teamMatePropertyID,
+        MonopolyLibrary.SWAP_TYPE swapType,
+        uint biddingAmount
+    ) external {
+        require(gameStarted, "Game not started yet");
+        gameBank.counterDeal(
+            msg.sender,
+            usersPropertyId,
+            teamMatePropertyID,
+            swapType,
+            biddingAmount
+        );
+    }
+
+    function acceptTrade() external {
+        require(gameStarted, "Game not started yet");
+        gameBank.acceptDeal(msg.sender);
+    }
+
+    function rejectDeal() external {
+        require(gameStarted, "Game not started yet");
+        gameBank.rejectDeal(msg.sender);
+    }
+
+    function handleRent() external {
+        MonopolyLibrary.Player storage player = players[msg.sender];
+        require(gameStarted, "Game not started yet");
+        require(
+            playerAddresses[currentPlayerIndex] == player.addr,
+            "Not your turn"
+        );
+        uint8 diceRolled = player.diceRolled;
+        uint8 propertyId = player.playerCurrentPosition;
+        gameBank.handleRent(msg.sender, propertyId, diceRolled);
     }
 
     /**
@@ -125,51 +262,13 @@ contract Game {
         return (dice1, dice2);
     }
 
-    function play() external {
-        MonopolyLibrary.Player storage player = players[msg.sender];
+    /**
+     * @dev Get the current player's address.
+     * @return The address of the current player.
+     */
+    function getCurrentPlayer() external view returns (address) {
         require(gameStarted, "Game not started yet");
-        require(
-            playerAddresses[currentPlayerIndex] == player.addr,
-            "Not your turn"
-        );
-
-        // Roll the dice
-        (uint8 dice1, uint8 dice2) = rollDices();
-        uint8 totalMove = dice1 + dice2;
-
-        // Check if player is in jail
-        if (player.inJail) {
-            // Check if the player rolled doubles
-            if (dice1 != dice2) {
-                player.jailAttemptCount++;
-
-                // If player has failed 3 times, release them from jail
-                if (player.jailAttemptCount >= 3) {
-                    player.inJail = false; // Player is out of jail
-                    player.jailAttemptCount = 0; // Reset attempt count
-                } else {
-                    revert("Failed to roll doubles. Try again.");
-                }
-            } else {
-                // Player rolled doubles and gets out of jail
-                player.inJail = false;
-                player.jailAttemptCount = 0;
-            }
-        }
-
-        // Update player's position
-        player.playerCurrentPosition += totalMove;
-
-        // Check if the player passed 'Go'
-        if (player.playerCurrentPosition > 40) {
-            player.playerCurrentPosition %= 40; // Reset position to within board range
-            gameBank.mint(player.addr, 200); // Reward for passing Go
-        }
-
-        // Emit an event for the move
-        emit PlayerMoved(player.addr, player.playerCurrentPosition);
-
-        // Advance the turn to the next player
+        return playerAddresses[currentPlayerIndex];
     }
 
     function advanceToNextPlayer() external {
@@ -186,38 +285,6 @@ contract Game {
         // Emit an event for the move
         emit PlayerMoved(player.addr, player.playerCurrentPosition);
     }
-
-    /**
-     * @dev Get the current player's address.
-     * @return The address of the current player.
-     */
-    function getCurrentPlayer() external view returns (address) {
-        require(gameStarted, "Game not started yet");
-        return playerAddresses[currentPlayerIndex];
-    }
-
-    function buyProperty() external {
-        MonopolyLibrary.Player storage player = players[msg.sender];
-        uint8 propertyId = player.playerCurrentPosition;
-        MonopolyLibrary.Property memory property = returnPropertyNft(
-            propertyId
-        );
-        uint256 bidAmount = property.buyAmount;
-        require(gameStarted, "Game not started yet");
-        require(
-            playerAddresses[currentPlayerIndex] == player.addr,
-            "Can Only buy Properties During Your Turn"
-        );
-
-        gameBank.buyProperty(propertyId, bidAmount, msg.sender);
-    }
-
-    // function sellProperty(uint8 propertyId) external view {
-    //     // MonopolyLibrary.Player storage player = players[msg.sender];
-    //     require(gameStarted, "Game not started yet");
-
-    //     // gameBank.sellProperty(propertyId, msg.sender);
-    // }
 
     //HELPER FUNCTIONS FOR TESTING
 
@@ -245,7 +312,7 @@ contract Game {
 
     function getProperty(
         uint8 propertyId
-    ) external view returns (MonopolyLibrary.PropertyG memory property) {
+    ) public view returns (MonopolyLibrary.PropertyG memory property) {
         property = gameBank.getProperty(propertyId);
         return property;
     }
@@ -255,5 +322,12 @@ contract Game {
     ) external view returns (address _propertyOwner) {
         _propertyOwner = gameBank.getPropertyOwner(propertyId);
         return _propertyOwner;
+    }
+
+    function returnDeal(
+        address user
+    ) public view returns (MonopolyLibrary.PropertySwap memory usersDeal) {
+        usersDeal = gameBank.returnProposal(user);
+        return usersDeal;
     }
 }
