@@ -241,35 +241,7 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         // to emit an event here
     }
 
-    // to refactor this function
-    // to be private later on .
-    function _sellProperty(uint8 propertyId) external {
-        MonopolyLibrary.PropertyG storage property = gameProperties[propertyId];
-        require(!mortgagedProperties[propertyId], "Property is Mortgaged and cannot be sold");
-
-        MonopolyLibrary.Bid memory bid = bids[propertyId];
-
-        require(property.propertyType != MonopolyLibrary.PropertyType.Special, "Invalid property");
-        require(property.owner == msg.sender, "You do not own this property");
-        require(bid.bidder != address(0), "No valid bid found for this property");
-
-        // Transfer funds from bidder to seller
-        bool success = transferFrom(bid.bidder, msg.sender, bid.bidAmount);
-        require(success, "Token transfer failed");
-
-        // Update ownership
-        property.owner = bid.bidder;
-        propertyOwner[propertyId] = bid.bidder;
-
-        noOfColorGroupOwnedByUser[property.propertyColor][msg.sender] -= 1;
-        noOfColorGroupOwnedByUser[property.propertyColor][bid.bidder] += 1;
-
-        // Clear the bid
-        delete bids[propertyId];
-
-        // Emit a property sold event
-        emit PropertySold(propertyId, bid.bidder, bid.bidAmount);
-    }
+  
 
     mapping(address => uint8) private numberOfOwnedRailways;
 
@@ -375,7 +347,7 @@ function proposePropertySwap(
     emit MonopolyLibrary.PropertySwapProposed(proposer, proposee, biddingPropertyId, propertyToSwapId, swapType);
 }
 
-function acceptDeal(address user) external nonReentrant  {
+function acceptDeal(address user) external nonReentrant {
     // Retrieve the deal for the user
     MonopolyLibrary.PropertySwap storage deal = propertySwap[user];
     require(deal.bidder != address(0), "No deal exists for this user");
@@ -391,25 +363,32 @@ function acceptDeal(address user) external nonReentrant  {
     // Handle the swap based on its type
     if (deal.swapType == MonopolyLibrary.SWAP_TYPE.PROPERTY_FOR_PROPERTY) {
         // Swap ownership of the properties
-        userProperty.owner = biddingProperty.owner;
-        biddingProperty.owner = user;
-    } else if (deal.swapType == MonopolyLibrary.SWAP_TYPE.PROPERTY_FOR_CASH_AND_PROPERTY) {
-        // Transfer cash and swap ownership
+        updateOwnershipAndAttributes(biddingProperty, userProperty, user, deal.bidder);
+    } else if (deal.swapType == MonopolyLibrary.SWAP_TYPE.PROPERTY_FOR_CASH) {
+        // Transfer cash to the bidder and transfer ownership to the user
         require(deal.biddingAmount > 0, "Invalid bidding amount");
         _transfer(user, biddingProperty.owner, deal.biddingAmount);
-        userProperty.owner = biddingProperty.owner;
-        biddingProperty.owner = user;
-    } else if (deal.swapType == MonopolyLibrary.SWAP_TYPE.PROPERTY_AND_CASH_FOR_PROPERTY) {
-        // Transfer cash and swap ownership
+        updateOwnershipAndAttributes(biddingProperty, userProperty, user, deal.bidder);
+    } else if (deal.swapType == MonopolyLibrary.SWAP_TYPE.CASH_FOR_PROPERTY) {
+        // Transfer cash to the user and transfer ownership to the bidder
         require(deal.biddingAmount > 0, "Invalid bidding amount");
         _transfer(biddingProperty.owner, user, deal.biddingAmount);
-        userProperty.owner = biddingProperty.owner;
-        biddingProperty.owner = user;
+        updateOwnershipAndAttributes(userProperty, biddingProperty, deal.bidder, user);
+    } else if (deal.swapType == MonopolyLibrary.SWAP_TYPE.PROPERTY_AND_CASH_FOR_PROPERTY) {
+        // Transfer cash from the bidder to the user and swap ownership
+        require(deal.biddingAmount > 0, "Invalid bidding amount");
+        _transfer(biddingProperty.owner, user, deal.biddingAmount);
+        updateOwnershipAndAttributes(userProperty, biddingProperty, deal.bidder, user);
+    } else if (deal.swapType == MonopolyLibrary.SWAP_TYPE.PROPERTY_FOR_CASH_AND_PROPERTY) {
+        // Transfer cash from the user to the bidder and swap ownership
+        require(deal.biddingAmount > 0, "Invalid bidding amount");
+        _transfer(user, biddingProperty.owner, deal.biddingAmount);
+        updateOwnershipAndAttributes(biddingProperty, userProperty, user, deal.bidder);
     } else {
         revert("Invalid swap type");
     }
-
-    // Emit an event to log the swap
+ 
+    // Emit an event to log the accepted deal
     emit MonopolyLibrary.DealAccepted(
         user,
         deal.bidder,
@@ -419,9 +398,40 @@ function acceptDeal(address user) external nonReentrant  {
         deal.biddingAmount
     );
 
-    // Clear the deal after it is processed
+    // Clear the deal after processing
     delete propertySwap[user];
 }
+
+function updateOwnershipAndAttributes(
+    MonopolyLibrary.PropertyG storage userProperty,
+    MonopolyLibrary.PropertyG storage biddersProperty,
+    address newOwner1,
+    address newOwner2
+) internal {
+    // Update color group ownership
+    noOfColorGroupOwnedByUser[userProperty.propertyColor][userProperty.owner] -= 1;
+    noOfColorGroupOwnedByUser[userProperty.propertyColor][newOwner1] += 1;
+
+    noOfColorGroupOwnedByUser[biddersProperty.propertyColor][biddersProperty.owner] -= 1;
+    noOfColorGroupOwnedByUser[biddersProperty.propertyColor][newOwner2] += 1;
+
+    // Handle rail station ownership changes
+    if (userProperty.propertyType == MonopolyLibrary.PropertyType.RailStation) {
+        numberOfOwnedRailways[userProperty.owner] -= 1;
+        numberOfOwnedRailways[newOwner1] += 1;
+    }
+    if (biddersProperty.propertyType == MonopolyLibrary.PropertyType.RailStation) {
+        numberOfOwnedRailways[biddersProperty.owner] -= 1;
+        numberOfOwnedRailways[newOwner2] += 1;
+    }
+
+    // Swap ownership
+    userProperty.owner = newOwner1;
+    biddersProperty.owner = newOwner2;
+
+   
+}
+
 
 function rejectDeal(address user) external nonReentrant {
     // Retrieve the deal for the user
