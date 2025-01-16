@@ -153,11 +153,13 @@ contract Game {
         uint8 usersPropertyId,
         uint8 teamMatePropertyID,
         MonopolyLibrary.SWAP_TYPE swapType,
-        uint biddingAmount
+        uint biddingAmount,
+        address _teamMateAddress
     ) external {
-        MonopolyLibrary.Player storage player = players[msg.sender];
-        MonopolyLibrary.PropertyG memory usersProperty = getProperty(
-            usersPropertyId
+        MonopolyLibrary.Player memory player = players[msg.sender];
+
+        MonopolyLibrary.PropertyG memory teamMateProperty = getProperty(
+            teamMatePropertyID
         );
         require(gameStarted, "Game not started yet");
         require(
@@ -165,9 +167,15 @@ contract Game {
             "Not your turn"
         );
 
+        address teamMateAddress;
+        teamMateAddress = teamMateProperty.owner;
+        if (swapType == MonopolyLibrary.SWAP_TYPE.CASH_FOR_PROPERTY) {
+            teamMateAddress = _teamMateAddress;
+        }
+
         gameBank.proposePropertySwap(
             msg.sender,
-            usersProperty.owner,
+            teamMateAddress,
             usersPropertyId,
             teamMatePropertyID,
             swapType,
@@ -316,7 +324,10 @@ contract Game {
         return _propertyOwner;
     }
 
-    function viewDeals(
-        address myDeals
-    ) public view returns (MonopolyLibrary.PropertySwap memory currentDeal) {}
+    function returnDeal(
+        address user
+    ) public view returns (MonopolyLibrary.PropertySwap memory usersDeal) {
+        usersDeal = gameBank.returnProposal(user);
+        return usersDeal;
+    }
 }

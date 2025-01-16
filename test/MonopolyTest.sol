@@ -123,4 +123,469 @@ contract MonopolyTest is Test {
         vm.prank(B);
         gamebank.handleRent(B, 13, 5);
     }
+
+    function testProposeTradeFromGame() external {
+        vm.prank(A);
+        game.startGame();
+        vm.prank(A);
+        game.play();
+        vm.prank(A);
+        game.advanceToNextPlayer();
+        vm.prank(B);
+        game.play();
+        game.returnPlayer(B);
+
+        vm.prank(B);
+        game.buyProperty();
+        game.returnPlayer(B);
+
+        vm.prank(B);
+        game.advanceToNextPlayer();
+
+        vm.prank(C);
+        game.play();
+        game.returnPlayer(C);
+        vm.prank(C);
+        game.buyProperty();
+
+        vm.prank(C);
+        game.advanceToNextPlayer();
+        vm.prank(D);
+        game.play();
+
+        vm.prank(D);
+        // game.getProperty(12);
+        game.openTrade(
+            0,
+            12,
+            MonopolyLibrary.SWAP_TYPE.PROPERTY_FOR_CASH,
+            140,
+            C
+        );
+
+        game.returnDeal(C);
+    }
+
+    function testAcceptTradeP4C() external {
+        vm.prank(A);
+        game.startGame();
+        vm.prank(A);
+        game.play();
+        vm.prank(A);
+        game.advanceToNextPlayer();
+        vm.prank(B);
+        game.play();
+        game.returnPlayer(B);
+
+        vm.prank(B);
+        game.buyProperty();
+        game.returnPlayer(B);
+
+        vm.prank(B);
+        game.advanceToNextPlayer();
+
+        vm.prank(C);
+        game.play();
+        game.returnPlayer(C);
+        vm.prank(C);
+        game.buyProperty();
+
+        vm.prank(C);
+        game.advanceToNextPlayer();
+        vm.prank(D);
+        game.play();
+
+        vm.prank(D);
+        // game.getProperty(12);
+        game.openTrade(
+            0,
+            12,
+            MonopolyLibrary.SWAP_TYPE.PROPERTY_FOR_CASH,
+            140,
+            C
+        );
+
+        game.returnDeal(C);
+        uint cbalb4 = game.playersBalances(C);
+
+        vm.prank(C);
+        game.acceptTrade();
+
+        uint cbalAfter = game.playersBalances(C);
+
+        assertEq(cbalAfter, cbalb4 + 140);
+
+        console.log("bal b4 ", cbalb4, "Bal after", cbalAfter);
+
+        address newOwner = game.getPropertyOwner(12);
+        assertEq(newOwner, D);
+    }
+
+    function testAcceptTradeC4P() external {
+        vm.prank(A);
+        game.startGame();
+        vm.prank(A);
+        game.play();
+        vm.prank(A);
+        game.advanceToNextPlayer();
+        vm.prank(B);
+        game.play();
+        game.returnPlayer(B);
+
+        vm.prank(B);
+        game.buyProperty();
+        game.returnPlayer(B);
+
+        vm.prank(B);
+        game.advanceToNextPlayer();
+
+        vm.prank(C);
+        game.play();
+        game.returnPlayer(C);
+        vm.prank(C);
+        game.buyProperty();
+
+        vm.prank(C);
+        game.advanceToNextPlayer();
+
+        vm.prank(D);
+        game.play();
+
+        vm.prank(D);
+        game.advanceToNextPlayer();
+
+        vm.prank(A);
+        game.play();
+        vm.prank(A);
+        game.advanceToNextPlayer();
+
+        vm.prank(B);
+        game.openTrade(
+            24,
+            0,
+            MonopolyLibrary.SWAP_TYPE.CASH_FOR_PROPERTY,
+            140,
+            C
+        );
+
+        address ownerB4 = game.getPropertyOwner(24);
+        uint cbalb4 = game.playersBalances(C);
+        uint bbalb4 = game.playersBalances(B);
+
+        vm.prank(C);
+        game.acceptTrade();
+        game.getPropertyOwner(24);
+
+        address ownerafter = game.getPropertyOwner(24);
+        uint bbalAfter = game.playersBalances(B);
+        uint cbalAfter = game.playersBalances(C);
+
+        assertEq(cbalAfter, cbalb4 - 140);
+        assertEq(bbalAfter, bbalb4 + 140);
+        assertEq(ownerB4, B);
+        assertEq(ownerafter, C);
+
+        console.log("bal b4  bbalb4", bbalb4, "Bal after bbalAfter", bbalAfter);
+        console.log("bal b4 ", cbalb4, "Bal after", cbalAfter);
+    }
+
+    function testAcceptTradeP4P() external {
+        vm.prank(A);
+        game.startGame();
+        vm.prank(A);
+        game.play();
+        vm.prank(A);
+        game.advanceToNextPlayer();
+        vm.prank(B);
+        game.play();
+        game.returnPlayer(B);
+
+        vm.prank(B);
+        game.buyProperty();
+        game.returnPlayer(B);
+
+        vm.prank(B);
+        game.advanceToNextPlayer();
+
+        vm.prank(C);
+        game.play();
+        game.returnPlayer(C);
+        vm.prank(C);
+        game.buyProperty();
+
+        vm.prank(C);
+        game.advanceToNextPlayer();
+
+        vm.prank(D);
+        game.play();
+        vm.prank(D);
+        game.advanceToNextPlayer();
+
+        vm.prank(A);
+        game.play();
+        vm.prank(A);
+        game.advanceToNextPlayer();
+        vm.prank(B);
+
+        game.openTrade(
+            24,
+            12,
+            MonopolyLibrary.SWAP_TYPE.PROPERTY_FOR_PROPERTY,
+            140,
+            C
+        );
+
+        game.returnDeal(C);
+        uint cbalb4 = game.playersBalances(C);
+
+        vm.prank(C);
+        game.acceptTrade();
+
+        uint cbalAfter = game.playersBalances(C);
+
+        assertEq(cbalAfter, cbalb4);
+
+        address newOwner = game.getPropertyOwner(12);
+        assertEq(newOwner, B);
+
+        address nwOwner = game.getPropertyOwner(24);
+        assertEq(nwOwner, C);
+    }
+
+    function testAcceptTradeP4P$C() external {
+        vm.prank(A);
+        game.startGame();
+        vm.prank(A);
+        game.play();
+        vm.prank(A);
+        game.advanceToNextPlayer();
+        vm.prank(B);
+        game.play();
+        game.returnPlayer(B);
+
+        vm.prank(B);
+        game.buyProperty();
+        game.returnPlayer(B);
+
+        vm.prank(B);
+        game.advanceToNextPlayer();
+
+        vm.prank(C);
+        game.play();
+        game.returnPlayer(C);
+        vm.prank(C);
+        game.buyProperty();
+
+        vm.prank(C);
+        game.advanceToNextPlayer();
+
+        vm.prank(D);
+        game.play();
+        vm.prank(D);
+        game.advanceToNextPlayer();
+
+        vm.prank(A);
+        game.play();
+        vm.prank(A);
+        game.advanceToNextPlayer();
+        vm.prank(B);
+
+        game.openTrade(
+            24,
+            12,
+            MonopolyLibrary.SWAP_TYPE.PROPERTY_FOR_CASH_AND_PROPERTY,
+            140,
+            C
+        );
+
+        game.returnDeal(C);
+        uint cbalb4 = game.playersBalances(C);
+        uint bbalb4 = game.playersBalances(B);
+
+        vm.prank(C);
+        game.acceptTrade();
+
+        uint cbalAfter = game.playersBalances(C);
+        uint bbalAfter = game.playersBalances(B);
+
+        assertEq(cbalAfter, (cbalb4 - 140));
+        assertEq(bbalAfter, (bbalb4 + 140));
+
+        console.log("bal b4  ", cbalb4, "Bal after ", cbalAfter);
+
+        console.log("bal b4  bbalb4", bbalb4, "Bal after bbalAfter", bbalAfter);
+
+        address newOwner = game.getPropertyOwner(12);
+        assertEq(newOwner, B);
+
+        address nwOwner = game.getPropertyOwner(24);
+        assertEq(nwOwner, C);
+    }
+
+    function testAcceptTradeP$C4P() external {
+        vm.prank(A);
+        game.startGame();
+        vm.prank(A);
+        game.play();
+        vm.prank(A);
+        game.advanceToNextPlayer();
+        vm.prank(B);
+        game.play();
+        game.returnPlayer(B);
+
+        vm.prank(B);
+        game.buyProperty();
+        game.returnPlayer(B);
+
+        vm.prank(B);
+        game.advanceToNextPlayer();
+
+        vm.prank(C);
+        game.play();
+        game.returnPlayer(C);
+        vm.prank(C);
+        game.buyProperty();
+
+        vm.prank(C);
+        game.advanceToNextPlayer();
+
+        vm.prank(D);
+        game.play();
+        vm.prank(D);
+        game.advanceToNextPlayer();
+
+        vm.prank(A);
+        game.play();
+        vm.prank(A);
+        game.advanceToNextPlayer();
+        vm.prank(B);
+
+        game.openTrade(
+            24,
+            12,
+            MonopolyLibrary.SWAP_TYPE.PROPERTY_AND_CASH_FOR_PROPERTY,
+            140,
+            C
+        );
+
+        game.returnDeal(C);
+        uint cbalb4 = game.playersBalances(C);
+        uint bbalb4 = game.playersBalances(B);
+
+        vm.prank(C);
+        game.acceptTrade();
+
+        uint cbalAfter = game.playersBalances(C);
+        uint bbalAfter = game.playersBalances(B);
+
+        assertEq(cbalAfter, (cbalb4 + 140));
+        assertEq(bbalAfter, (bbalb4 - 140));
+
+        console.log("bal b4  ", cbalb4, "Bal after ", cbalAfter);
+
+        console.log("bal b4  bbalb4", bbalb4, "Bal after bbalAfter", bbalAfter);
+
+        address newOwner = game.getPropertyOwner(12);
+        assertEq(newOwner, B);
+
+        address nwOwner = game.getPropertyOwner(24);
+        assertEq(nwOwner, C);
+    }
+
+    function testRejectProposal() external {
+        vm.prank(A);
+        game.startGame();
+        vm.prank(A);
+        game.play();
+        vm.prank(A);
+        game.advanceToNextPlayer();
+        vm.prank(B);
+        game.play();
+        game.returnPlayer(B);
+
+        vm.prank(B);
+        game.buyProperty();
+        game.returnPlayer(B);
+
+        vm.prank(B);
+        game.advanceToNextPlayer();
+
+        vm.prank(C);
+        game.play();
+        game.returnPlayer(C);
+        vm.prank(C);
+        game.buyProperty();
+
+        vm.prank(C);
+        game.advanceToNextPlayer();
+        vm.prank(D);
+        game.play();
+
+        vm.prank(D);
+        // game.getProperty(12);
+        game.openTrade(
+            0,
+            12,
+            MonopolyLibrary.SWAP_TYPE.PROPERTY_FOR_CASH,
+            140,
+            C
+        );
+
+        vm.prank(C);
+        game.rejectDeal();
+
+        game.returnDeal(C);
+    }
+
+    function testCounterDeal() external {
+        vm.prank(A);
+        game.startGame();
+        vm.prank(A);
+        game.play();
+        vm.prank(A);
+        game.advanceToNextPlayer();
+        vm.prank(B);
+        game.play();
+        game.returnPlayer(B);
+
+        vm.prank(B);
+        game.buyProperty();
+        game.returnPlayer(B);
+
+        vm.prank(B);
+        game.advanceToNextPlayer();
+
+        vm.prank(C);
+        game.play();
+        game.returnPlayer(C);
+        vm.prank(C);
+        game.buyProperty();
+
+        vm.prank(C);
+        game.advanceToNextPlayer();
+        vm.prank(D);
+        game.play();
+
+        vm.prank(D);
+
+        game.openTrade(
+            0,
+            12,
+            MonopolyLibrary.SWAP_TYPE.PROPERTY_FOR_CASH,
+            140,
+            C
+        );
+
+        game.returnDeal(C);
+
+        vm.prank(C);
+        game.counterDeal(
+            0,
+            12,
+            MonopolyLibrary.SWAP_TYPE.CASH_FOR_PROPERTY,
+            200
+        );
+
+        game.returnDeal(D);
+    }
 }
