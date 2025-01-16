@@ -90,6 +90,7 @@ library MonopolyLibrary {
 
     struct PropertySwap {
         address bidder;
+        address clientAddress;
         uint8 biddersProperty;
         uint8 yourProperty;
         SWAP_TYPE swapType;
