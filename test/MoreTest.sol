@@ -60,23 +60,16 @@ contract MonopolyTest is Test {
         // uint256 bal = gamebank.bal(A);
 
         vm.prank(A);
-        gamebank.buyProperty(2, 60, A);
+        gamebank.buyProperty(2, A);
 
         vm.prank(B);
-        gamebank.buyProperty(25, 240, B);
+        gamebank.buyProperty(25, B);
 
         uint256 balAB4 = gamebank.bal(A);
         uint256 balB4 = gamebank.bal(B);
 
         vm.prank(B);
-        gamebank.proposePropertySwap(
-            B,
-            A,
-            25,
-            2,
-            MonopolyLibrary.SWAP_TYPE.PROPERTY_AND_CASH_FOR_PROPERTY,
-            50
-        );
+        gamebank.proposePropertySwap(B, A, 25, 2, MonopolyLibrary.SWAP_TYPE.PROPERTY_AND_CASH_FOR_PROPERTY, 50);
 
         vm.prank(A);
         gamebank.viewDeals(A);

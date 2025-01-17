@@ -12,6 +12,7 @@ library MonopolyLibrary {
         PropertyType propertyType;
         PropertyColors propertyColor;
     }
+
     enum PropertyColors {
         PINK,
         YELLOW,
@@ -48,15 +49,16 @@ library MonopolyLibrary {
         uint256 cash;
         uint8 diceRolled;
     }
+
     struct PropertyRent {
         uint8 propertyId;
-        uint site;
-        uint withOneHouse;
-        uint withTwoHouses;
-        uint withThreeHouses;
-        uint withFourHouses;
-        uint withHotel;
-        uint costOfHouse;
+        uint256 site;
+        uint256 withOneHouse;
+        uint256 withTwoHouses;
+        uint256 withThreeHouses;
+        uint256 withFourHouses;
+        uint256 withHotel;
+        uint256 costOfHouse;
     }
 
     enum BenefitType {
@@ -94,7 +96,7 @@ library MonopolyLibrary {
         uint8 biddersProperty;
         uint8 yourProperty;
         SWAP_TYPE swapType;
-        uint biddingAmount;
+        uint256 biddingAmount;
     }
 
     enum SWAP_TYPE {
