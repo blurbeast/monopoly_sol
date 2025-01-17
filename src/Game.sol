@@ -8,6 +8,11 @@ interface NFTContract {
     function returnProperty(
         uint8 propertyId
     ) external view returns (MonopolyLibrary.Property memory property);
+
+    function returnPropertyRent(
+        uint8 propertyId,
+        uint8 upgradeStatus
+    ) external view returns (uint rent);
 }
 
 contract Game {
@@ -221,6 +226,64 @@ contract Game {
         gameBank.handleRent(msg.sender, propertyId, diceRolled);
     }
 
+    function mortgageProperty(uint8 propertyID) external {
+        MonopolyLibrary.Player memory player = players[msg.sender];
+
+        MonopolyLibrary.PropertyG memory property = getProperty(propertyID);
+        require(gameStarted, "Game not started yet");
+        require(
+            playerAddresses[currentPlayerIndex] == player.addr,
+            "Not your turn"
+        );
+        require(property.owner == msg.sender, "not your property");
+
+        gameBank.mortgageProperty(msg.sender, propertyID);
+    }
+
+    function releaseMortgage(uint8 _propertyID) external {
+        MonopolyLibrary.Player memory player = players[msg.sender];
+
+        MonopolyLibrary.PropertyG memory property = getProperty(_propertyID);
+        require(gameStarted, "Game not started yet");
+        require(
+            playerAddresses[currentPlayerIndex] == player.addr,
+            "Not your turn"
+        );
+        require(property.owner == msg.sender, "not your property");
+
+        gameBank.releaseMortgage(msg.sender, _propertyID);
+    }
+
+    function upgradeProperty(
+        uint8 propertyId,
+        uint8 noOfIntendedUpgrade
+    ) external {
+        MonopolyLibrary.Player memory player = players[msg.sender];
+
+        require(gameStarted, "Game not started yet");
+        require(
+            playerAddresses[currentPlayerIndex] == player.addr,
+            "Not your turn"
+        );
+
+        gameBank.upgradeProperty(propertyId, noOfIntendedUpgrade, msg.sender);
+    }
+
+    function downgradeProperty(
+        uint8 propertyId,
+        uint8 requestedDowngrades
+    ) external {
+        MonopolyLibrary.Player memory player = players[msg.sender];
+
+        require(gameStarted, "Game not started yet");
+        require(
+            playerAddresses[currentPlayerIndex] == player.addr,
+            "Not your turn"
+        );
+
+        gameBank.downgradeProperty(propertyId, requestedDowngrades, msg.sender);
+    }
+
     /**
      * @dev Advance to the next player's turn.
      */
@@ -329,5 +392,21 @@ contract Game {
     ) public view returns (MonopolyLibrary.PropertySwap memory usersDeal) {
         usersDeal = gameBank.returnProposal(user);
         return usersDeal;
+    }
+
+    function getPropertyRent(
+        uint8 id,
+        uint8 upgradeStatus
+    ) public view returns (uint rent) {
+        rent = nftContract.returnPropertyRent(id, upgradeStatus);
+        return rent;
+    }
+
+    function updateProperty(uint8 propertyId, address owner) public {
+        gameBank.updateProperty(propertyId, owner);
+    }
+
+    function mintMoreTokens(address user) public {
+        gameBank.mint(user, 15000);
     }
 }
