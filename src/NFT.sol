@@ -744,7 +744,7 @@ contract GeneralNFT is ERC721URIStorage {
         return totalSupply;
     }
 
-    function returnPropertyRent(
+    function getPropertyRent(
         uint8 propertyId,
         uint8 upgradeStatus
     ) public view returns (uint rent) {
@@ -766,5 +766,12 @@ contract GeneralNFT is ERC721URIStorage {
 
         require(upgradeStatus < rents.length, "Invalid upgrade status");
         rent = rents[upgradeStatus];
+    }
+
+    function costOfHouse(uint8 _propertyId) public view returns (uint) {
+        MonopolyLibrary.PropertyRent memory property = propertyRent[
+            _propertyId
+        ];
+        return property.costOfHouse;
     }
 }

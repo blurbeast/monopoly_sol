@@ -23,6 +23,11 @@ event PropertyDownGraded(uint256 propertyId);
 
 interface NFTContract {
     function getAllProperties() external view returns (MonopolyLibrary.Property[] memory);
+     function getPropertyRent(
+        uint8 propertyId,
+        uint8 upgradeStatus
+    ) external view returns (uint rent);
+    function costOfHouse(uint8 _propertyId) external view returns(uint);
 }
 
 /**
@@ -44,6 +49,7 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
 
 
     MonopolyLibrary.PropertyG[] properties;
+
 
     mapping(uint8 => MonopolyLibrary.Bid) public bids;
     mapping(uint8 => address) propertyOwner;
@@ -120,7 +126,7 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         require(property.owner != buyer, "You already own the property");
         // require(property.buyAmount > 0, "Property price must be greater than zero");
         require(bidAmount >= property.buyAmount, "Bid amount must be at least the property price");
-        require(!mortgagedProperties[propertyId], "Property is Mortgaged and cannot be bought");
+        
         require(property.owner == address(this), "already owned by a player");
 
         // // Approve contract to spend bid amount (requires user to call `approve` beforehand)
@@ -158,7 +164,7 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         require(benefitType.length == benefitValue.length && benefitValue.length == numberOfTurns.length, "");
         address realOwner = propertyOwner[proposedPropertyId];
         require(realOwner == _user, "only property owner can perform this action");
-        require(!mortgagedProperties[proposedPropertyId], "proposed property has been mortgaged ");
+        
 
         uint8 benefitSize = uint8(benefitValue.length);
 
@@ -193,7 +199,7 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         address realOwner = propertyOwner[proposal.biddedPropertyId];
 
         require(realOwner == _user, "only owner can perform action");
-        require(!mortgagedProperties[proposal.biddedPropertyId], "property is on mortgage");
+        
 
         if (proposal.biddedTokenAmount > 0) {
             require(balanceOf(proposal.user) >= proposal.biddedTokenAmount, "");
@@ -325,7 +331,7 @@ function proposePropertySwap(
 if(biddingPropertyId != 0 ){
 
     require(biddingProperty.owner == proposer, "You are not the owner of this property");
-    require(!mortgagedProperties[biddingPropertyId], "Property is already mortgaged");
+    
 }
 
     // Validate the replacement property
@@ -533,34 +539,35 @@ function counterDeal(
      */
 
     // Function to mortgage a property
-    function mortgageProperty(uint8 propertyId) external {
-        MonopolyLibrary.PropertyG storage property = gameProperties[propertyId];
-        require(!mortgagedProperties[propertyId], "Property is already Mortgaged");
+    function mortgageProperty(address _propertyOwner, uint8 _propertyId) external {
+        MonopolyLibrary.PropertyG storage property = gameProperties[_propertyId];
+        require(!mortgagedProperties[_propertyId], "Property is already Mortgaged");
 
-        require(property.owner == msg.sender, "You are not the owner of this property");
-        mortgagedProperties[propertyId] = true;
+        require(property.owner == _propertyOwner, "You are not the owner of this property");
+        mortgagedProperties[_propertyId] = true;
 
         uint256 mortgageAmount = property.buyAmount / 2;
         // Transfer funds to the owner
-        bool success = transferFrom(address(this), msg.sender, mortgageAmount);
-        require(success, "Token transfer failed");
+          _transfer(address(this),_propertyOwner, mortgageAmount);
+        
 
-        emit PropertyMortgaged(propertyId, mortgageAmount, msg.sender);
+        emit PropertyMortgaged(_propertyId, mortgageAmount, _propertyOwner);
     }
 
     // Function to release a mortgage
-    function releaseMortgage(uint8 propertyId) external {
-        MonopolyLibrary.PropertyG storage property = gameProperties[propertyId];
+    function releaseMortgage(address _propertyOwner, uint8 _propertyId) external {
+        MonopolyLibrary.PropertyG storage property = gameProperties[_propertyId];
 
-        require(property.owner == msg.sender, "You are not the owner of this property");
-        require(mortgagedProperties[propertyId], "Property is not Mortgaged");
+        require(property.owner ==  _propertyOwner, "You are not the owner of this property");
+        require(mortgagedProperties[_propertyId], "Property is not Mortgaged");
 
+        uint256 mortgageAmount = property.buyAmount ;
         // Transfer the repaid funds to the contract owner or use it for future logic
-        bool success = transfer(address(this), property.buyAmount / 2);
-        require(success, "Token transfer failed");
+        _transfer(_propertyOwner, address(this), mortgageAmount);
+        
 
         // Release the mortgage
-        mortgagedProperties[propertyId] = false;
+        mortgagedProperties[_propertyId] = false;
     }
 
     /**
@@ -568,58 +575,74 @@ function counterDeal(
      *  a 2d mapping of string to address to number
      *  we can upgrade the three at once
      */
-    function upgradeProperty(uint8 propertyId, uint8 _noOfUpgrade) external {
-        MonopolyLibrary.PropertyG storage property = gameProperties[propertyId];
+  function upgradeProperty(uint8 propertyId, uint8 requestedUpgrades, address user) external {
+    require(requestedUpgrades > 0, "Number of upgrades must be greater than 0");
+    
+    
+    MonopolyLibrary.PropertyG storage property = gameProperties[propertyId];
+    uint8 currentUpgrades = property.noOfUpgrades;
 
-        require(property.owner == msg.sender, "You are not the owner of this property");
-        require(!mortgagedProperties[propertyId], "Property is Mortgaged cannot upgrade");
-        require(property.propertyType == MonopolyLibrary.PropertyType.Property, "Only properties can be upgraded");
-        require(_noOfUpgrade > 0 && _noOfUpgrade <= 5, "");
-        // require(noOfUpgrades[propertyId] <= 5, "Property at Max upgrade");
+    require(property.owner == user, "You are not the owner of this property");
+    require(!mortgagedProperties[propertyId], "Property is mortgaged and cannot be upgraded");
+    require(property.propertyType == MonopolyLibrary.PropertyType.Property, "Only properties can be upgraded");
 
-        uint8 mustOwnedNumberOfSiteColor = upgradeUserPropertyColorOwnedNumber[property.propertyColor];
+    uint8 maxUpgrades = 5; // Replace magic number
+    require(currentUpgrades + requestedUpgrades <= maxUpgrades, "Exceeds max upgrades");
 
-        // Calculate the cost of one house
-        uint8 userColorGroupOwned = noOfColorGroupOwnedByUser[property.propertyColor][msg.sender];
+    
+    uint costPerUpgrade = nftContract.costOfHouse(propertyId);
+    uint totalCost = costPerUpgrade * requestedUpgrades;
 
-        require(userColorGroupOwned >= mustOwnedNumberOfSiteColor, "must own at least two site with same color ");
-        require(property.noOfUpgrades < 5, "reach the peak upgrade for this property ");
-        uint8 noOfUpgrade = property.noOfUpgrades + _noOfUpgrade;
+    require(balanceOf(user) >= totalCost, "Insufficient funds for upgrade");
 
-        require(noOfUpgrade <= 5, "upgrade exceed peak ");
+    // Deduct funds and apply upgrades
+    _transfer(user, address(this), totalCost);
+    property.noOfUpgrades += requestedUpgrades;
 
-        uint256 amountToPay = property.buyAmount * (2 * (2 ** (noOfUpgrade - 1)));
+    // Update rent
+    property.rentAmount = _newRent(propertyId, property.noOfUpgrades);
 
-        require(balanceOf(msg.sender) >= amountToPay, "Insufficient funds to upgrade property");
+    // Emit detailed event
+    
+    emit MonopolyLibrary.PropertyUpgraded(propertyId, user, requestedUpgrades, property.rentAmount);
+}
 
-        bool success = transferFrom(msg.sender, address(this), amountToPay);
 
-        require(success, "Insufficient funds to transfer");
+    function _newRent( uint8 propertyId,
+        uint8 noOfIntendedUpgrade) internal view returns (uint rent) {
 
-        property.noOfUpgrades += 1;
+         rent = nftContract.getPropertyRent(propertyId, noOfIntendedUpgrade);
+         return rent;
 
-        emit PropertyUpGraded(propertyId);
     }
 
     // make the game owner of the bank and hence owns the token
-    function downgradeProperty(uint8 propertyId, uint8 noOfDowngrade) external {
-        MonopolyLibrary.PropertyG memory property = gameProperties[propertyId];
+   function downgradeProperty(uint8 propertyId, uint8 requestedDowngrades, address user) external {
+    MonopolyLibrary.PropertyG storage property = gameProperties[propertyId];
+    uint8 currentUpgrades = property.noOfUpgrades;
 
-        // Ensure the caller is the owner of the property
-        require(property.owner == msg.sender, "You are not the owner of this property");
-        require(property.noOfUpgrades > 0, "cannot downgrade site");
-        require(noOfDowngrade > 0 && noOfDowngrade <= property.noOfUpgrades, "cannot downgrade");
+    // Validate user and state
+    require(property.owner == user, "You are not the owner of this property");
+    require(currentUpgrades > 0, "No upgrades available to downgrade");
+    require(requestedDowngrades > 0 && requestedDowngrades <= currentUpgrades, "Invalid number of downgrades");
+    require(!mortgagedProperties[propertyId], "Cannot downgrade a mortgaged property");
 
-        // Ensure the property is not mortgaged
-        require(!mortgagedProperties[propertyId], "Cannot downgrade a mortgaged property");
+    // Apply downgrade
+    property.noOfUpgrades -= requestedDowngrades;
 
-        uint256 amountToRecieve = property.buyAmount * (2 ** (noOfDowngrade - 1));
+    // Update rent
+    property.rentAmount = _newRent(propertyId, property.noOfUpgrades);
 
-        bool success = transfer(msg.sender, amountToRecieve);
-        require(success, "");
-        property.noOfUpgrades -= noOfDowngrade;
-        emit PropertyDownGraded(propertyId);
-    }
+    // Calculate refund
+    uint costPerUpgrade = nftContract.costOfHouse(propertyId);
+    uint256 refundAmount = (costPerUpgrade / 2) * requestedDowngrades;
+
+    // Transfer refund
+    _transfer(address(this), user, refundAmount);
+
+    // Emit detailed event
+    emit MonopolyLibrary.PropertyDowngraded(propertyId, user, requestedDowngrades, property.noOfUpgrades, refundAmount);
+}
 
     // for testing purpose
     function bal(address addr) external view returns (uint256) {
@@ -644,4 +667,9 @@ function counterDeal(
         currentDeal = swap;
         return currentDeal;
     }
+    function updateProperty(uint8 propertyId, address owner) public {
+        MonopolyLibrary.PropertyG storage property = gameProperties[propertyId];
+        property.owner = owner;
+    }
+   
 }
