@@ -181,9 +181,9 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
 
         proposalIds += 1;
         MonopolyLibrary.Proposal storage proposal = inGameProposals[proposalIds];
-        proposal.user = _user;
+        proposal.player = _user;
         proposal.proposedPropertyId = proposedPropertyId;
-        proposal.biddedPropertyId = biddedPropertyId;
+        proposal.biddingPropertyId = biddedPropertyId;
         proposal.biddedTokenAmount = biddedTokenAmount;
         proposal.numberOfBenefits = benefitSize;
 
@@ -206,15 +206,15 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
     function acceptProposal(address _user, uint8 proposalId) external nonReentrant {
         MonopolyLibrary.Proposal storage proposal = inGameProposals[proposalId];
 
-        address realOwner = propertyOwner[proposal.biddedPropertyId];
+        address realOwner = propertyOwner[proposal.biddingPropertyId];
 
         require(realOwner == _user, "only owner can perform action");
-        require(!mortgagedProperties[proposal.biddedPropertyId], "property is on mortgage");
+        require(!mortgagedProperties[proposal.biddingPropertyId], "property is on mortgage");
 
         if (proposal.biddedTokenAmount > 0) {
-            require(balanceOf(proposal.user) >= proposal.biddedTokenAmount, "");
+            require(balanceOf(proposal.player) >= proposal.biddedTokenAmount, "");
 
-            _transfer(proposal.user, _user, proposal.biddedTokenAmount);
+            _transfer(proposal.player, _user, proposal.biddedTokenAmount);
         }
 
         uint8 sizeOfBenefits = uint8(proposal.numberOfBenefits);
@@ -229,10 +229,10 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         // the mapping propertyOwner handles this
         // moving on it should be changed
 
-        MonopolyLibrary.PropertyG storage property = gameProperties[proposal.biddedPropertyId];
-        property.owner = proposal.user;
+        MonopolyLibrary.PropertyG storage property = gameProperties[proposal.biddingPropertyId];
+        property.owner = proposal.player;
 
-        propertyOwner[proposal.biddedPropertyId] = proposal.user;
+        propertyOwner[proposal.biddingPropertyId] = proposal.player;
         propertyOwner[proposal.proposedPropertyId] = realOwner;
 
         MonopolyLibrary.PropertyG storage proposedProperty = gameProperties[proposal.proposedPropertyId];
@@ -240,19 +240,19 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
 
         // change the color number for each property
         noOfColorGroupOwnedByUser[property.propertyColor][realOwner] -= 1;
-        noOfColorGroupOwnedByUser[property.propertyColor][proposal.user] += 1;
+        noOfColorGroupOwnedByUser[property.propertyColor][proposal.player] += 1;
 
         noOfColorGroupOwnedByUser[proposedProperty.propertyColor][realOwner] += 1;
-        noOfColorGroupOwnedByUser[proposedProperty.propertyColor][proposal.user] -= 1;
+        noOfColorGroupOwnedByUser[proposedProperty.propertyColor][proposal.player] -= 1;
 
         //confirm if it is a rail station
         property.propertyType == MonopolyLibrary.PropertyType.RailStation
-            ? numberOfOwnedRailways[proposal.user] += 1
+            ? numberOfOwnedRailways[proposal.player] += 1
             : numberOfOwnedRailways[realOwner] -= 1;
 
         proposedProperty.propertyType == MonopolyLibrary.PropertyType.RailStation
             ? numberOfOwnedRailways[realOwner] += 1
-            : numberOfOwnedRailways[proposal.user] -= 1;
+            : numberOfOwnedRailways[proposal.player] -= 1;
 
         propertyToProposal[proposal.proposedPropertyId] = proposalId;
         userProposalExist[proposalId][_user] = true;

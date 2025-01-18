@@ -76,14 +76,37 @@ library MonopolyLibrary {
     }
 
     struct Proposal {
-        address user;
-        // address biddedUser;
-        uint8 proposedPropertyId;
-        uint8 biddedPropertyId;
-        uint256 biddedTokenAmount;
-        mapping(uint8 => Benefit) benefits;
-        uint8 numberOfBenefits;
+        address player;
+        address otherPlayer;
+        SwapType swapType;
     }
+
+    struct PropertyForProperty{
+
+    }
+    struct PropertyForCashAndProperty {
+
+    }
+    struct PropertyAndCashForProperty{
+
+    }
+    struct PropertyForCash {
+
+    }
+    struct CashForProperty {
+
+    }
+
+
+    enum SwapType {
+        PROPERTY_FOR_PROPERTY,
+        PROPERTY_FOR_CASH_AND_PROPERTY,
+        PROPERTY_AND_CASH_FOR_PROPERTY,
+        PROPERTY_FOR_CASH,
+        CASH_FOR_PROPERTY
+    }
+
+
 
     struct PropertySwap {
         address bidder;
@@ -92,14 +115,6 @@ library MonopolyLibrary {
         uint8 yourProperty;
         SwapType swapType;
         uint256 biddingAmount;
-    }
-
-    enum SwapType {
-        PROPERTY_FOR_PROPERTY,
-        PROPERTY_FOR_CASH_AND_PROPERTY,
-        PROPERTY_AND_CASH_FOR_PROPERTY,
-        PROPERTY_FOR_CASH,
-        CASH_FOR_PROPERTY
     }
 
     event PropertySwapProposed(
