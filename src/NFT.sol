@@ -724,9 +724,9 @@ contract GeneralNFT is ERC721URIStorage {
     }
 
     // redundant
-//    function returnTotalSupply() external view returns (uint8) {
-//        return totalSupply;
-//    }
+    //    function returnTotalSupply() external view returns (uint8) {
+    //        return totalSupply;
+    //    }
 
     function returnPropertyRent(uint8 propertyId, uint8 upgradeStatus) public view returns (uint256 rent) {
         MonopolyLibrary.PropertyRent memory property = propertyRent[propertyId];

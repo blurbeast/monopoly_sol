@@ -18,7 +18,7 @@ contract BankTest is Test {
         generalNft = new GeneralNFT("");
         gameBank = new GameBank(4, address(generalNft));
         gameBank.mint(player1, 2000);
-        gameBank.mint(player2,  2000);
+        gameBank.mint(player2, 2000);
     }
 
     // upon deployment , the balance of the bank should be 8
@@ -63,15 +63,14 @@ contract BankTest is Test {
 
     // test that user can pay rent
     function testHandleRent() external {
-
         // special property cannot be rented
         vm.expectRevert();
         gameBank.handleRent(player2, 1, 2);
 
         vm.expectRevert();
         gameBank.handleRent(player1, 2, 4);
-//        gameBank.mint(player2, 1000);
-//        gameBank.mint(player1, 1000);
+        //        gameBank.mint(player2, 1000);
+        //        gameBank.mint(player1, 1000);
         gameBank.buyProperty(2, player2);
 
         vm.expectRevert();
@@ -86,14 +85,12 @@ contract BankTest is Test {
         assertEq(gameBank.balanceOf(player1), 1998);
 
         assertEq(gameBank.balanceOf(player2), 1942);
-
     }
 
     // test rent for different property types
     function testHandleRentA() external {
-
-//        gameBank.mint(player2, 2000);
-//        gameBank.mint(player1, 2000);
+        //        gameBank.mint(player2, 2000);
+        //        gameBank.mint(player1, 2000);
 
         // rail station
         gameBank.buyProperty(16, player1); //200
@@ -116,14 +113,12 @@ contract BankTest is Test {
 
         assertEq(gameBank.balanceOf(player2), 1500);
         assertEq(gameBank.balanceOf(player1), 1400);
-
     }
 
-
     function testUpgradeAndDowngradeProperty() external {
-//        gameBank.mint(player1, 2000);
+        //        gameBank.mint(player1, 2000);
 
-        gameBank.buyProperty(2, player1);//60
+        gameBank.buyProperty(2, player1); //60
         MonopolyLibrary.PropertyG memory property = gameBank.getProperty(2);
         assertEq(property.noOfUpgrades, 0);
 
@@ -136,7 +131,6 @@ contract BankTest is Test {
         gameBank.upgradeProperty(2, 3, player1);
 
         vm.stopPrank();
-
 
         // another user cannot upgrade another player property
         vm.startPrank(player2);
@@ -153,7 +147,7 @@ contract BankTest is Test {
         vm.startPrank(player1);
         vm.expectRevert();
         gameBank.upgradeProperty(2, 3, player1);
-//        vm.stopPrank();
+        //        vm.stopPrank();
 
         vm.expectRevert();
         gameBank.downgradeProperty(2, 4, player1);
@@ -163,17 +157,16 @@ contract BankTest is Test {
 
         assertEq(gameBank.balanceOf(player1), 1620);
 
-
         MonopolyLibrary.PropertyG memory afterDowngradeProperty = gameBank.getProperty(2);
 
         assertEq(afterDowngradeProperty.noOfUpgrades, 0);
     }
 
     function testMortgageAndReleaseProperty() external {
-//        gameBank.mint(player1, 2000);
+        //        gameBank.mint(player1, 2000);
 
-//        vm.expectRevert();
-//        gameBank.buyProperty(2, player2);
+        //        vm.expectRevert();
+        //        gameBank.buyProperty(2, player2);
 
         vm.startPrank(player1);
         gameBank.buyProperty(2, player1); //60
@@ -190,7 +183,6 @@ contract BankTest is Test {
         // no action can be performed on a mortgaged property
         vm.expectRevert();
         gameBank.upgradeProperty(2, 3, player1);
-
 
         gameBank.releaseMortgage(2, player1);
 
@@ -210,10 +202,35 @@ contract BankTest is Test {
         gameBank.handleRent(player2, 2, 10);
 
         assertEq(gameBank.balanceOf(player2), 1992);
-
     }
 
     function testCreateProposal() external {
 
+        // test that user can only propose owned asset;
+        MonopolyLibrary.SwapType swapType = MonopolyLibrary.SwapType.PROPERTY_FOR_CASH;
+        vm.expectRevert("asset specified is not owned by player");
+        gameBank.makeProposal(player1, player2, 2, 6, swapType, 0);
+
+        gameBank.buyProperty(2, player1);
+
+        // mortgaged asset cannot be used as proposal
+        gameBank.mortgageProperty(2, player1);
+
+        vm.expectRevert("asset on mortgage");
+        gameBank.makeProposal(player1, player2, 2, 6, swapType, 0);
+
+        gameBank.buyProperty(6, player2);
+
+        gameBank.releaseMortgage(2, player1);
+        MonopolyLibrary.SwapType swappedType = MonopolyLibrary.SwapType.PROPERTY_FOR_PROPERTY;
+        gameBank.makeProposal(player1, player2, 2, 6, swappedType, 0);
+
+        (,, MonopolyLibrary.SwapType _swap)= gameBank.inGameProposals(1);
+//
+        assertEq(uint8(_swap), uint8 (MonopolyLibrary.SwapType.PROPERTY_FOR_PROPERTY));
+
+        MonopolyLibrary.SwappedType memory swappedTypes = gameBank.getProposalSwappedType(1);
+
+    assertEq(swappedTypes.propertyForProperty.biddingPropertyId, 6);
     }
 }

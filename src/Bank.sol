@@ -5,7 +5,7 @@ import {ERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol"
 import {ReentrancyGuard} from "lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol";
 
 import "./libraries/MonopolyLibrary.sol";
-import { console} from "forge-std/Test.sol";
+import {console} from "forge-std/Test.sol";
 
 event RentPaid(address tenant, address landlord, uint256 rentPrice, bytes property);
 
@@ -37,7 +37,7 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
 
     MonopolyLibrary.PropertyG[] private properties;
 
-//    mapping(uint8 => MonopolyLibrary.Bid) public bids;
+    //    mapping(uint8 => MonopolyLibrary.Bid) public bids;
     mapping(uint8 => address) private propertyOwner;
     mapping(uint256 => bool) private mortgagedProperties;
     mapping(uint8 => uint8) private noOfUpgrades;
@@ -156,53 +156,94 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
     mapping(uint256 => MonopolyLibrary.Proposal) public inGameProposals;
     mapping(uint8 => uint8) public propertyToProposal;
     uint256 private proposalIds;
+    mapping(uint8 => MonopolyLibrary.SwappedType) public swappedType;
 
-//address proposer,
-//address proposee,
-//uint8 biddingPropertyId,
-//uint8 propertyToSwapId,
-//MonopolyLibrary.SwapType swapType,
-//uint256 biddingAmount
+    //address proposer,
+    //address proposee,
+    //uint8 biddingPropertyId,
+    //uint8 propertyToSwapId,
+    //MonopolyLibrary.SwapType swapType,
+    //uint256 biddingAmount
+
+    function getProposalSwappedType(uint8 proposalId) external view returns(MonopolyLibrary.SwappedType memory ) {
+        return swappedType[proposalId];
+    }
 
     // correct i think
     function makeProposal(
         address proposer,
         address otherPlayer,
-    uint8 proposedPropertyId,
-    uint8 biddingPropertyId,
+        uint8 proposedPropertyId,
+        uint8 biddingPropertyId,
         MonopolyLibrary.SwapType swapType,
         uint256 amountInvolved
     ) external {
+        // using tdd
+        address realOwner = propertyOwner[proposedPropertyId];
+        require(realOwner == proposer, "asset specified is not owned by player");
+        require(!mortgagedProperties[proposedPropertyId], "asset on mortgage");
 
-//        require(benefitType.length == benefitValue.length && benefitValue.length == numberOfTurns.length, "");
-//        address realOwner = propertyOwner[proposedPropertyId];
-//        require(realOwner == _user, "only property owner can perform this action");
-//        require(!mortgagedProperties[proposedPropertyId], "proposed property has been mortgaged ");
-//
-//        uint8 benefitSize = uint8(benefitValue.length);
-//
-//        require(benefitSize < 3, "the benefit offer should not be more than 3");
-//
-//        // mapping (uint8 => Benefit) proposalBenefits;
-//
-//        proposalIds += 1;
-//        MonopolyLibrary.Proposal storage proposal = inGameProposals[proposalIds];
-//        proposal.player = _user;
-//        proposal.proposedPropertyId = proposedPropertyId;
-//        proposal.biddingPropertyId = biddedPropertyId;
-//        proposal.biddedTokenAmount = biddedTokenAmount;
-//        proposal.numberOfBenefits = benefitSize;
-//
-//        for (uint8 i = 0; i < benefitSize; i++) {
-//            proposal.benefits[i + 1] = MonopolyLibrary.Benefit({
-//                benefitType: benefitType[i],
-//                isActive: false,
-//                benefitValue: benefitValue[i],
-//                numberOfTurns: numberOfTurns[i]
-//            });
-//        }
+        proposalIds += 1;
+        MonopolyLibrary.Proposal storage proposal = inGameProposals[proposalIds];
+        proposal.swapType = swapType;
+        proposal.otherPlayer = otherPlayer;
+        proposal.player = proposer;
+
+        proposal.swapType == MonopolyLibrary.SwapType.PROPERTY_FOR_PROPERTY ?
+            _propertyForProperty(proposalIds, proposedPropertyId, biddingPropertyId) :
+        swapType == MonopolyLibrary.SwapType.PROPERTY_FOR_CASH_AND_PROPERTY ?
+            _propertyForCashAndProperty(proposalIds, proposedPropertyId, biddingPropertyId, amountInvolved)
+        : swapType == MonopolyLibrary.SwapType.PROPERTY_AND_CASH_FOR_PROPERTY ?
+            _propertyAndCashForProperty(proposalIds, proposedPropertyId, amountInvolved, biddingPropertyId)
+        :
+        swapType == MonopolyLibrary.SwapType.PROPERTY_FOR_CASH ?
+            _propertyForCash(proposalIds, proposedPropertyId, amountInvolved) :
+        swapType == MonopolyLibrary.SwapType.CASH_FOR_PROPERTY ?  
+        _cashForProperty(proposalIds, amountInvolved, biddingPropertyId) : revert() ;
+
 
         // to emit an event here
+    }
+
+    function _cashForProperty(uint256 proposalId, uint256 proposedAmount, uint8 biddingPropertyId) private {
+        MonopolyLibrary.SwappedType storage swappedSwapType = swappedType[proposalId];
+        swappedSwapType.cashForProperty({
+            proposedAmount : proposedAmount,
+            biddingPropertyId : biddingPropertyId
+        });
+    }
+
+    function _propertyForCash(uint256 proposalId, uint8 propertyId, uint256 biddingAmount) private {
+        MonopolyLibrary.SwappedType storage swappedSwapType = swappedType[proposalId];
+        swappedSwapType.propertyForCash({
+            propertyId : propertyId,
+            biddingAmount : biddingAmount
+        });
+    }
+
+    function _propertyAndCashForProperty(uint256 proposailId, uint8 proposedPropertyId, uint256 proposedAmount, uint8 biddingPropertyId) private {
+    MonopolyLibrary.SwappedType storage swappedSwapType = swappedType[proposalId];
+    swappedSwapType.propertyAndCashForProperty ({
+    proposedPropertyId : proposedPropertyId,
+    proposedAmount : proposedAmount,
+    biddingPropertyId : biddingPropertyId
+    });
+    }
+    function _propertyForCashAndProperty(uint256 proposalId, uint8 proposedPropertyId, uint8 biddingPropertyId, uint8 biddingAmount) private view {
+    MonopolyLibrary.SwappedType storage swappedSwapType = swappedType[proposalId];
+
+    swappedSwapType.propertyForCashAndProperty({
+    proposedPropertyId : propposedPropertyId,
+    biddingPropertyId : biddingPropertyId,
+    biddingAmount : biddingAmount
+    });
+    }
+    function _propertyForProperty(uint256 proposalId, uint8 proposedPropertyId, uint8 biddingPropertyId) private view {
+        MonopolyLibrary.SwappedType storage swappedSwapType = swappedType[proposalId];
+        swappedSwapType.propertyForProperty({
+    proposedPropertyId : proposedPropertyId,
+    biddingPropertyId : biddingPropertyId
+    });
     }
 
     // in progress
@@ -212,22 +253,22 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
     function acceptProposal(address _user, uint8 proposalId) external nonReentrant {
         MonopolyLibrary.Proposal storage proposal = inGameProposals[proposalId];
 
-        address realOwner = propertyOwner[proposal.biddingPropertyId];
+        address realOwner = propertyOwner[1];
 
         require(realOwner == _user, "only owner can perform action");
-        require(!mortgagedProperties[proposal.biddingPropertyId], "property is on mortgage");
+        require(!mortgagedProperties[1], "property is on mortgage");
 
-        if (proposal.biddedTokenAmount > 0) {
-            require(balanceOf(proposal.player) >= proposal.biddedTokenAmount, "");
+        if (1 > 0) {
+            require(balanceOf(proposal.player) >= 0, "");
 
-            _transfer(proposal.player, _user, proposal.biddedTokenAmount);
+            _transfer(proposal.player, _user, 2);
         }
 
-        uint8 sizeOfBenefits = uint8(proposal.numberOfBenefits);
+        uint8 sizeOfBenefits = uint8(1);
 
-        for (uint8 i = 0; i < sizeOfBenefits; i++) {
-            proposal.benefits[i].isActive = true;
-        }
+        //        for (uint8 i = 0; i < sizeOfBenefits; i++) {
+        //            proposal.benefits[i].isActive = true;
+        //        }
 
         // make changes to the property
         // i think refactoring the property struct will be okay here as we should only read from the state here
@@ -235,13 +276,13 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         // the mapping propertyOwner handles this
         // moving on it should be changed
 
-        MonopolyLibrary.PropertyG storage property = gameProperties[proposal.biddingPropertyId];
+        MonopolyLibrary.PropertyG storage property = gameProperties[1];
         property.owner = proposal.player;
 
-        propertyOwner[proposal.biddingPropertyId] = proposal.player;
-        propertyOwner[proposal.proposedPropertyId] = realOwner;
+        //        propertyOwner[proposal.biddingPropertyId] = proposal.player;
+        //        propertyOwner[proposal.proposedPropertyId] = realOwner;
 
-        MonopolyLibrary.PropertyG storage proposedProperty = gameProperties[proposal.proposedPropertyId];
+        MonopolyLibrary.PropertyG storage proposedProperty = gameProperties[1];
         proposedProperty.owner = realOwner;
 
         // change the color number for each property
@@ -260,7 +301,7 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
             ? numberOfOwnedRailways[realOwner] += 1
             : numberOfOwnedRailways[proposal.player] -= 1;
 
-        propertyToProposal[proposal.proposedPropertyId] = proposalId;
+        propertyToProposal[1] = proposalId;
         userProposalExist[proposalId][_user] = true;
         // to emit an event here
     }
@@ -310,28 +351,28 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         }
 
         uint8 proposalId = propertyToProposal[propertyId];
-        if (proposalId > 0) {
-            bool isAnActiveProposal = userProposalExist[proposalId][player];
-            if (isAnActiveProposal) {
-                MonopolyLibrary.Proposal storage proposal = inGameProposals[proposalId];
-                uint256 numberOfBenefits = proposal.numberOfBenefits;
-
-                for (uint8 i = 0; i < numberOfBenefits; i++) {
-                    if (proposal.benefits[i].isActive) {
-                        if (proposal.benefits[i].benefitType == MonopolyLibrary.BenefitType.FREE_RENT) {
-                            rentAmount = 0;
-                        } else if (proposal.benefits[i].benefitType == MonopolyLibrary.BenefitType.RENT_DISCOUNT) {
-                            rentAmount = (rentAmount * proposal.benefits[i].benefitValue) / 100;
-                        }
-                        proposal.benefits[i].numberOfTurns -= 1;
-                        proposal.benefits[i].numberOfTurns == 0 ? proposal.benefits[i].isActive = false : true;
-                    }
-                }
-            }
-        }
+        //        if (proposalId > 0) {
+        //            bool isAnActiveProposal = userProposalExist[proposalId][player];
+        //            if (isAnActiveProposal) {
+        //                MonopolyLibrary.Proposal storage proposal = inGameProposals[proposalId];
+        ////                uint256 numberOfBenefits = proposal.numberOfBenefits;
+        //
+        //                for (uint8 i = 0; i < numberOfBenefits; i++) {
+        //                    if (proposal.benefits[i].isActive) {
+        //                        if (proposal.benefits[i].benefitType == MonopolyLibrary.BenefitType.FREE_RENT) {
+        //                            rentAmount = 0;
+        //                        } else if (proposal.benefits[i].benefitType == MonopolyLibrary.BenefitType.RENT_DISCOUNT) {
+        //                            rentAmount = (rentAmount * proposal.benefits[i].benefitValue) / 100;
+        //                        }
+        //                        proposal.benefits[i].numberOfTurns -= 1;
+        //                        proposal.benefits[i].numberOfTurns == 0 ? proposal.benefits[i].isActive = false : true;
+        //                    }
+        //                }
+        //            }
+        //        }
 
         // Transfer the rent to the owner
-        _transfer(player, foundProperty.owner, rentAmount);
+                _transfer(player, foundProperty.owner, rentAmount);
     }
 
     // love the enum swap type
@@ -558,9 +599,9 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
 
         uint256 mortgageAmount = property.buyAmount / 2;
         // Transfer funds to the owner
-//        bool success = transferFrom(address(this), msg.sender, mortgageAmount);
-//        require(success, "Token transfer failed");
-        _transfer(address (this), player, mortgageAmount);
+        //        bool success = transferFrom(address(this), msg.sender, mortgageAmount);
+        //        require(success, "Token transfer failed");
+        _transfer(address(this), player, mortgageAmount);
 
         emit PropertyMortgaged(propertyId, mortgageAmount, player);
     }
@@ -574,7 +615,7 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
 
         // Transfer the repaid funds to the contract owner or use it for future logic
 
-        _transfer(player, address (this), (property.buyAmount / 2));
+        _transfer(player, address(this), (property.buyAmount / 2));
 
         // Release the mortgage
         mortgagedProperties[propertyId] = false;
@@ -609,8 +650,8 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
 
         require(balanceOf(player) >= amountToPay, "Insufficient funds to upgrade property");
 
-//        bool success = transferFrom(msg.sender, address(this), amountToPay);
-        _transfer(player, address (this), amountToPay);
+        //        bool success = transferFrom(msg.sender, address(this), amountToPay);
+        _transfer(player, address(this), amountToPay);
 
         property.noOfUpgrades += _noOfUpgrade;
 
@@ -631,9 +672,9 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
 
         uint256 amountToReceive = property.buyAmount * (2 ** (noOfDowngrade - 1));
 
-//        bool success = transfer(msg.sender, amountToReceive);
-//        require(success, "");
-        _transfer(address (this), player, amountToReceive);
+        //        bool success = transfer(msg.sender, amountToReceive);
+        //        require(success, "");
+        _transfer(address(this), player, amountToReceive);
 
         property.noOfUpgrades -= noOfDowngrade;
         emit PropertyDownGraded(propertyId);

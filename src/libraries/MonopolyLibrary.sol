@@ -81,27 +81,39 @@ library MonopolyLibrary {
         SwapType swapType;
     }
 
-    struct PropertyForProperty{
+    struct PropertyForProperty {
         uint8 proposedPropertyId;
         uint8 biddingPropertyId;
     }
+
     struct PropertyForCashAndProperty {
         uint8 proposedPropertyId;
         uint8 biddingPropertyId;
         uint256 biddingAmount;
     }
-    struct PropertyAndCashForProperty{
+
+    struct PropertyAndCashForProperty {
         uint8 proposedPropertyId;
         uint256 proposedAmount;
         uint8 biddingPropertyId;
     }
+
     struct PropertyForCash {
         uint8 propertyId;
         uint256 biddingAmount;
     }
+
     struct CashForProperty {
         uint256 proposedAmount;
         uint8 biddingPropertyId;
+    }
+
+    struct SwappedType {
+        CashForProperty cashForProperty;
+        PropertyForCash propertyForCash;
+        PropertyAndCashForProperty propertyAndCashForProperty;
+        PropertyForCashAndProperty propertyForCashAndProperty;
+        PropertyForProperty propertyForProperty;
     }
 
     enum SwapType {
@@ -111,8 +123,6 @@ library MonopolyLibrary {
         PROPERTY_FOR_CASH,
         CASH_FOR_PROPERTY
     }
-
-
 
     struct PropertySwap {
         address bidder;
@@ -151,10 +161,7 @@ library MonopolyLibrary {
     );
 
     event PropertyUpgraded(
-        uint8 indexed propertyId,
-        address indexed user,
-        uint8 upgradesApplied,
-        uint256 newRentAmount
+        uint8 indexed propertyId, address indexed user, uint8 upgradesApplied, uint256 newRentAmount
     );
 
     event PropertyDowngraded(
