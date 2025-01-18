@@ -157,7 +157,7 @@ contract Game {
     function openTrade(
         uint8 usersPropertyId,
         uint8 teamMatePropertyID,
-        MonopolyLibrary.SWAP_TYPE swapType,
+        MonopolyLibrary.SwapType swapType,
         uint biddingAmount,
         address _teamMateAddress
     ) external {
@@ -174,7 +174,7 @@ contract Game {
 
         address teamMateAddress;
         teamMateAddress = teamMateProperty.owner;
-        if (swapType == MonopolyLibrary.SWAP_TYPE.CASH_FOR_PROPERTY) {
+        if (swapType == MonopolyLibrary.SwapType.CASH_FOR_PROPERTY) {
             teamMateAddress = _teamMateAddress;
         }
 
@@ -191,7 +191,7 @@ contract Game {
     function counterDeal(
         uint8 usersPropertyId,
         uint8 teamMatePropertyID,
-        MonopolyLibrary.SWAP_TYPE swapType,
+        MonopolyLibrary.SwapType swapType,
         uint biddingAmount
     ) external {
         require(gameStarted, "Game not started yet");

@@ -212,4 +212,8 @@ contract BankTest is Test {
         assertEq(gameBank.balanceOf(player2), 1992);
 
     }
+
+    function testCreateProposal() external {
+
+    }
 }

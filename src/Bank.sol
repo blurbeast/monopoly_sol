@@ -31,14 +31,13 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
     using MonopolyLibrary for MonopolyLibrary.Property;
     using MonopolyLibrary for MonopolyLibrary.PropertyColors;
     using MonopolyLibrary for MonopolyLibrary.PropertyType;
-    using MonopolyLibrary for MonopolyLibrary.Bid;
     using MonopolyLibrary for MonopolyLibrary.BenefitType;
     using MonopolyLibrary for MonopolyLibrary.Benefit;
     using MonopolyLibrary for MonopolyLibrary.Proposal;
 
     MonopolyLibrary.PropertyG[] private properties;
 
-    mapping(uint8 => MonopolyLibrary.Bid) public bids;
+//    mapping(uint8 => MonopolyLibrary.Bid) public bids;
     mapping(uint8 => address) private propertyOwner;
     mapping(uint256 => bool) private mortgagedProperties;
     mapping(uint8 => uint8) private noOfUpgrades;
@@ -335,7 +334,7 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         address proposee,
         uint8 biddingPropertyId,
         uint8 propertyToSwapId,
-        MonopolyLibrary.SWAP_TYPE swapType,
+        MonopolyLibrary.SwapType swapType,
         uint256 biddingAmount
     ) public {
         // Validate the bidding property
@@ -349,7 +348,7 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         }
 
         // Validate the replacement property
-        if (swapType != MonopolyLibrary.SWAP_TYPE.CASH_FOR_PROPERTY) {
+        if (swapType != MonopolyLibrary.SwapType.CASH_FOR_PROPERTY) {
             MonopolyLibrary.PropertyG storage propertyToSwap = gameProperties[propertyToSwapId];
             require(propertyToSwap.owner == proposee, "Proposee does not own the replacement property");
         }
@@ -391,27 +390,27 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         }
 
         // Handle the swap based on its type
-        if (deal.swapType == MonopolyLibrary.SWAP_TYPE.PROPERTY_FOR_PROPERTY) {
+        if (deal.swapType == MonopolyLibrary.SwapType.PROPERTY_FOR_PROPERTY) {
             // Swap ownership of the properties 1 MEANS THERE IS PROPERTY SWAP IN updateOwnershipAndAttributes
             updateOwnershipAndAttributes(biddingProperty, userProperty, user, deal.bidder, 1);
-        } else if (deal.swapType == MonopolyLibrary.SWAP_TYPE.PROPERTY_FOR_CASH) {
+        } else if (deal.swapType == MonopolyLibrary.SwapType.PROPERTY_FOR_CASH) {
             // Transfer cash to the bidder and transfer ownership to the user
             require(deal.biddingAmount > 0, "Invalid bidding amount");
             _transfer(deal.bidder, user, deal.biddingAmount);
             // 2 MEANS THERE IS NO PROPERTY SWAP IN updateOwnershipAndAttributes USER TRANSFERS PROPERTY TO CLIENT
             updateOwnershipAndAttributes(biddingProperty, userProperty, user, deal.bidder, 2);
-        } else if (deal.swapType == MonopolyLibrary.SWAP_TYPE.CASH_FOR_PROPERTY) {
+        } else if (deal.swapType == MonopolyLibrary.SwapType.CASH_FOR_PROPERTY) {
             // Transfer cash to the user and transfer ownership to the bidder
             require(deal.biddingAmount > 0, "Invalid bidding amount");
             _transfer(user, biddingProperty.owner, deal.biddingAmount);
             //  MEANS THERE IS NO PROPERTY SWAP IN updateOwnershipAndAttributes USER GIVES CASH AND RECEIVE PROPERTY FROM CLIENT
             updateOwnershipAndAttributes(userProperty, biddingProperty, user, user, 3);
-        } else if (deal.swapType == MonopolyLibrary.SWAP_TYPE.PROPERTY_AND_CASH_FOR_PROPERTY) {
+        } else if (deal.swapType == MonopolyLibrary.SwapType.PROPERTY_AND_CASH_FOR_PROPERTY) {
             // Transfer cash from the bidder to the user and swap ownership
             require(deal.biddingAmount > 0, "Invalid bidding amount");
             _transfer(biddingProperty.owner, user, deal.biddingAmount);
             updateOwnershipAndAttributes(userProperty, biddingProperty, deal.bidder, user, 1);
-        } else if (deal.swapType == MonopolyLibrary.SWAP_TYPE.PROPERTY_FOR_CASH_AND_PROPERTY) {
+        } else if (deal.swapType == MonopolyLibrary.SwapType.PROPERTY_FOR_CASH_AND_PROPERTY) {
             // Transfer cash from the user to the bidder and swap ownership
             require(deal.biddingAmount > 0, "Invalid bidding amount");
             _transfer(user, biddingProperty.owner, deal.biddingAmount);
@@ -508,7 +507,7 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         address user,
         uint8 biddingPropertyId,
         uint8 propertyToSwapId,
-        MonopolyLibrary.SWAP_TYPE swapType,
+        MonopolyLibrary.SwapType swapType,
         uint256 biddingAmount
     ) external nonReentrant {
         // Retrieve the deal for the user

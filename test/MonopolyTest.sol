@@ -156,7 +156,7 @@ contract MonopolyTest is Test {
 
         vm.prank(D);
         // game.getProperty(12);
-        game.openTrade(0, 12, MonopolyLibrary.SWAP_TYPE.PROPERTY_FOR_CASH, 140, C);
+        game.openTrade(0, 12, MonopolyLibrary.SwapType.PROPERTY_FOR_CASH, 140, C);
 
         game.returnDeal(C);
     }
@@ -518,7 +518,7 @@ contract MonopolyTest is Test {
 
         vm.prank(D);
         // game.getProperty(12);
-        game.openTrade(0, 12, MonopolyLibrary.SWAP_TYPE.PROPERTY_FOR_CASH, 140, C);
+        game.openTrade(0, 12, MonopolyLibrary.SwapType.PROPERTY_FOR_CASH, 140, C);
 
         vm.prank(C);
         game.rejectDeal();
@@ -557,12 +557,12 @@ contract MonopolyTest is Test {
 
         vm.prank(D);
 
-        game.openTrade(0, 12, MonopolyLibrary.SWAP_TYPE.PROPERTY_FOR_CASH, 140, C);
+        game.openTrade(0, 12, MonopolyLibrary.SwapType.PROPERTY_FOR_CASH, 140, C);
 
         game.returnDeal(C);
 
         vm.prank(C);
-        game.counterDeal(0, 12, MonopolyLibrary.SWAP_TYPE.CASH_FOR_PROPERTY, 200);
+        game.counterDeal(0, 12, MonopolyLibrary.SwapType.CASH_FOR_PROPERTY, 200);
 
         game.returnDeal(D);
     }

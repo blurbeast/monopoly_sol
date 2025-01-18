@@ -85,21 +85,16 @@ library MonopolyLibrary {
         uint8 numberOfBenefits;
     }
 
-    struct Bid {
-        address bidder;
-        uint256 bidAmount;
-    }
-
     struct PropertySwap {
         address bidder;
         address clientAddress;
         uint8 biddersProperty;
         uint8 yourProperty;
-        SWAP_TYPE swapType;
+        SwapType swapType;
         uint256 biddingAmount;
     }
 
-    enum SWAP_TYPE {
+    enum SwapType {
         PROPERTY_FOR_PROPERTY,
         PROPERTY_FOR_CASH_AND_PROPERTY,
         PROPERTY_AND_CASH_FOR_PROPERTY,
@@ -112,7 +107,7 @@ library MonopolyLibrary {
         address indexed proposee,
         uint8 biddingPropertyId,
         uint8 propertyToSwapId,
-        SWAP_TYPE swapType
+        SwapType swapType
     );
 
     // Event to log the swap details
@@ -121,7 +116,7 @@ library MonopolyLibrary {
         address indexed bidder,
         uint8 biddersProperty,
         uint8 yourProperty,
-        MonopolyLibrary.SWAP_TYPE swapType,
+        MonopolyLibrary.SwapType swapType,
         uint256 biddingAmount
     );
 
@@ -130,7 +125,7 @@ library MonopolyLibrary {
         address indexed user,
         uint8 biddingPropertyId,
         uint8 propertyToSwapId,
-        MonopolyLibrary.SWAP_TYPE swapType,
+        MonopolyLibrary.SwapType swapType,
         uint256 biddingAmount
     );
 
