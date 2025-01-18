@@ -11,8 +11,8 @@ import {Test, console} from "forge-std/Test.sol";
 contract BankTest is Test {
     GameBank private gameBank;
     GeneralNFT private generalNft;
-    address player1 = address(0xa);
-    address player2 = address(0xb);
+    address private player1 = address(0xa);
+    address private player2 = address(0xb);
 
     function setUp() public {
         generalNft = new GeneralNFT("");
@@ -129,11 +129,11 @@ contract BankTest is Test {
 
         vm.startPrank(player1);
         vm.expectRevert();
-        gameBank.upgradeProperty(2, 3);
+        gameBank.upgradeProperty(2, 3, player1);
 
         gameBank.buyProperty(4, player1); //80
 
-        gameBank.upgradeProperty(2, 3);
+        gameBank.upgradeProperty(2, 3, player1);
 
         vm.stopPrank();
 
@@ -141,7 +141,7 @@ contract BankTest is Test {
         // another user cannot upgrade another player property
         vm.startPrank(player2);
         vm.expectRevert();
-        gameBank.upgradeProperty(2, 3);
+        gameBank.upgradeProperty(2, 3, player2);
         vm.stopPrank();
 
         MonopolyLibrary.PropertyG memory afterUpgradeProperty = gameBank.getProperty(2);
@@ -152,14 +152,14 @@ contract BankTest is Test {
 
         vm.startPrank(player1);
         vm.expectRevert();
-        gameBank.upgradeProperty(2, 3);
+        gameBank.upgradeProperty(2, 3, player1);
 //        vm.stopPrank();
 
         vm.expectRevert();
-        gameBank.downgradeProperty(2, 4);
+        gameBank.downgradeProperty(2, 4, player1);
 
         // downgrade property
-        gameBank.downgradeProperty(2, 3);
+        gameBank.downgradeProperty(2, 3, player1);
 
         assertEq(gameBank.balanceOf(player1), 1620);
 
@@ -180,19 +180,19 @@ contract BankTest is Test {
 
         //player1 balance should be 1940 as the property amount is 60
 
-        gameBank.mortgageProperty(2);
+        gameBank.mortgageProperty(2, player1);
 
         assertEq(gameBank.balanceOf(player1), 1970);
 
         vm.expectRevert();
-        gameBank.mortgageProperty(2);
+        gameBank.mortgageProperty(2, player1);
 
         // no action can be performed on a mortgaged property
         vm.expectRevert();
-        gameBank.upgradeProperty(2, 3);
+        gameBank.upgradeProperty(2, 3, player1);
 
 
-        gameBank.releaseMortgage(2);
+        gameBank.releaseMortgage(2, player1);
 
         assertEq(gameBank.balanceOf(player1), 1940);
 
@@ -204,7 +204,7 @@ contract BankTest is Test {
         gameBank.buyProperty(2, player1);
         gameBank.buyProperty(4, player1);
 
-        gameBank.upgradeProperty(2, 3);
+        gameBank.upgradeProperty(2, 3, player1);
 
         vm.startPrank(player2);
         gameBank.handleRent(player2, 2, 10);

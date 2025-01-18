@@ -86,4 +86,131 @@ contract MonopolyTest is Test {
         gamebank.getPropertyOwner(2);
         gamebank.getPropertyOwner(25);
     }
+
+    function testMortgageProperty() external {
+        vm.prank(A);
+        game.startGame();
+        vm.prank(A);
+        game.play();
+        vm.prank(A);
+        game.advanceToNextPlayer();
+        vm.prank(B);
+        game.play();
+        game.returnPlayer(B);
+
+        vm.prank(B);
+        game.buyProperty();
+        game.returnPlayer(B);
+
+        vm.prank(B);
+        game.advanceToNextPlayer();
+
+        vm.prank(C);
+        game.play();
+        game.returnPlayer(C);
+        vm.prank(C);
+        game.buyProperty();
+
+        vm.prank(C);
+        game.advanceToNextPlayer();
+
+        vm.prank(D);
+        game.play();
+        vm.prank(D);
+        game.advanceToNextPlayer();
+
+        vm.prank(A);
+        game.play();
+        vm.prank(A);
+        game.advanceToNextPlayer();
+
+        vm.prank(B);
+        game.mortgageProperty(24);
+
+        vm.prank(B);
+        game.releaseMortgage(24);
+
+        vm.prank(B);
+
+        game.openTrade(
+            24,
+            12,
+            MonopolyLibrary.SWAP_TYPE.PROPERTY_FOR_PROPERTY,
+            140,
+            C
+        );
+
+        game.returnDeal(C);
+        uint cbalb4 = game.playersBalances(C);
+
+        vm.prank(C);
+        game.acceptTrade();
+
+        uint cbalAfter = game.playersBalances(C);
+
+        assertEq(cbalAfter, cbalb4);
+
+        address newOwner = game.getPropertyOwner(12);
+        assertEq(newOwner, B);
+
+        address nwOwner = game.getPropertyOwner(24);
+        assertEq(nwOwner, C);
+    }
+
+    function testUpgradeAndDowngradePropertyFromBank() external {
+        gamebank.mint(A, 1500);
+        gamebank.mint(B, 6500);
+
+        vm.prank(A);
+        gamebank.buyProperty(2, A);
+
+        vm.prank(B);
+        gamebank.buyProperty(27, B);
+        gamebank.buyProperty(28, B);
+        gamebank.buyProperty(30, B);
+
+        vm.prank(B);
+        gamebank.upgradeProperty(27, 4, B);
+
+        uint initialBalance = gamebank.balanceOf(B);
+        vm.prank(B);
+        gamebank.downgradeProperty(27, 3, B);
+        uint balanceAfterUpgrade = gamebank.balanceOf(B);
+        gamebank.getProperty(27);
+
+        console.log(
+            "initial Balance",
+            initialBalance,
+            "balance After downgrade",
+            balanceAfterUpgrade
+        );
+    }
+
+    // COMMENT LINE 593 IN Bank.sol
+//    function testUpgradeAndDowngradePropertyFromGame() external {
+//        game.startGame();
+//
+//        game.updateProperty(27, A);
+//        game.updateProperty(28, A);
+//        game.updateProperty(30, A);
+//
+//        vm.prank(A);
+//        game.upgradeProperty(30, 2);
+//
+//        uint initialBalance = game.playersBalances(A);
+//
+//        vm.prank(A);
+//        game.downgradeProperty(30, 1);
+//
+//        game.getProperty(30);
+//
+//        uint balanceAfterUpgrade = game.playersBalances(A);
+//
+//        console.log(
+//            "initial Balance",
+//            initialBalance,
+//            "balance After upgrade",
+//            balanceAfterUpgrade
+//        );
+//    }
 }

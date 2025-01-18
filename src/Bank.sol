@@ -36,12 +36,12 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
     using MonopolyLibrary for MonopolyLibrary.Benefit;
     using MonopolyLibrary for MonopolyLibrary.Proposal;
 
-    MonopolyLibrary.PropertyG[] properties;
+    MonopolyLibrary.PropertyG[] private properties;
 
     mapping(uint8 => MonopolyLibrary.Bid) public bids;
-    mapping(uint8 => address) propertyOwner;
-    mapping(uint256 => bool) mortgagedProperties;
-    mapping(uint8 => uint8) noOfUpgrades;
+    mapping(uint8 => address) private propertyOwner;
+    mapping(uint256 => bool) private mortgagedProperties;
+    mapping(uint8 => uint8) private noOfUpgrades;
 
     uint16 private constant decimalPlace = 1000;
     //
@@ -251,7 +251,7 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
             ? numberOfOwnedRailways[proposal.user] += 1
             : numberOfOwnedRailways[realOwner] -= 1;
 
-        property.propertyType == MonopolyLibrary.PropertyType.RailStation
+        proposedProperty.propertyType == MonopolyLibrary.PropertyType.RailStation
             ? numberOfOwnedRailways[realOwner] += 1
             : numberOfOwnedRailways[proposal.user] -= 1;
 
@@ -500,7 +500,7 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
     }
 
     function returnProposal(address user) external view returns (MonopolyLibrary.PropertySwap memory) {
-        MonopolyLibrary.PropertySwap storage deal = propertySwap[user];
+        MonopolyLibrary.PropertySwap memory deal = propertySwap[user];
         return deal;
     }
 
@@ -544,32 +544,32 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
      */
 
     // Function to mortgage a property
-    function mortgageProperty(uint8 propertyId) external nonReentrant {
+    function mortgageProperty(uint8 propertyId, address player) external nonReentrant {
         MonopolyLibrary.PropertyG memory property = gameProperties[propertyId];
         require(!mortgagedProperties[propertyId], "Property is already Mortgaged");
 
-        require(property.owner == msg.sender, "You are not the owner of this property");
+        require(property.owner == player, "You are not the owner of this property");
         mortgagedProperties[propertyId] = true;
 
         uint256 mortgageAmount = property.buyAmount / 2;
         // Transfer funds to the owner
 //        bool success = transferFrom(address(this), msg.sender, mortgageAmount);
 //        require(success, "Token transfer failed");
-        _transfer(address (this), msg.sender, mortgageAmount);
+        _transfer(address (this), player, mortgageAmount);
 
-        emit PropertyMortgaged(propertyId, mortgageAmount, msg.sender);
+        emit PropertyMortgaged(propertyId, mortgageAmount, player);
     }
 
     // Function to release a mortgage
-    function releaseMortgage(uint8 propertyId) external {
+    function releaseMortgage(uint8 propertyId, address player) external {
         MonopolyLibrary.PropertyG memory property = gameProperties[propertyId];
 
-        require(property.owner == msg.sender, "You are not the owner of this property");
+        require(property.owner == player, "You are not the owner of this property");
         require(mortgagedProperties[propertyId], "Property is not Mortgaged");
 
         // Transfer the repaid funds to the contract owner or use it for future logic
 
-        _transfer(msg.sender, address (this), (property.buyAmount / 2));
+        _transfer(player, address (this), (property.buyAmount / 2));
 
         // Release the mortgage
         mortgagedProperties[propertyId] = false;
@@ -580,10 +580,10 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
      *  a 2d mapping of string to address to number
      *  we can upgrade the three at once
      */
-    function upgradeProperty(uint8 propertyId, uint8 _noOfUpgrade) external {
+    function upgradeProperty(uint8 propertyId, uint8 _noOfUpgrade, address player) external {
         MonopolyLibrary.PropertyG storage property = gameProperties[propertyId];
 
-        require(property.owner == msg.sender, "You are not the owner of this property");
+        require(property.owner == player, "You are not the owner of this property");
         require(!mortgagedProperties[propertyId], "Property is Mortgaged cannot upgrade");
         require(property.propertyType == MonopolyLibrary.PropertyType.Property, "Only properties can be upgraded");
         require(_noOfUpgrade > 0 && _noOfUpgrade <= 5, "");
@@ -592,7 +592,7 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         uint8 mustOwnedNumberOfSiteColor = upgradeUserPropertyColorOwnedNumber[property.propertyColor];
 
         // Calculate the cost of one house
-        uint8 userColorGroupOwned = noOfColorGroupOwnedByUser[property.propertyColor][msg.sender];
+        uint8 userColorGroupOwned = noOfColorGroupOwnedByUser[property.propertyColor][player];
 
         require(userColorGroupOwned >= mustOwnedNumberOfSiteColor, "must own at least two/three site with same color ");
         require(property.noOfUpgrades < 5, "reach the peak upgrade for this property ");
@@ -602,10 +602,10 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
 
         uint256 amountToPay = property.buyAmount * (2 * (2 ** (noOfUpgrade - 1)));
 
-        require(balanceOf(msg.sender) >= amountToPay, "Insufficient funds to upgrade property");
+        require(balanceOf(player) >= amountToPay, "Insufficient funds to upgrade property");
 
 //        bool success = transferFrom(msg.sender, address(this), amountToPay);
-        _transfer(msg.sender, address (this), amountToPay);
+        _transfer(player, address (this), amountToPay);
 
         property.noOfUpgrades += _noOfUpgrade;
 
@@ -613,11 +613,11 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
     }
 
     // make the game owner of the bank and hence owns the token
-    function downgradeProperty(uint8 propertyId, uint8 noOfDowngrade) external {
+    function downgradeProperty(uint8 propertyId, uint8 noOfDowngrade, address player) external {
         MonopolyLibrary.PropertyG storage property = gameProperties[propertyId];
 
         // Ensure the caller is the owner of the property
-        require(property.owner == msg.sender, "You are not the owner of this property");
+        require(property.owner == player, "You are not the owner of this property");
         require(property.noOfUpgrades > 0, "cannot downgrade site");
         require(noOfDowngrade > 0 && noOfDowngrade <= property.noOfUpgrades, "cannot downgrade");
 
@@ -628,7 +628,7 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
 
 //        bool success = transfer(msg.sender, amountToReceive);
 //        require(success, "");
-        _transfer(address (this), msg.sender, amountToReceive);
+        _transfer(address (this), player, amountToReceive);
 
         property.noOfUpgrades -= noOfDowngrade;
         emit PropertyDownGraded(propertyId);

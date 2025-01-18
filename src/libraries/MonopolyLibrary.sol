@@ -134,5 +134,20 @@ library MonopolyLibrary {
         uint256 biddingAmount
     );
 
+    event PropertyUpgraded(
+        uint8 indexed propertyId,
+        address indexed user,
+        uint8 upgradesApplied,
+        uint256 newRentAmount
+    );
+
+    event PropertyDowngraded(
+        uint8 indexed propertyId,
+        address indexed user,
+        uint8 downgradesApplied,
+        uint8 remainingUpgrades,
+        uint256 refundAmount
+    );
+
     event DealRejected(address indexed user);
 }
