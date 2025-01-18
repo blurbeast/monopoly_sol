@@ -82,21 +82,27 @@ library MonopolyLibrary {
     }
 
     struct PropertyForProperty{
-
+        uint8 proposedPropertyId;
+        uint8 biddingPropertyId;
     }
     struct PropertyForCashAndProperty {
-
+        uint8 proposedPropertyId;
+        uint8 biddingPropertyId;
+        uint256 biddingAmount;
     }
     struct PropertyAndCashForProperty{
-
+        uint8 proposedPropertyId;
+        uint256 proposedAmount;
+        uint8 biddingPropertyId;
     }
     struct PropertyForCash {
-
+        uint8 propertyId;
+        uint256 biddingAmount;
     }
     struct CashForProperty {
-
+        uint256 proposedAmount;
+        uint8 biddingPropertyId;
     }
-
 
     enum SwapType {
         PROPERTY_FOR_PROPERTY,

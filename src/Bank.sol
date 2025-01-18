@@ -157,44 +157,50 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
     mapping(uint8 => uint8) public propertyToProposal;
     uint256 private proposalIds;
 
+//address proposer,
+//address proposee,
+//uint8 biddingPropertyId,
+//uint8 propertyToSwapId,
+//MonopolyLibrary.SwapType swapType,
+//uint256 biddingAmount
+
     // correct i think
     function makeProposal(
-        address _user,
-        // address _biddedUser,
-        uint8 proposedPropertyId,
-        uint8 biddedPropertyId,
-        uint8[] calldata benefitValue,
-        MonopolyLibrary.BenefitType[] calldata benefitType,
-        uint8[] calldata numberOfTurns,
-        uint256 biddedTokenAmount
+        address proposer,
+        address otherPlayer,
+    uint8 proposedPropertyId,
+    uint8 biddingPropertyId,
+        MonopolyLibrary.SwapType swapType,
+        uint256 amountInvolved
     ) external {
-        require(benefitType.length == benefitValue.length && benefitValue.length == numberOfTurns.length, "");
-        address realOwner = propertyOwner[proposedPropertyId];
-        require(realOwner == _user, "only property owner can perform this action");
-        require(!mortgagedProperties[proposedPropertyId], "proposed property has been mortgaged ");
 
-        uint8 benefitSize = uint8(benefitValue.length);
-
-        require(benefitSize < 3, "the benefit offer should not be more than 3");
-
-        // mapping (uint8 => Benefit) proposalBenefits;
-
-        proposalIds += 1;
-        MonopolyLibrary.Proposal storage proposal = inGameProposals[proposalIds];
-        proposal.player = _user;
-        proposal.proposedPropertyId = proposedPropertyId;
-        proposal.biddingPropertyId = biddedPropertyId;
-        proposal.biddedTokenAmount = biddedTokenAmount;
-        proposal.numberOfBenefits = benefitSize;
-
-        for (uint8 i = 0; i < benefitSize; i++) {
-            proposal.benefits[i + 1] = MonopolyLibrary.Benefit({
-                benefitType: benefitType[i],
-                isActive: false,
-                benefitValue: benefitValue[i],
-                numberOfTurns: numberOfTurns[i]
-            });
-        }
+//        require(benefitType.length == benefitValue.length && benefitValue.length == numberOfTurns.length, "");
+//        address realOwner = propertyOwner[proposedPropertyId];
+//        require(realOwner == _user, "only property owner can perform this action");
+//        require(!mortgagedProperties[proposedPropertyId], "proposed property has been mortgaged ");
+//
+//        uint8 benefitSize = uint8(benefitValue.length);
+//
+//        require(benefitSize < 3, "the benefit offer should not be more than 3");
+//
+//        // mapping (uint8 => Benefit) proposalBenefits;
+//
+//        proposalIds += 1;
+//        MonopolyLibrary.Proposal storage proposal = inGameProposals[proposalIds];
+//        proposal.player = _user;
+//        proposal.proposedPropertyId = proposedPropertyId;
+//        proposal.biddingPropertyId = biddedPropertyId;
+//        proposal.biddedTokenAmount = biddedTokenAmount;
+//        proposal.numberOfBenefits = benefitSize;
+//
+//        for (uint8 i = 0; i < benefitSize; i++) {
+//            proposal.benefits[i + 1] = MonopolyLibrary.Benefit({
+//                benefitType: benefitType[i],
+//                isActive: false,
+//                benefitValue: benefitValue[i],
+//                numberOfTurns: numberOfTurns[i]
+//            });
+//        }
 
         // to emit an event here
     }
