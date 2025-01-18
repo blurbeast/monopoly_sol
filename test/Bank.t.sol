@@ -205,7 +205,6 @@ contract BankTest is Test {
     }
 
     function testCreateProposal() external {
-
         // test that user can only propose owned asset;
         MonopolyLibrary.SwapType swapType = MonopolyLibrary.SwapType.PROPERTY_FOR_CASH;
         vm.expectRevert("asset specified is not owned by player");
@@ -225,12 +224,12 @@ contract BankTest is Test {
         MonopolyLibrary.SwapType swappedType = MonopolyLibrary.SwapType.PROPERTY_FOR_PROPERTY;
         gameBank.makeProposal(player1, player2, 2, 6, swappedType, 0);
 
-        (,, MonopolyLibrary.SwapType _swap)= gameBank.inGameProposals(1);
-//
-        assertEq(uint8(_swap), uint8 (MonopolyLibrary.SwapType.PROPERTY_FOR_PROPERTY));
+        (,, MonopolyLibrary.SwapType _swap) = gameBank.inGameProposals(1);
+        //
+        assertEq(uint8(_swap), uint8(MonopolyLibrary.SwapType.PROPERTY_FOR_PROPERTY));
 
         MonopolyLibrary.SwappedType memory swappedTypes = gameBank.getProposalSwappedType(1);
 
-    assertEq(swappedTypes.propertyForProperty.biddingPropertyId, 6);
+        assertEq(swappedTypes.propertyForProperty.biddingPropertyId, 6);
     }
 }

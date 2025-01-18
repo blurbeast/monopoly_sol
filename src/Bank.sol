@@ -156,7 +156,7 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
     mapping(uint256 => MonopolyLibrary.Proposal) public inGameProposals;
     mapping(uint8 => uint8) public propertyToProposal;
     uint256 private proposalIds;
-    mapping(uint8 => MonopolyLibrary.SwappedType) public swappedType;
+    mapping(uint256 => MonopolyLibrary.SwappedType) public swappedType;
 
     //address proposer,
     //address proposee,
@@ -165,7 +165,7 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
     //MonopolyLibrary.SwapType swapType,
     //uint256 biddingAmount
 
-    function getProposalSwappedType(uint8 proposalId) external view returns(MonopolyLibrary.SwappedType memory ) {
+    function getProposalSwappedType(uint8 proposalId) external view returns (MonopolyLibrary.SwappedType memory) {
         return swappedType[proposalId];
     }
 
@@ -189,63 +189,62 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         proposal.otherPlayer = otherPlayer;
         proposal.player = proposer;
 
-        // proposal.swapType == MonopolyLibrary.SwapType.PROPERTY_FOR_PROPERTY ?
-        //     _propertyForProperty(proposalIds, proposedPropertyId, biddingPropertyId) :
-        // proposal.swapType == MonopolyLibrary.SwapType.PROPERTY_FOR_CASH_AND_PROPERTY ?
-        //     _propertyForCashAndProperty(proposalIds, proposedPropertyId, biddingPropertyId, amountInvolved)
-        // : proposal.swapType == MonopolyLibrary.SwapType.PROPERTY_AND_CASH_FOR_PROPERTY ?
-        //     _propertyAndCashForProperty(proposalIds, proposedPropertyId, amountInvolved, biddingPropertyId)
-        // :
-        // proposal.swapType == MonopolyLibrary.SwapType.PROPERTY_FOR_CASH ?
-        //     _propertyForCash(proposalIds, proposedPropertyId, amountInvolved) :
-        // proposal.swapType == MonopolyLibrary.SwapType.CASH_FOR_PROPERTY ?  
-        // _cashForProperty(proposalIds, amountInvolved, biddingPropertyId) : revert("") ;
-
-        
-
-
         // to emit an event here
     }
 
+    // proposal.swapType == MonopolyLibrary.SwapType.PROPERTY_FOR_PROPERTY ?
+    //     _propertyForProperty(proposalIds, proposedPropertyId, biddingPropertyId) :
+    // proposal.swapType == MonopolyLibrary.SwapType.PROPERTY_FOR_CASH_AND_PROPERTY ?
+    //     _propertyForCashAndProperty(proposalIds, proposedPropertyId, biddingPropertyId, amountInvolved)
+    // : proposal.swapType == MonopolyLibrary.SwapType.PROPERTY_AND_CASH_FOR_PROPERTY ?
+    // _propertyAndCashForProperty(proposalIds, proposedPropertyId, amountInvolved, biddingPropertyId);
+    // :
+    // proposal.swapType == MonopolyLibrary.SwapType.PROPERTY_FOR_CASH ?
+    //     _propertyForCash(proposalIds, proposedPropertyId, amountInvolved) :
+    // proposal.swapType == MonopolyLibrary.SwapType.CASH_FOR_PROPERTY ?
+    // _cashForProperty(proposalIds, amountInvolved, biddingPropertyId) : revert("") ;
+
     function _cashForProperty(uint256 proposalId, uint256 proposedAmount, uint8 biddingPropertyId) private {
         MonopolyLibrary.SwappedType storage swappedSwapType = swappedType[proposalId];
-        swappedSwapType.cashForProperty({
-            proposedAmount : proposedAmount,
-            biddingPropertyId : biddingPropertyId
-        });
+        swappedSwapType.cashForProperty.proposedAmount = proposedAmount;
+        swappedSwapType.cashForProperty.biddingPropertyId = biddingPropertyId;
     }
 
     function _propertyForCash(uint256 proposalId, uint8 propertyId, uint256 biddingAmount) private {
         MonopolyLibrary.SwappedType storage swappedSwapType = swappedType[proposalId];
-        swappedSwapType.propertyForCash({
-            propertyId : propertyId,
-            biddingAmount : biddingAmount
-        });
+        swappedSwapType.propertyForCash.propertyId = propertyId;
+        swappedSwapType.propertyForCash.biddingAmount = biddingAmount;
     }
 
-    function _propertyAndCashForProperty(uint256 proposailId, uint8 proposedPropertyId, uint256 proposedAmount, uint8 biddingPropertyId) private {
-    MonopolyLibrary.SwappedType storage swappedSwapType = swappedType[proposalId];
-    swappedSwapType.propertyAndCashForProperty ({
-    proposedPropertyId : proposedPropertyId,
-    proposedAmount : proposedAmount,
-    biddingPropertyId : biddingPropertyId
-    });
-    }
-    function _propertyForCashAndProperty(uint256 proposalId, uint8 proposedPropertyId, uint8 biddingPropertyId, uint8 biddingAmount) private view {
-    MonopolyLibrary.SwappedType storage swappedSwapType = swappedType[proposalId];
-
-    swappedSwapType.propertyForCashAndProperty({
-    proposedPropertyId : propposedPropertyId,
-    biddingPropertyId : biddingPropertyId,
-    biddingAmount : biddingAmount
-    });
-    }
-    function _propertyForProperty(uint256 proposalId, uint8 proposedPropertyId, uint8 biddingPropertyId) private view {
+    function _propertyAndCashForProperty(
+        uint256 proposalId,
+        uint8 proposedPropertyId,
+        uint256 proposedAmount,
+        uint8 biddingPropertyId
+    ) private {
         MonopolyLibrary.SwappedType storage swappedSwapType = swappedType[proposalId];
-        swappedSwapType.propertyForProperty({
-    proposedPropertyId : proposedPropertyId,
-    biddingPropertyId : biddingPropertyId
-    });
+        swappedSwapType.propertyAndCashForProperty.proposedPropertyId = proposedPropertyId;
+        swappedSwapType.propertyAndCashForProperty.proposedAmount = proposedAmount;
+        swappedSwapType.propertyAndCashForProperty.biddingPropertyId = biddingPropertyId;
+    }
+
+    function _propertyForCashAndProperty(
+        uint256 proposalId,
+        uint8 proposedPropertyId,
+        uint8 biddingPropertyId,
+        uint256 biddingAmount
+    ) private {
+        MonopolyLibrary.SwappedType storage swappedSwapType = swappedType[proposalId];
+
+        swappedSwapType.propertyForCashAndProperty.proposedPropertyId = proposedPropertyId;
+        swappedSwapType.propertyForCashAndProperty.biddingPropertyId = biddingPropertyId;
+        swappedSwapType.propertyForCashAndProperty.biddingAmount = biddingAmount;
+    }
+
+    function _propertyForProperty(uint256 proposalId, uint8 proposedPropertyId, uint8 biddingPropertyId) private {
+        MonopolyLibrary.SwappedType storage swappedSwapType = swappedType[proposalId];
+        swappedSwapType.propertyForProperty.proposedPropertyId = proposedPropertyId;
+        swappedSwapType.propertyForProperty.biddingPropertyId = biddingPropertyId;
     }
 
     // in progress
@@ -374,7 +373,7 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         //        }
 
         // Transfer the rent to the owner
-                _transfer(player, foundProperty.owner, rentAmount);
+        _transfer(player, foundProperty.owner, rentAmount);
     }
 
     // love the enum swap type
