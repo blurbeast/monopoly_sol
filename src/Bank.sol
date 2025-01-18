@@ -189,17 +189,19 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         proposal.otherPlayer = otherPlayer;
         proposal.player = proposer;
 
-        proposal.swapType == MonopolyLibrary.SwapType.PROPERTY_FOR_PROPERTY ?
-            _propertyForProperty(proposalIds, proposedPropertyId, biddingPropertyId) :
-        swapType == MonopolyLibrary.SwapType.PROPERTY_FOR_CASH_AND_PROPERTY ?
-            _propertyForCashAndProperty(proposalIds, proposedPropertyId, biddingPropertyId, amountInvolved)
-        : swapType == MonopolyLibrary.SwapType.PROPERTY_AND_CASH_FOR_PROPERTY ?
-            _propertyAndCashForProperty(proposalIds, proposedPropertyId, amountInvolved, biddingPropertyId)
-        :
-        swapType == MonopolyLibrary.SwapType.PROPERTY_FOR_CASH ?
-            _propertyForCash(proposalIds, proposedPropertyId, amountInvolved) :
-        swapType == MonopolyLibrary.SwapType.CASH_FOR_PROPERTY ?  
-        _cashForProperty(proposalIds, amountInvolved, biddingPropertyId) : revert() ;
+        // proposal.swapType == MonopolyLibrary.SwapType.PROPERTY_FOR_PROPERTY ?
+        //     _propertyForProperty(proposalIds, proposedPropertyId, biddingPropertyId) :
+        // proposal.swapType == MonopolyLibrary.SwapType.PROPERTY_FOR_CASH_AND_PROPERTY ?
+        //     _propertyForCashAndProperty(proposalIds, proposedPropertyId, biddingPropertyId, amountInvolved)
+        // : proposal.swapType == MonopolyLibrary.SwapType.PROPERTY_AND_CASH_FOR_PROPERTY ?
+        //     _propertyAndCashForProperty(proposalIds, proposedPropertyId, amountInvolved, biddingPropertyId)
+        // :
+        // proposal.swapType == MonopolyLibrary.SwapType.PROPERTY_FOR_CASH ?
+        //     _propertyForCash(proposalIds, proposedPropertyId, amountInvolved) :
+        // proposal.swapType == MonopolyLibrary.SwapType.CASH_FOR_PROPERTY ?  
+        // _cashForProperty(proposalIds, amountInvolved, biddingPropertyId) : revert("") ;
+
+        
 
 
         // to emit an event here
