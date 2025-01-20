@@ -283,13 +283,8 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         biddingProperty.owner = proposer;
         propertyOwner[biddingPropertyId] = proposer;
 
-        noOfColorGroupOwnedByUser[biddingProperty.propertyColor][_user] -= 1;
-        noOfColorGroupOwnedByUser[biddingProperty.propertyColor][proposer] += 1;
-
-        if (biddingProperty.propertyType == MonopolyLibrary.PropertyType.RailStation) {
-            numberOfOwnedRailways[_user] -= 1;
-            numberOfOwnedRailways[proposer] += 1;
-        }
+        //bidding
+        _handlePropertyTransfer(biddingProperty, _user, proposer);
     }
 
     function _checkPropertyForCash(
@@ -310,13 +305,8 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
 
         propertyOwner[proposedPropertyId] = _user;
 
-        noOfColorGroupOwnedByUser[proposedProperty.propertyColor][proposer] -= 1;
-        noOfColorGroupOwnedByUser[proposedProperty.propertyColor][_user] += 1;
-
-        if (proposedProperty.propertyType == MonopolyLibrary.PropertyType.RailStation) {
-            numberOfOwnedRailways[proposer] -= 1;
-            numberOfOwnedRailways[_user] += 1;
-        }
+        //proposed
+        _handlePropertyTransfer(proposedProperty, proposer, _user);
     }
 
     function _checkPropertyAndCashForProperty(
@@ -342,21 +332,11 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         propertyOwner[biddingPropertyId] = proposer;
         propertyOwner[proposedPropertyId] = _user;
 
-        noOfColorGroupOwnedByUser[biddingProperty.propertyColor][_user] -= 1;
-        noOfColorGroupOwnedByUser[biddingProperty.propertyColor][proposer] += 1;
-        //
-        noOfColorGroupOwnedByUser[proposedProperty.propertyColor][_user] += 1;
-        noOfColorGroupOwnedByUser[proposedProperty.propertyColor][proposer] -= 1;
+        //bidding
+        _handlePropertyTransfer(biddingProperty, _user, proposer);
 
-        if (biddingProperty.propertyType == MonopolyLibrary.PropertyType.RailStation) {
-            numberOfOwnedRailways[proposer] += 1;
-            numberOfOwnedRailways[_user] -= 1;
-        }
-
-        if (proposedProperty.propertyType == MonopolyLibrary.PropertyType.RailStation) {
-            numberOfOwnedRailways[proposer] -= 1;
-            numberOfOwnedRailways[_user] += 1;
-        }
+        //proposed
+        _handlePropertyTransfer(proposedProperty, proposer, _user);
     }
 
     function _checkPropertyForProperty(
@@ -378,23 +358,11 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         propertyOwner[biddingPropertyId] = proposer;
         propertyOwner[proposedPropertyId] = _user;
 
-        // run it
-        noOfColorGroupOwnedByUser[biddingProperty.propertyColor][_user] -= 1;
-        noOfColorGroupOwnedByUser[biddingProperty.propertyColor][proposer] += 1;
-        //
-        noOfColorGroupOwnedByUser[proposedProperty.propertyColor][_user] += 1;
-        noOfColorGroupOwnedByUser[proposedProperty.propertyColor][proposer] -= 1;
-        //
-        //        //confirm if it is a rail station
-        if (biddingProperty.propertyType == MonopolyLibrary.PropertyType.RailStation) {
-            numberOfOwnedRailways[proposer] += 1;
-            numberOfOwnedRailways[_user] -= 1;
-        }
+        //bidding
+        _handlePropertyTransfer(biddingProperty, _user, proposer);
 
-        if (proposedProperty.propertyType == MonopolyLibrary.PropertyType.RailStation) {
-            numberOfOwnedRailways[proposer] -= 1;
-            numberOfOwnedRailways[_user] += 1;
-        }
+        // proposed
+        _handlePropertyTransfer(proposedProperty, proposer, _user);
     }
 
     function _checkPropertyForCashAndProperty(
@@ -419,20 +387,22 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         propertyOwner[biddingPropertyId] = proposer;
         propertyOwner[proposedPropertyId] = _user;
 
-        noOfColorGroupOwnedByUser[biddingProperty.propertyColor][_user] -= 1;
-        noOfColorGroupOwnedByUser[biddingProperty.propertyColor][proposer] += 1;
-        //
-        noOfColorGroupOwnedByUser[proposedProperty.propertyColor][_user] += 1;
-        noOfColorGroupOwnedByUser[proposedProperty.propertyColor][proposer] -= 1;
+        //bidding
+        _handlePropertyTransfer(biddingProperty, _user, proposer);
 
-        if (biddingProperty.propertyType == MonopolyLibrary.PropertyType.RailStation) {
-            numberOfOwnedRailways[proposer] += 1;
-            numberOfOwnedRailways[_user] -= 1;
-        }
+        // proposed
+        _handlePropertyTransfer(proposedProperty, proposer, _user);
+    }
 
-        if (proposedProperty.propertyType == MonopolyLibrary.PropertyType.RailStation) {
-            numberOfOwnedRailways[proposer] -= 1;
-            numberOfOwnedRailways[_user] += 1;
+    function _handlePropertyTransfer(MonopolyLibrary.PropertyG memory propertyG, address player1, address player2)
+        private
+    {
+        noOfColorGroupOwnedByUser[propertyG.propertyColor][player1] -= 1;
+        noOfColorGroupOwnedByUser[propertyG.propertyColor][player2] += 1;
+
+        if (propertyG.propertyType == MonopolyLibrary.PropertyType.RailStation) {
+            numberOfOwnedRailways[player1] -= 1;
+            numberOfOwnedRailways[player2] += 1;
         }
     }
 
