@@ -79,6 +79,13 @@ library MonopolyLibrary {
         address player;
         address otherPlayer;
         SwapType swapType;
+        ProposalStatus proposalStatus;
+    }
+
+    enum ProposalStatus {
+        PENDING,
+ACCEPTED,
+REJECTED
     }
 
     struct PropertyForProperty {

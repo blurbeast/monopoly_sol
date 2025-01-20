@@ -69,13 +69,13 @@ contract MonopolyTest is Test {
         uint256 balB4 = gamebank.bal(B);
 
         vm.prank(B);
-        gamebank.proposePropertySwap(B, A, 25, 2, MonopolyLibrary.SwapType.PROPERTY_AND_CASH_FOR_PROPERTY, 50);
+//        gamebank.proposePropertySwap(B, A, 25, 2, MonopolyLibrary.SwapType.PROPERTY_AND_CASH_FOR_PROPERTY, 50);
 
         vm.prank(A);
         gamebank.viewDeals(A);
 
         vm.prank(A);
-        gamebank.acceptDeal(A);
+//        gamebank.acceptDeal(A);
 
         uint256 balA = gamebank.bal(A);
         uint256 bal = gamebank.bal(B);

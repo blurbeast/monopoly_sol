@@ -204,7 +204,7 @@ contract BankTest is Test {
         assertEq(gameBank.balanceOf(player2), 1992);
     }
 
-    function testCreateProposal() external {
+    function testProposal() external {
         // test that user can only propose owned asset;
         MonopolyLibrary.SwapType swapType = MonopolyLibrary.SwapType.PROPERTY_FOR_CASH;
         vm.expectRevert("asset specified is not owned by player");
@@ -224,12 +224,34 @@ contract BankTest is Test {
         MonopolyLibrary.SwapType swappedType = MonopolyLibrary.SwapType.PROPERTY_FOR_PROPERTY;
         gameBank.makeProposal(player1, player2, 2, 6, swappedType, 0);
 
-        (,, MonopolyLibrary.SwapType _swap) = gameBank.inGameProposals(1);
+        (,, MonopolyLibrary.SwapType _swap, MonopolyLibrary.ProposalStatus status) = gameBank.inGameProposals(1);
         //
         assertEq(uint8(_swap), uint8(MonopolyLibrary.SwapType.PROPERTY_FOR_PROPERTY));
 
         MonopolyLibrary.SwappedType memory swappedTypes = gameBank.getProposalSwappedType(1);
 
         assertEq(swappedTypes.propertyForProperty.biddingPropertyId, 6);
+
+        assertEq(uint8(status), 0);
+
+        (uint8 noOfOwnedBefore)= gameBank.noOfColorGroupOwnedByUser(MonopolyLibrary.PropertyColors.BROWN, player1);
+        assertEq(noOfOwnedBefore, 1);
+        // accept proposal
+        gameBank.acceptProposal(player2, 1);
+
+        (,, MonopolyLibrary.SwapType _swapp, MonopolyLibrary.ProposalStatus statuss) = gameBank.inGameProposals(1);
+
+        assertEq(uint8(statuss), 1);
+
+        (address previouslyOwnedByPlayer1) = gameBank.propertyOwner(2);
+        (address previouslyOwnedByPlayer2) = gameBank.propertyOwner(6);
+
+        assertEq(previouslyOwnedByPlayer1, player2);
+        assertEq(previouslyOwnedByPlayer2, player1);
+
+        (uint8 noOfOwnedAfter)= gameBank.noOfColorGroupOwnedByUser(MonopolyLibrary.PropertyColors.BROWN, player1);
+
+        assertEq(noOfOwnedAfter, 0);
+
     }
 }
