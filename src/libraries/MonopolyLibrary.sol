@@ -84,8 +84,8 @@ library MonopolyLibrary {
 
     enum ProposalStatus {
         PENDING,
-ACCEPTED,
-REJECTED
+        ACCEPTED,
+        REJECTED
     }
 
     struct PropertyForProperty {

@@ -148,9 +148,9 @@ contract Game {
             teamMateAddress = _teamMateAddress;
         }
 
-//        gameBank.proposePropertySwap(
-//            msg.sender, teamMateAddress, usersPropertyId, teamMatePropertyID, swapType, biddingAmount
-//        );
+        //        gameBank.proposePropertySwap(
+        //            msg.sender, teamMateAddress, usersPropertyId, teamMatePropertyID, swapType, biddingAmount
+        //        );
     }
 
     function counterDeal(
@@ -160,17 +160,17 @@ contract Game {
         uint256 biddingAmount
     ) external {
         require(gameStarted, "Game not started yet");
-//        gameBank.counterDeal(msg.sender, usersPropertyId, teamMatePropertyID, swapType, biddingAmount);
+        //        gameBank.counterDeal(msg.sender, usersPropertyId, teamMatePropertyID, swapType, biddingAmount);
     }
 
     function acceptTrade() external {
         require(gameStarted, "Game not started yet");
-//        gameBank.acceptDeal(msg.sender);
+        //        gameBank.acceptDeal(msg.sender);
     }
 
     function rejectDeal() external {
         require(gameStarted, "Game not started yet");
-//        gameBank.rejectDeal(msg.sender);
+        //        gameBank.rejectDeal(msg.sender);
     }
 
     function handleRent() external {

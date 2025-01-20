@@ -158,7 +158,6 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
     uint256 private proposalIds;
     mapping(uint256 => MonopolyLibrary.SwappedType) public swappedType;
 
-
     function getProposalSwappedType(uint8 proposalId) external view returns (MonopolyLibrary.SwappedType memory) {
         return swappedType[proposalId];
     }
@@ -177,7 +176,10 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         require(realOwner == proposer, "asset specified is not owned by player");
         require(!mortgagedProperties[proposedPropertyId], "asset on mortgage");
         if (biddingPropertyId > 0) {
-        require(!mortgagedProperties[biddingPropertyId], "bidding property is on mortgage , hence proposal cannot be made");
+            require(
+                !mortgagedProperties[biddingPropertyId],
+                "bidding property is on mortgage , hence proposal cannot be made"
+            );
         }
 
         proposalIds += 1;
@@ -252,28 +254,24 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
 
         require(proposal.otherPlayer == _user, "proposal not to this user");
 
-        proposal.swapType == MonopolyLibrary.SwapType.PROPERTY_FOR_PROPERTY ?
-        _checkPropertyForProperty(proposalSwappedType, _user, proposal.player) :
-            proposal.swapType == MonopolyLibrary.SwapType.PROPERTY_FOR_CASH ?
-        _checkPropertyForCashAndProperty(proposalSwappedType, _user, proposal.player) :
-                proposal.swapType == MonopolyLibrary.SwapType.CASH_FOR_PROPERTY ?
-        _checkPropertyAndCashForProperty(proposalSwappedType, _user, proposal.player) : proposal.swapType == MonopolyLibrary.SwapType.PROPERTY_FOR_CASH ?
-        _checkPropertyForCash(proposalSwappedType, _user, proposal.player) : _checkCashForProperty(proposalSwappedType, _user, proposal.player);
+        proposal.swapType == MonopolyLibrary.SwapType.PROPERTY_FOR_PROPERTY
+            ? _checkPropertyForProperty(proposalSwappedType, _user, proposal.player)
+            : proposal.swapType == MonopolyLibrary.SwapType.PROPERTY_FOR_CASH
+                ? _checkPropertyForCashAndProperty(proposalSwappedType, _user, proposal.player)
+                : proposal.swapType == MonopolyLibrary.SwapType.CASH_FOR_PROPERTY
+                    ? _checkPropertyAndCashForProperty(proposalSwappedType, _user, proposal.player)
+                    : proposal.swapType == MonopolyLibrary.SwapType.PROPERTY_FOR_CASH
+                        ? _checkPropertyForCash(proposalSwappedType, _user, proposal.player)
+                        : _checkCashForProperty(proposalSwappedType, _user, proposal.player);
 
         proposal.proposalStatus = MonopolyLibrary.ProposalStatus.ACCEPTED;
-//        MonopolyLibrary.PropertyG storage property = gameProperties[];
-
-        // make changes to the property
-        // i think refactoring the property struct will be okay here as we should only read from the state here
-        // here the owner is vague as it would cost more here
-        // the mapping propertyOwner handles this
-        // moving on it should be changed
-
-//
-        // to emit an event here
     }
 
-    function _checkCashForProperty(MonopolyLibrary.SwappedType memory proposalSwappedType, address _user, address proposer) private {
+    function _checkCashForProperty(
+        MonopolyLibrary.SwappedType memory proposalSwappedType,
+        address _user,
+        address proposer
+    ) private {
         uint256 amountInvolved = proposalSwappedType.cashForProperty.proposedAmount;
         uint8 biddingPropertyId = proposalSwappedType.cashForProperty.biddingPropertyId;
 
@@ -294,8 +292,12 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         }
     }
 
-    function _checkPropertyForCash(MonopolyLibrary.SwappedType memory proposalSwappedType, address _user, address proposer) private {
-//        proposalSwappedType.
+    function _checkPropertyForCash(
+        MonopolyLibrary.SwappedType memory proposalSwappedType,
+        address _user,
+        address proposer
+    ) private {
+        //        proposalSwappedType.
         uint8 proposedPropertyId = proposalSwappedType.propertyForCash.propertyId;
         uint256 amountInvolved = proposalSwappedType.propertyForCash.biddingAmount;
 
@@ -317,11 +319,15 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         }
     }
 
-    function _checkPropertyAndCashForProperty(MonopolyLibrary.SwappedType memory proposalSwappedType, address _user, address proposer) private {
+    function _checkPropertyAndCashForProperty(
+        MonopolyLibrary.SwappedType memory proposalSwappedType,
+        address _user,
+        address proposer
+    ) private {
         uint256 amountInvolve = proposalSwappedType.propertyAndCashForProperty.proposedAmount;
         require(balanceOf(proposer) >= amountInvolve, "proposer does not hold such value at hand");
 
-        _transfer(proposer, _user , amountInvolve);
+        _transfer(proposer, _user, amountInvolve);
 
         uint8 proposedPropertyId = proposalSwappedType.propertyAndCashForProperty.proposedPropertyId;
         uint8 biddingPropertyId = proposalSwappedType.propertyForProperty.biddingPropertyId;
@@ -338,11 +344,11 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
 
         noOfColorGroupOwnedByUser[biddingProperty.propertyColor][_user] -= 1;
         noOfColorGroupOwnedByUser[biddingProperty.propertyColor][proposer] += 1;
-//
+        //
         noOfColorGroupOwnedByUser[proposedProperty.propertyColor][_user] += 1;
         noOfColorGroupOwnedByUser[proposedProperty.propertyColor][proposer] -= 1;
 
-        if(biddingProperty.propertyType == MonopolyLibrary.PropertyType.RailStation){
+        if (biddingProperty.propertyType == MonopolyLibrary.PropertyType.RailStation) {
             numberOfOwnedRailways[proposer] += 1;
             numberOfOwnedRailways[_user] -= 1;
         }
@@ -353,7 +359,11 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         }
     }
 
-    function _checkPropertyForProperty(MonopolyLibrary.SwappedType memory proposalSwappedType, address _user, address proposer) private {
+    function _checkPropertyForProperty(
+        MonopolyLibrary.SwappedType memory proposalSwappedType,
+        address _user,
+        address proposer
+    ) private {
         // do this
         uint8 proposedPropertyId = proposalSwappedType.propertyForProperty.proposedPropertyId;
         uint8 biddingPropertyId = proposalSwappedType.propertyForProperty.biddingPropertyId;
@@ -371,12 +381,12 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         // run it
         noOfColorGroupOwnedByUser[biddingProperty.propertyColor][_user] -= 1;
         noOfColorGroupOwnedByUser[biddingProperty.propertyColor][proposer] += 1;
-//
+        //
         noOfColorGroupOwnedByUser[proposedProperty.propertyColor][_user] += 1;
         noOfColorGroupOwnedByUser[proposedProperty.propertyColor][proposer] -= 1;
-//
-//        //confirm if it is a rail station
-        if(biddingProperty.propertyType == MonopolyLibrary.PropertyType.RailStation){
+        //
+        //        //confirm if it is a rail station
+        if (biddingProperty.propertyType == MonopolyLibrary.PropertyType.RailStation) {
             numberOfOwnedRailways[proposer] += 1;
             numberOfOwnedRailways[_user] -= 1;
         }
@@ -387,14 +397,18 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         }
     }
 
-    function _checkPropertyForCashAndProperty(MonopolyLibrary.SwappedType memory proposalSwappedType, address _user, address proposer) private {
+    function _checkPropertyForCashAndProperty(
+        MonopolyLibrary.SwappedType memory proposalSwappedType,
+        address _user,
+        address proposer
+    ) private {
         uint256 amountInvolved = proposalSwappedType.propertyForCashAndProperty.biddingAmount;
         uint8 proposedPropertyId = proposalSwappedType.propertyForCashAndProperty.proposedPropertyId;
         uint8 biddingPropertyId = proposalSwappedType.propertyForCashAndProperty.biddingPropertyId;
 
         require(balanceOf(_user) >= amountInvolved, "");
 
-        _transfer(_user, proposer , amountInvolved);
+        _transfer(_user, proposer, amountInvolved);
 
         MonopolyLibrary.PropertyG storage proposedProperty = gameProperties[proposedPropertyId];
         MonopolyLibrary.PropertyG storage biddingProperty = gameProperties[biddingPropertyId];
@@ -407,11 +421,11 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
 
         noOfColorGroupOwnedByUser[biddingProperty.propertyColor][_user] -= 1;
         noOfColorGroupOwnedByUser[biddingProperty.propertyColor][proposer] += 1;
-//
+        //
         noOfColorGroupOwnedByUser[proposedProperty.propertyColor][_user] += 1;
         noOfColorGroupOwnedByUser[proposedProperty.propertyColor][proposer] -= 1;
 
-        if(biddingProperty.propertyType == MonopolyLibrary.PropertyType.RailStation){
+        if (biddingProperty.propertyType == MonopolyLibrary.PropertyType.RailStation) {
             numberOfOwnedRailways[proposer] += 1;
             numberOfOwnedRailways[_user] -= 1;
         }
@@ -420,7 +434,6 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
             numberOfOwnedRailways[proposer] -= 1;
             numberOfOwnedRailways[_user] += 1;
         }
-
     }
 
     mapping(address => uint8) private numberOfOwnedRailways;
