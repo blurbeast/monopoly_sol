@@ -237,7 +237,7 @@ contract BankTest is Test {
         (uint8 noOfOwnedBefore) = gameBank.noOfColorGroupOwnedByUser(MonopolyLibrary.PropertyColors.BROWN, player1);
         assertEq(noOfOwnedBefore, 1);
         // accept proposal
-        gameBank.acceptProposal(player2, 1);
+        gameBank.makeDecisionOnProposal(player2, 1, true);
 
         (,, MonopolyLibrary.SwapType _swapp, MonopolyLibrary.ProposalStatus statuss) = gameBank.inGameProposals(1);
 
@@ -251,6 +251,10 @@ contract BankTest is Test {
 
         (uint8 noOfOwnedAfter) = gameBank.noOfColorGroupOwnedByUser(MonopolyLibrary.PropertyColors.BROWN, player1);
 
+        (,,,,address getOwner,,,)= gameBank.gameProperties(6);
+
         assertEq(noOfOwnedAfter, 0);
+
+        assertEq(getOwner, player1);
     }
 }

@@ -244,11 +244,21 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         swappedSwapType.propertyForProperty.biddingPropertyId = biddingPropertyId;
     }
 
+    function makeDecisionOnProposal(address _user, uint256 proposalId, bool isAccepted) external nonReentrant {
+        MonopolyLibrary.Proposal storage proposal = inGameProposals[proposalId];
+        if (isAccepted) {
+            acceptProposal(_user, proposalId);
+        }
+        else {
+            proposal.proposalStatus = MonopolyLibrary.ProposalStatus.REJECTED;
+        }
+    }
+
     // in progress
     // this state track the user to the proposalId to a boolean value
     mapping(uint8 => mapping(address => bool)) private userProposalExist;
 
-    function acceptProposal(address _user, uint8 proposalId) external nonReentrant {
+    function acceptProposal(address _user, uint256 proposalId) public nonReentrant {
         MonopolyLibrary.Proposal storage proposal = inGameProposals[proposalId];
         MonopolyLibrary.SwappedType memory proposalSwappedType = swappedType[proposalId];
 
@@ -280,7 +290,6 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         _transfer(proposer, _user, amountInvolved);
 
         MonopolyLibrary.PropertyG storage biddingProperty = gameProperties[biddingPropertyId];
-        biddingProperty.owner = proposer;
         propertyOwner[biddingPropertyId] = proposer;
 
         //bidding
@@ -301,7 +310,6 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         _transfer(_user, proposer, amountInvolved);
 
         MonopolyLibrary.PropertyG storage proposedProperty = gameProperties[proposedPropertyId];
-        proposedProperty.owner = _user;
 
         propertyOwner[proposedPropertyId] = _user;
 
@@ -326,9 +334,6 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         MonopolyLibrary.PropertyG storage proposedProperty = gameProperties[proposedPropertyId];
         MonopolyLibrary.PropertyG storage biddingProperty = gameProperties[biddingPropertyId];
 
-        proposedProperty.owner = _user;
-        biddingProperty.owner = proposer;
-
         propertyOwner[biddingPropertyId] = proposer;
         propertyOwner[proposedPropertyId] = _user;
 
@@ -351,9 +356,6 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         // do that
         MonopolyLibrary.PropertyG storage proposedProperty = gameProperties[proposedPropertyId];
         MonopolyLibrary.PropertyG storage biddingProperty = gameProperties[biddingPropertyId];
-
-        proposedProperty.owner = _user;
-        biddingProperty.owner = proposer;
 
         propertyOwner[biddingPropertyId] = proposer;
         propertyOwner[proposedPropertyId] = _user;
@@ -381,9 +383,6 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         MonopolyLibrary.PropertyG storage proposedProperty = gameProperties[proposedPropertyId];
         MonopolyLibrary.PropertyG storage biddingProperty = gameProperties[biddingPropertyId];
 
-        proposedProperty.owner = _user;
-        biddingProperty.owner = proposer;
-
         propertyOwner[biddingPropertyId] = proposer;
         propertyOwner[proposedPropertyId] = _user;
 
@@ -394,9 +393,10 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         _handlePropertyTransfer(proposedProperty, proposer, _user);
     }
 
-    function _handlePropertyTransfer(MonopolyLibrary.PropertyG memory propertyG, address player1, address player2)
+    function _handlePropertyTransfer(MonopolyLibrary.PropertyG storage propertyG, address player1, address player2)
         private
     {
+        propertyG.owner = player2;
         noOfColorGroupOwnedByUser[propertyG.propertyColor][player1] -= 1;
         noOfColorGroupOwnedByUser[propertyG.propertyColor][player2] += 1;
 
