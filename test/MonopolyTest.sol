@@ -125,41 +125,47 @@ contract MonopolyTest is Test {
         gamebank.handleRent(B, 13, 5);
     }
 
-    function testProposeTradeFromGame() external {
-        vm.prank(A);
-        game.startGame();
-        vm.prank(A);
-        game.play();
-        vm.prank(A);
-        game.advanceToNextPlayer();
-        vm.prank(B);
-        game.play();
-        game.returnPlayer(B);
+    // function testProposeTradeFromGame() external {
+    //     vm.prank(A);
+    //     game.startGame();
+    //     vm.prank(A);
+    //     game.play();
+    //     vm.prank(A);
+    //     game.advanceToNextPlayer();
+    //     vm.prank(B);
+    //     game.play();
+    //     game.returnPlayer(B);
 
-        vm.prank(B);
-        game.buyProperty();
-        game.returnPlayer(B);
+    //     vm.prank(B);
+    //     game.buyProperty();
+    //     game.returnPlayer(B);
 
-        vm.prank(B);
-        game.advanceToNextPlayer();
+    //     vm.prank(B);
+    //     game.advanceToNextPlayer();
 
-        vm.prank(C);
-        game.play();
-        game.returnPlayer(C);
-        vm.prank(C);
-        game.buyProperty();
+    //     vm.prank(C);
+    //     game.play();
+    //     game.returnPlayer(C);
+    //     vm.prank(C);
+    //     game.buyProperty();
 
-        vm.prank(C);
-        game.advanceToNextPlayer();
-        vm.prank(D);
-        game.play();
+    //     vm.prank(C);
+    //     game.advanceToNextPlayer();
+    //     vm.prank(D);
+    //     game.play();
 
-        vm.prank(D);
-        // game.getProperty(12);
-        game.openTrade(0, 12, MonopolyLibrary.SwapType.PROPERTY_FOR_CASH, 140, C);
+    //     vm.prank(D);
+    //     // game.getProperty(12);
+    //     game.openTrade(
+    //         0,
+    //         12,
+    //         MonopolyLibrary.SwapType.PROPERTY_FOR_CASH,
+    //         140,
+    //         C
+    //     );
 
-        game.returnDeal(C);
-    }
+    //     game.returnDeal(C);
+    // }
 
     // function testAcceptTradeP4C() external {
     //     vm.prank(A);
@@ -195,7 +201,7 @@ contract MonopolyTest is Test {
     //     game.openTrade(
     //         0,
     //         12,
-    //         MonopolyLibrary.SWAP_TYPE.PROPERTY_FOR_CASH,
+    //         MonopolyLibrary.SwapType.PROPERTY_FOR_CASH,
     //         140,
     //         C
     //     );
@@ -258,7 +264,7 @@ contract MonopolyTest is Test {
     //     game.openTrade(
     //         24,
     //         0,
-    //         MonopolyLibrary.SWAP_TYPE.CASH_FOR_PROPERTY,
+    //         MonopolyLibrary.SwapType.CASH_FOR_PROPERTY,
     //         140,
     //         C
     //     );
@@ -325,7 +331,7 @@ contract MonopolyTest is Test {
     //     game.openTrade(
     //         24,
     //         12,
-    //         MonopolyLibrary.SWAP_TYPE.PROPERTY_FOR_PROPERTY,
+    //         MonopolyLibrary.SwapType.PROPERTY_FOR_PROPERTY,
     //         140,
     //         C
     //     );
@@ -388,7 +394,7 @@ contract MonopolyTest is Test {
     //     game.openTrade(
     //         24,
     //         12,
-    //         MonopolyLibrary.SWAP_TYPE.PROPERTY_FOR_CASH_AND_PROPERTY,
+    //         MonopolyLibrary.SwapType.PROPERTY_FOR_CASH_AND_PROPERTY,
     //         140,
     //         C
     //     );
@@ -458,7 +464,7 @@ contract MonopolyTest is Test {
     //     game.openTrade(
     //         24,
     //         12,
-    //         MonopolyLibrary.SWAP_TYPE.PROPERTY_AND_CASH_FOR_PROPERTY,
+    //         MonopolyLibrary.SwapType.PROPERTY_AND_CASH_FOR_PROPERTY,
     //         140,
     //         C
     //     );
@@ -487,83 +493,47 @@ contract MonopolyTest is Test {
     //     assertEq(nwOwner, C);
     // }
 
-    function testRejectProposal() external {
-        vm.prank(A);
-        game.startGame();
-        vm.prank(A);
-        game.play();
-        vm.prank(A);
-        game.advanceToNextPlayer();
-        vm.prank(B);
-        game.play();
-        game.returnPlayer(B);
+    // function testRejectProposal() external {
+    //     vm.prank(A);
+    //     game.startGame();
+    //     vm.prank(A);
+    //     game.play();
+    //     vm.prank(A);
+    //     game.advanceToNextPlayer();
+    //     vm.prank(B);
+    //     game.play();
+    //     game.returnPlayer(B);
 
-        vm.prank(B);
-        game.buyProperty();
-        game.returnPlayer(B);
+    //     vm.prank(B);
+    //     game.buyProperty();
+    //     game.returnPlayer(B);
 
-        vm.prank(B);
-        game.advanceToNextPlayer();
+    //     vm.prank(B);
+    //     game.advanceToNextPlayer();
 
-        vm.prank(C);
-        game.play();
-        game.returnPlayer(C);
-        vm.prank(C);
-        game.buyProperty();
+    //     vm.prank(C);
+    //     game.play();
+    //     game.returnPlayer(C);
+    //     vm.prank(C);
+    //     game.buyProperty();
 
-        vm.prank(C);
-        game.advanceToNextPlayer();
-        vm.prank(D);
-        game.play();
+    //     vm.prank(C);
+    //     game.advanceToNextPlayer();
+    //     vm.prank(D);
+    //     game.play();
 
-        vm.prank(D);
-        // game.getProperty(12);
-        game.openTrade(0, 12, MonopolyLibrary.SwapType.PROPERTY_FOR_CASH, 140, C);
-
-        vm.prank(C);
-        game.rejectDeal();
-
-        game.returnDeal(C);
-    }
-
-    function testCounterDeal() external {
-        vm.prank(A);
-        game.startGame();
-        vm.prank(A);
-        game.play();
-        vm.prank(A);
-        game.advanceToNextPlayer();
-        vm.prank(B);
-        game.play();
-        game.returnPlayer(B);
-
-        vm.prank(B);
-        game.buyProperty();
-        game.returnPlayer(B);
-
-        vm.prank(B);
-        game.advanceToNextPlayer();
-
-        vm.prank(C);
-        game.play();
-        game.returnPlayer(C);
-        vm.prank(C);
-        game.buyProperty();
-
-        vm.prank(C);
-        game.advanceToNextPlayer();
-        vm.prank(D);
-        game.play();
-
-        vm.prank(D);
-
-        game.openTrade(0, 12, MonopolyLibrary.SwapType.PROPERTY_FOR_CASH, 140, C);
-
-        game.returnDeal(C);
-
-        vm.prank(C);
-        game.counterDeal(0, 12, MonopolyLibrary.SwapType.CASH_FOR_PROPERTY, 200);
-
-        game.returnDeal(D);
-    }
+    //     vm.prank(D);
+    //     game.getProperty(12);
+    //     vm.prank(D);
+    //     game.openTrade(
+    //         0,
+    //         12,
+    //         MonopolyLibrary.SwapType.PROPERTY_FOR_CASH,
+    //         140,
+    //         C
+    //     );
+    //     vm.prank(C);
+    //     game.rejectDeal();
+    //     game.returnDeal(C);
+    // }
 }

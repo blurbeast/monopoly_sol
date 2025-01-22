@@ -21,7 +21,8 @@ library MonopolyLibrary {
         RED,
         GREEN,
         PURPLE,
-        BROWN
+        BROWN,
+        DARKBLUE
     }
 
     enum PropertyType {
@@ -48,6 +49,29 @@ library MonopolyLibrary {
         uint8 jailAttemptCount;
         uint256 cash;
         uint8 diceRolled;
+        bool played;
+        bool paidRent;
+    }
+
+    enum ChanceType {
+        Credit,
+        Debit,
+        PositionManipulation,
+        CreditAndPositionManipulation,
+        DebitAndPositionManipulation
+    }
+    struct Chance {
+        uint8 id;
+        bytes chance;
+        ChanceType chanceType;
+        uint8 changeInPosition;
+        uint8 newPosition;
+        int balanceChange;
+    }
+
+    struct PlayerProperties {
+        uint8 houses;
+        uint8 hotels;
     }
 
     struct PropertyRent {
@@ -79,6 +103,9 @@ library MonopolyLibrary {
         address player;
         address otherPlayer;
         SwapType swapType;
+        uint8 biddingPropertyId;
+        uint8 proposedPropertyId;
+        uint256 amountInvolved;
         ProposalStatus proposalStatus;
     }
 
@@ -168,7 +195,10 @@ library MonopolyLibrary {
     );
 
     event PropertyUpgraded(
-        uint8 indexed propertyId, address indexed user, uint8 upgradesApplied, uint256 newRentAmount
+        uint8 indexed propertyId,
+        address indexed user,
+        uint8 upgradesApplied,
+        uint256 newRentAmount
     );
 
     event PropertyDowngraded(

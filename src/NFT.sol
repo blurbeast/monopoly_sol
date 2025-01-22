@@ -21,33 +21,7 @@ contract GeneralNFT is ERC721URIStorage {
     using MonopolyLibrary for MonopolyLibrary.Property;
     using MonopolyLibrary for MonopolyLibrary.PropertyColors;
     using MonopolyLibrary for MonopolyLibrary.PropertyType;
-
-    struct Property {
-        bytes name;
-        uint256 rentAmount;
-        bytes uri;
-        uint256 buyAmount;
-        PropertyType propertyType;
-        PropertyColors color;
-    }
-
-    enum PropertyType {
-        Property,
-        RailStation,
-        Utility,
-        Special
-    }
-
-    enum PropertyColors {
-        PINK,
-        YELLOW,
-        BLUE,
-        ORANGE,
-        RED,
-        GREEN,
-        PURPLE,
-        BROWN
-    }
+    using MonopolyLibrary for MonopolyLibrary.Chance;
 
     MonopolyLibrary.Property[] public allProperties;
 
@@ -56,18 +30,23 @@ contract GeneralNFT is ERC721URIStorage {
 
     mapping(uint8 => MonopolyLibrary.PropertyRent) propertyRent;
 
+    
+
     constructor(string memory uri) ERC721("MonoPoly", "MNP") {
         baseUri = uri;
         createNftProperties();
         populateRent();
         _setAllProperties();
+        
     }
 
     function mint(address _minter) external {
         require(totalSupply < MAX_SUPPLY, "Max supply reached");
         uint256 tokenId = totalSupply;
         _mint(_minter, tokenId);
-        string memory tokenUri = string(abi.encodePacked(baseUri, "/", Strings.toString(tokenId)));
+        string memory tokenUri = string(
+            abi.encodePacked(baseUri, "/", Strings.toString(tokenId))
+        );
         _setTokenURI(tokenId, tokenUri);
         totalSupply++;
         populatePropertyUri();
@@ -421,7 +400,7 @@ contract GeneralNFT is ERC721URIStorage {
             uri: "",
             buyAmount: 350,
             propertyType: MonopolyLibrary.PropertyType.Property,
-            color: MonopolyLibrary.PropertyColors.BLUE
+            color: MonopolyLibrary.PropertyColors.DARKBLUE
         });
 
         properties[39] = MonopolyLibrary.Property({
@@ -439,9 +418,11 @@ contract GeneralNFT is ERC721URIStorage {
             uri: "",
             buyAmount: 400,
             propertyType: MonopolyLibrary.PropertyType.Property,
-            color: MonopolyLibrary.PropertyColors.BLUE
+            color: MonopolyLibrary.PropertyColors.DARKBLUE
         });
     }
+
+  
 
     function populatePropertyUri() private {
         require(totalSupply > 0, "no property minted yet");
@@ -452,8 +433,15 @@ contract GeneralNFT is ERC721URIStorage {
         }
     }
 
-    function getAllProperties() external view returns (MonopolyLibrary.Property[] memory) {
-        MonopolyLibrary.Property[] memory propertiesInMemory = new MonopolyLibrary.Property[](allProperties.length);
+    function getAllProperties()
+        external
+        view
+        returns (MonopolyLibrary.Property[] memory)
+    {
+        MonopolyLibrary.Property[]
+            memory propertiesInMemory = new MonopolyLibrary.Property[](
+                allProperties.length
+            );
         for (uint256 i = 0; i < allProperties.length; i++) {
             propertiesInMemory[i] = allProperties[i];
         }
@@ -461,7 +449,7 @@ contract GeneralNFT is ERC721URIStorage {
     }
 
     function _setAllProperties() private {
-        for (uint8 i = 1; i < 40; i++) {
+        for (uint8 i = 1; i < 41; i++) {
             allProperties.push(properties[i]);
         }
     }
@@ -708,17 +696,27 @@ contract GeneralNFT is ERC721URIStorage {
         });
     }
 
+   
+
     // i changed your original getAllProperties function to this
-    function getAllPropertiesM() external view returns (MonopolyLibrary.Property[] memory) {
+    function getAllPropertiesM()
+        external
+        view
+        returns (MonopolyLibrary.Property[] memory)
+    {
         require(totalSupply > 0, "No properties minted yet");
-        MonopolyLibrary.Property[] memory prop = new MonopolyLibrary.Property[](MAX_SUPPLY);
+        MonopolyLibrary.Property[] memory prop = new MonopolyLibrary.Property[](
+            MAX_SUPPLY
+        );
         for (uint8 i = 0; i < totalSupply; i++) {
             prop[i] = properties[i + 1];
         }
         return prop;
     }
 
-    function returnProperty(uint8 propertyId) external view returns (MonopolyLibrary.Property memory property) {
+    function returnProperty(
+        uint8 propertyId
+    ) external view returns (MonopolyLibrary.Property memory property) {
         property = properties[propertyId];
         return property;
     }
@@ -728,18 +726,25 @@ contract GeneralNFT is ERC721URIStorage {
     //        return totalSupply;
     //    }
 
-    function returnPropertyRent(uint8 propertyId, uint8 upgradeStatus) public view returns (uint256 rent) {
+    function returnPropertyRent(
+        uint8 propertyId,
+        uint8 upgradeStatus
+    ) public view returns (uint256 rent) {
         MonopolyLibrary.PropertyRent memory property = propertyRent[propertyId];
         MonopolyLibrary.Property memory propertyy = properties[propertyId];
-        require(propertyy.propertyType == MonopolyLibrary.PropertyType.Property, "Not a Property");
-        require(propertyId <= 40 && upgradeStatus <= 5, "invalid Property");
-        uint256[6] memory rents = [
+        require(
+            propertyy.propertyType == MonopolyLibrary.PropertyType.Property,
+            "Not a Property"
+        );
+        require(propertyId <= 40 && upgradeStatus <= 6, "invalid Property");
+        uint256[7] memory rents = [
             property.site,
             property.withOneHouse,
             property.withTwoHouses,
             property.withThreeHouses,
             property.withFourHouses,
-            property.withHotel
+            property.withHotel,
+            property.costOfHouse
         ];
 
         require(upgradeStatus < rents.length, "Invalid upgrade status");
