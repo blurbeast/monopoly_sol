@@ -10,9 +10,19 @@ interface INFTContract {
     function returnPropertyRent(uint8 propertyId, uint8 upgradeStatus) external view returns (uint256 rent);
 }
 
+interface IPlayerContract {
+    function checkIfPlayerIsRegistered(address _player) external view returns(bool);
+}
+
+interface IDice {
+    function rollDice() external view returns (uint256);
+}
+
 contract Game {
     GameBank public gameBank;
     INFTContract private nftContract;
+    IPlayerContract private iPlayerContract;
+    IDice private iDice;
     uint8 public numberOfPlayers;
 
     using MonopolyLibrary for MonopolyLibrary.PropertyG;
@@ -32,21 +42,26 @@ contract Game {
     event GameStarted(uint8 numberOfPlayers, address[] players);
 
     constructor(address _nftContract, address[] memory _playerAddresses, address _playerContract) {
-        require(_playerAddresses.length > 0 && _playerAddresses.length < 10, "Exceeds the allowed number of players");
+        require(_playerContract.code.length > 0, "Not a contract address");
+        iPlayerContract = IPlayerContract(_playerContract);
+        require(_playerAddresses.length > 1 && _playerAddresses.length < 10, "Exceeds the allowed number of players");
 
         for (uint8 i = 0; i < _playerAddresses.length; i++) {
-            require(_playerAddresses[i].code.length == 0, "Player address must be an EOA");
+            // require(_playerAddresses[i].code.length == 0, "Player address must be an EOA");
+            // require(!isPlayer[_playerAddresses[i]], "Duplicate player address detected");
+            // isPlayer[_playerAddresses[i]] = true;
+            // players[_playerAddresses[i]] = MonopolyLibrary.Player({
+            //     username: "",
+            //     addr: _playerAddresses[i],
+            //     playerCurrentPosition: 0,
+            //     inJail: false,
+            //     jailAttemptCount: 0,
+            //     cash: 0,
+            //     diceRolled: 0
+            // });
+            bool isRegistered = iPlayerContract.checkIfPlayerIsRegistered(_playerAddresses[i]);
+            require(isRegistered, "Player not registered");
             require(!isPlayer[_playerAddresses[i]], "Duplicate player address detected");
-            isPlayer[_playerAddresses[i]] = true;
-            players[_playerAddresses[i]] = MonopolyLibrary.Player({
-                username: "",
-                addr: _playerAddresses[i],
-                playerCurrentPosition: 0,
-                inJail: false,
-                jailAttemptCount: 0,
-                cash: 0,
-                diceRolled: 0
-            });
             playerAddresses.push(_playerAddresses[i]);
         }
 
@@ -68,8 +83,8 @@ contract Game {
             gameBank.mint(playerAddresses[i], 1500);
         }
         currentPlayerIndex = 0;
-        emit GameStarted(numberOfPlayers, playerAddresses);
         gameStarted = true;
+        emit GameStarted(numberOfPlayers, playerAddresses);
         return true;
     }
 
@@ -236,19 +251,19 @@ contract Game {
         // emit TurnChanged(playersPosition[currentPlayerIndex]);
     }
 
-    function _rollDice() private view returns (uint256) {
-        return (uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender, blockhash(block.number - 1)))) % 6) + 1;
-    }
+    // function _rollDice() private view returns (uint256) {
+    //     return (uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender, blockhash(block.number - 1)))) % 6) + 1;
+    // }
 
     function rollDices() private view returns (uint8, uint8) {
-        uint8 dice1 = uint8(_rollDice());
-        uint8 dice2 = uint8(_rollDice());
+        uint8 dice1 = uint8(iDice.rollDice());
+        uint8 dice2 = uint8(iDice.rollDice());
 
-        if (dice1 == dice2) {
-            uint8 dice3 = uint8(_rollDice());
-            uint8 dice4 = uint8(_rollDice());
-            return (dice3 + dice1, dice2 + dice4);
-        }
+        // if (dice1 == dice2) {
+        //     uint8 dice3 = uint8(_rollDice());
+        //     uint8 dice4 = uint8(_rollDice());
+        //     return (dice3 + dice1, dice2 + dice4);
+        // }
 
         return (dice1, dice2);
     }

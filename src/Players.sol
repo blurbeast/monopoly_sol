@@ -49,7 +49,7 @@ contract PlayerS {
         //emit an event
     }
 
-    function checkIfPlayerIsRegistered(address _player) external returns(bool) {
+    function checkIfPlayerIsRegistered(address _player) external view returns(bool) {
         return alreadyRegistered[_player];
     }
 
