@@ -181,9 +181,9 @@ contract Game {
         //        gameBank.rejectDeal(msg.sender);
     }
 
-    function handleRent() external {
-        MonopolyLibrary.Player storage player = players[msg.sender];
+    function handleRent(address _currentPlayer) external {
         require(gameStarted, "Game not started yet");
+        MonopolyLibrary.Player memory player = players[msg.sender];
         require(playerAddresses[currentPlayerIndex] == player.addr, "Not your turn");
         uint8 diceRolled = player.diceRolled;
         uint8 propertyId = player.playerCurrentPosition;
@@ -191,40 +191,40 @@ contract Game {
     }
 
     function mortgageProperty(uint8 propertyID) external {
+        require(gameStarted, "Game not started yet");
         MonopolyLibrary.Player memory player = players[msg.sender];
 
         MonopolyLibrary.PropertyG memory property = getProperty(propertyID);
-        require(gameStarted, "Game not started yet");
         require(playerAddresses[currentPlayerIndex] == player.addr, "Not your turn");
-        require(property.owner == msg.sender, "not your property");
+        // require(property.owner == msg.sender, "not your property");
 
         gameBank.mortgageProperty(propertyID, msg.sender);
     }
 
-    function releaseMortgage(uint8 _propertyID) external {
+    function releaseMortgage(uint8 _propertyId, address _curerntPlayer) external {
+        require(gameStarted, "Game not started yet");
         MonopolyLibrary.Player memory player = players[msg.sender];
 
-        MonopolyLibrary.PropertyG memory property = getProperty(_propertyID);
-        require(gameStarted, "Game not started yet");
+        // MonopolyLibrary.PropertyG memory property = getProperty(_propertyID);
         require(playerAddresses[currentPlayerIndex] == player.addr, "Not your turn");
-        require(property.owner == msg.sender, "not your property");
+        // require(property.owner == msg.sender, "not your property");
 
-        gameBank.releaseMortgage(_propertyID, msg.sender);
+        gameBank.releaseMortgage(_propertyId, msg.sender);
     }
 
-    function upgradeProperty(uint8 propertyId, uint8 noOfIntendedUpgrade) external {
+    function upgradeProperty(uint8 propertyId, uint8 noOfIntendedUpgrade, address _currentPlayer) external {
+        require(gameStarted, "Game not started yet");
         MonopolyLibrary.Player memory player = players[msg.sender];
 
-        require(gameStarted, "Game not started yet");
         require(playerAddresses[currentPlayerIndex] == player.addr, "Not your turn");
 
         gameBank.upgradeProperty(propertyId, noOfIntendedUpgrade, player.addr);
     }
 
-    function downgradeProperty(uint8 propertyId, uint8 requestedDowngrades) external {
+    function downgradeProperty(uint8 propertyId, uint8 requestedDowngrades, address _currentPlayer) external {
+        require(gameStarted, "Game not started yet");
         MonopolyLibrary.Player memory player = players[msg.sender];
 
-        require(gameStarted, "Game not started yet");
         require(playerAddresses[currentPlayerIndex] == player.addr, "Not your turn");
 
         gameBank.downgradeProperty(propertyId, requestedDowngrades, player.addr);
@@ -251,11 +251,11 @@ contract Game {
         uint8 dice1 = uint8(iDice.rollDice());
         uint8 dice2 = uint8(iDice.rollDice());
 
-        // if (dice1 == dice2) {
-        //     uint8 dice3 = uint8(_rollDice());
-        //     uint8 dice4 = uint8(_rollDice());
-        //     return (dice3 + dice1, dice2 + dice4);
-        // }
+        if (dice1 == dice2) {
+            uint8 dice3 = uint8(iDice.rollDice());
+            uint8 dice4 = uint8(iDice.rollDice());
+            return (dice3 + dice1, dice2 + dice4);
+        }
 
         return (dice1, dice2);
     }
