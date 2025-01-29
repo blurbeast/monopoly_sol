@@ -49,6 +49,10 @@ contract PlayerS {
         //emit an event
     }
 
+    function checkIfPlayerIsRegistered(address _player) external returns(bool) {
+        return alreadyRegistered[_player];
+    }
+
     /**
      * @dev when this function is called, user should be able to join game via the provided gamesid if the game has been created but not ended yet.
      *     @dev this function should make a call to the game contract to check if provided gamesid is valid and not ended.

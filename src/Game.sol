@@ -4,7 +4,7 @@ pragma solidity ^0.8.26;
 import {GameBank} from "./Bank.sol";
 import "./libraries/MonopolyLibrary.sol";
 
-interface NFTContract {
+interface INFTContract {
     function returnProperty(uint8 propertyId) external view returns (MonopolyLibrary.Property memory property);
 
     function returnPropertyRent(uint8 propertyId, uint8 upgradeStatus) external view returns (uint256 rent);
@@ -12,7 +12,7 @@ interface NFTContract {
 
 contract Game {
     GameBank public gameBank;
-    NFTContract private nftContract;
+    INFTContract private nftContract;
     uint8 public numberOfPlayers;
 
     using MonopolyLibrary for MonopolyLibrary.PropertyG;
@@ -31,7 +31,7 @@ contract Game {
 
     event GameStarted(uint8 numberOfPlayers, address[] players);
 
-    constructor(address _nftContract, address[] memory _playerAddresses) {
+    constructor(address _nftContract, address[] memory _playerAddresses, address _playerContract) {
         require(_playerAddresses.length > 0 && _playerAddresses.length < 10, "Exceeds the allowed number of players");
 
         for (uint8 i = 0; i < _playerAddresses.length; i++) {
@@ -52,7 +52,7 @@ contract Game {
 
         gameBank = new GameBank(uint8(playerAddresses.length), _nftContract);
         numberOfPlayers = uint8(playerAddresses.length);
-        nftContract = NFTContract(_nftContract);
+        nftContract = INFTContract(_nftContract);
     }
 
     /**
@@ -119,6 +119,7 @@ contract Game {
     }
 
     function buyProperty() external {
+        // require game has started 
         MonopolyLibrary.Player storage player = players[msg.sender];
         uint8 propertyId = player.playerCurrentPosition;
         MonopolyLibrary.Property memory property = returnPropertyNft(propertyId);

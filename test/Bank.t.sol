@@ -251,7 +251,7 @@ contract BankTest is Test {
 
         (uint8 noOfOwnedAfter) = gameBank.noOfColorGroupOwnedByUser(MonopolyLibrary.PropertyColors.BROWN, player1);
 
-        (,,,,address getOwner,,,)= gameBank.gameProperties(6);
+        (,,,, address getOwner,,,) = gameBank.gameProperties(6);
 
         assertEq(noOfOwnedAfter, 0);
 

@@ -248,8 +248,7 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         MonopolyLibrary.Proposal storage proposal = inGameProposals[proposalId];
         if (isAccepted) {
             acceptProposal(_user, proposalId);
-        }
-        else {
+        } else {
             proposal.proposalStatus = MonopolyLibrary.ProposalStatus.REJECTED;
         }
     }
