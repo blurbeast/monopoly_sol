@@ -105,21 +105,17 @@ contract Game {
                 player.jailAttemptCount++;
 
                 // If player has failed 3 times, release them from jail
-                if (player.jailAttemptCount >= 3) {
+                if (player.jailAttemptCount > 1 && player.jailAttemptCount > 2) {
                     player.inJail = false; // Player is out of jail
                     player.jailAttemptCount = 0; // Reset attempt count
                 } else {
-                    revert("Failed to roll doubles. Try again.");
+                    // Player rolled doubles and gets out of jail
+                    player.inJail = false;
+                    player.jailAttemptCount = 0;
+                    player.playerCurrentPosition += totalMove;
                 }
-            } else {
-                // Player rolled doubles and gets out of jail
-                player.inJail = false;
-                player.jailAttemptCount = 0;
             }
         }
-
-        // Update player's position
-        player.playerCurrentPosition += totalMove;
 
         // Check if the player passed 'Go'
         if (player.playerCurrentPosition > 40) {
@@ -133,15 +129,11 @@ contract Game {
         // Advance the turn to the next player
     }
 
-    function buyProperty() external {
-        // require game has started 
-        MonopolyLibrary.Player storage player = players[msg.sender];
-        uint8 propertyId = player.playerCurrentPosition;
-        MonopolyLibrary.Property memory property = returnPropertyNft(propertyId);
-        uint256 bidAmount = property.buyAmount;
+    function buyProperty(address _currentPlayer) external {
         require(gameStarted, "Game not started yet");
+        MonopolyLibrary.Player memory player = players[msg.sender];
         require(playerAddresses[currentPlayerIndex] == player.addr, "Can Only buy Properties During Your Turn");
-
+        uint8 propertyId = player.playerCurrentPosition;
         gameBank.buyProperty(propertyId, msg.sender);
     }
 
