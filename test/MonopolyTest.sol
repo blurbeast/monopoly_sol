@@ -6,6 +6,7 @@ import {GameBank} from "../src/Bank.sol";
 import {Game} from "../src/Game.sol";
 import {GeneralNFT} from "../src/NFT.sol";
 import "../src/libraries/MonopolyLibrary.sol";
+import {PlayerS} from "../src/Players.sol";
 
 using MonopolyLibrary for MonopolyLibrary.Property;
 using MonopolyLibrary for MonopolyLibrary.PropertyColors;
@@ -24,6 +25,7 @@ contract MonopolyTest is Test {
     GameBank public gamebank;
     Game public game;
     GeneralNFT public generalNft;
+    PlayerS public playerS;
 
     address A = address(0xa);
     address B = address(0xb);
@@ -37,14 +39,21 @@ contract MonopolyTest is Test {
     function setUp() public {
         // Deploy contracts
         generalNft = new GeneralNFT("uri");
-
+        playerS = new PlayerS();
         gamebank = new GameBank(4, address(generalNft));
-        game = new Game(address(generalNft), a);
+        game = new Game(address(generalNft), a, address(playerS));
 
         // Log initial states for debugging
         console.log("GeneralNFT deployed at:", address(generalNft));
         console.log("GameBank deployed at:", address(gamebank));
         // console.log("Game deployed at:", address(game));
+    }
+
+    function registerPlayers() private {
+        playerS.registerPlayer(A, "Alice");
+        playerS.registerPlayer(B, "Bob");
+        playerS.registerPlayer(C, "Charlie");
+        playerS.registerPlayer(D, "David");
     }
 
     function testSetupContracts() public view {
@@ -77,7 +86,7 @@ contract MonopolyTest is Test {
         game.returnPlayer(B);
         uint256 balb4 = game.playersBalances(B);
         vm.prank(B);
-        game.buyProperty();
+        game.buyProperty(B);
         game.returnPlayer(B);
         uint256 balAfter = game.playersBalances(B);
         // Confirming change of balance
@@ -92,7 +101,7 @@ contract MonopolyTest is Test {
         game.play();
         game.returnPlayer(C);
         vm.prank(C);
-        game.buyProperty();
+        game.buyProperty(C);
         uint256 cbalAfter = game.playersBalances(C);
         assertEq(cbalAfter, cbalb4 - 140);
         // checking new Ownership
@@ -137,7 +146,7 @@ contract MonopolyTest is Test {
         game.returnPlayer(B);
 
         vm.prank(B);
-        game.buyProperty();
+        game.buyProperty(B);
         game.returnPlayer(B);
 
         vm.prank(B);
@@ -147,7 +156,7 @@ contract MonopolyTest is Test {
         game.play();
         game.returnPlayer(C);
         vm.prank(C);
-        game.buyProperty();
+        game.buyProperty(C);
 
         vm.prank(C);
         game.advanceToNextPlayer();
@@ -499,7 +508,7 @@ contract MonopolyTest is Test {
         game.returnPlayer(B);
 
         vm.prank(B);
-        game.buyProperty();
+        game.buyProperty(B);
         game.returnPlayer(B);
 
         vm.prank(B);
@@ -509,7 +518,7 @@ contract MonopolyTest is Test {
         game.play();
         game.returnPlayer(C);
         vm.prank(C);
-        game.buyProperty();
+        game.buyProperty(C);
 
         vm.prank(C);
         game.advanceToNextPlayer();
@@ -538,7 +547,7 @@ contract MonopolyTest is Test {
         game.returnPlayer(B);
 
         vm.prank(B);
-        game.buyProperty();
+        game.buyProperty(B);
         game.returnPlayer(B);
 
         vm.prank(B);
@@ -548,7 +557,7 @@ contract MonopolyTest is Test {
         game.play();
         game.returnPlayer(C);
         vm.prank(C);
-        game.buyProperty();
+        game.buyProperty(C);
 
         vm.prank(C);
         game.advanceToNextPlayer();

@@ -193,8 +193,6 @@ contract Game {
     function mortgageProperty(uint8 propertyID) external {
         require(gameStarted, "Game not started yet");
         MonopolyLibrary.Player memory player = players[msg.sender];
-
-        MonopolyLibrary.PropertyG memory property = getProperty(propertyID);
         require(playerAddresses[currentPlayerIndex] == player.addr, "Not your turn");
         // require(property.owner == msg.sender, "not your property");
 
