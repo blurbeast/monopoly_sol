@@ -580,7 +580,10 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
 
     function getPropertiesOwnedByAPlayer(address _playerAddress) external view returns (MonopolyLibrary.PropertyG[] memory playerProperties) {
         for(uint8 i = 1; i <= propertySize ; i++) {
-
+            MonopolyLibrary.PropertyG memory p = gameProperties[i];
+            if (p.owner == _playerAddress) {
+                playerProperties.push(p);
+            }
         }
     }
 }
