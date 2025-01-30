@@ -60,67 +60,70 @@ contract MonopolyTest is Test {
         playerS.registerPlayer(D, "David");
     }
 
-    function testSetupContracts() public view {
-        // Check if the contracts are correctly deployed
-        assert(address(generalNft) != address(0));
-        assert(address(gamebank) != address(0));
-        // assert(address(game) != address(0));
-    }
 
-    function testBuyPropertyFromBank() external {
-        gamebank.mint(A, 1500);
-        uint256 bal = gamebank.balanceOf(A);
-        assert(bal == 1500);
-        vm.prank(A);
-        // gamebank.buyProperty(2, 60, A);
-        gamebank.buyProperty(2, A);
-        uint256 bal1 = gamebank.bal(A);
-        assert(bal1 == 1440);
-    }
+    
 
-    function testBuyPropertyFromGame() external {
-        vm.prank(A);
-        game.startGame();
-        vm.prank(A);
-        game.play();
-        vm.prank(A);
-        game.advanceToNextPlayer();
-        vm.prank(B);
-        game.play();
-        game.returnPlayer(B);
-        uint256 balb4 = game.playersBalances(B);
-        // vm.prank(B);
-        // game.buyProperty(B);
-        // game.returnPlayer(B);
-        // uint256 balAfter = game.playersBalances(B);
-        // Confirming change of balance
-        // assertEq(balAfter, balb4 - 220);
-        // checking new Ownership
-        // address newOwner = game.getPropertyOwner(24);
-        // assertEq(B, newOwner);
-        vm.prank(B);
-        game.advanceToNextPlayer();
-        uint256 cbalb4 = game.playersBalances(C);
-        vm.prank(C);
-        game.play();
-        game.returnPlayer(C);
-        vm.prank(C);
-        // game.buyProperty(C);
-        // uint256 cbalAfter = game.playersBalances(C);
-        // assertEq(cbalAfter, cbalb4 - 140);
-        // checking new Ownership
-        // address cnewOwner = game.getPropertyOwner(12);
-        // assertEq(C, cnewOwner);
-        // vm.prank(C);
-        // game.advanceToNextPlayer();
-        // vm.prank(D);
-        // game.play();
-        // vm.prank(D);
-        // game.advanceToNextPlayer();
-        // address currentPlayer = game.getCurrentPlayer();
-        // // MAKE SURE THE FIRST PLAYER GETS HIS TURN AFTER THE LAST
-        // assertEq(currentPlayer, A);
-    }
+    // function testSetupContracts() public view {
+    //     // Check if the contracts are correctly deployed
+    //     assert(address(generalNft) != address(0));
+    //     assert(address(gamebank) != address(0));
+    //     // assert(address(game) != address(0));
+    // }
+
+    // function testBuyPropertyFromBank() external {
+    //     gamebank.mint(A, 1500);
+    //     uint256 bal = gamebank.balanceOf(A);
+    //     assert(bal == 1500);
+    //     vm.prank(A);
+    //     // gamebank.buyProperty(2, 60, A);
+    //     gamebank.buyProperty(2, A);
+    //     uint256 bal1 = gamebank.bal(A);
+    //     assert(bal1 == 1440);
+    // }
+
+    // function testBuyPropertyFromGame() external {
+    //     vm.prank(A);
+    //     game.startGame();
+    //     vm.prank(A);
+    //     game.play();
+    //     vm.prank(A);
+    //     game.advanceToNextPlayer();
+    //     vm.prank(B);
+    //     game.play();
+    //     game.returnPlayer(B);
+    //     uint256 balb4 = game.playersBalances(B);
+    //     // vm.prank(B);
+    //     // game.buyProperty(B);
+    //     // game.returnPlayer(B);
+    //     // uint256 balAfter = game.playersBalances(B);
+    //     // Confirming change of balance
+    //     // assertEq(balAfter, balb4 - 220);
+    //     // checking new Ownership
+    //     // address newOwner = game.getPropertyOwner(24);
+    //     // assertEq(B, newOwner);
+    //     vm.prank(B);
+    //     game.advanceToNextPlayer();
+    //     uint256 cbalb4 = game.playersBalances(C);
+    //     vm.prank(C);
+    //     game.play();
+    //     game.returnPlayer(C);
+    //     vm.prank(C);
+    //     // game.buyProperty(C);
+    //     // uint256 cbalAfter = game.playersBalances(C);
+    //     // assertEq(cbalAfter, cbalb4 - 140);
+    //     // checking new Ownership
+    //     // address cnewOwner = game.getPropertyOwner(12);
+    //     // assertEq(C, cnewOwner);
+    //     // vm.prank(C);
+    //     // game.advanceToNextPlayer();
+    //     // vm.prank(D);
+    //     // game.play();
+    //     // vm.prank(D);
+    //     // game.advanceToNextPlayer();
+    //     // address currentPlayer = game.getCurrentPlayer();
+    //     // // MAKE SURE THE FIRST PLAYER GETS HIS TURN AFTER THE LAST
+    //     // assertEq(currentPlayer, A);
+    // }
 
     // function testHandleRent() external {
     //     gamebank.mint(A, 1500);

@@ -48,6 +48,7 @@ library MonopolyLibrary {
         uint8 jailAttemptCount;
         uint256 cash;
         uint8 diceRolled;
+        bool bankrupt;
     }
 
     struct PropertyRent {
