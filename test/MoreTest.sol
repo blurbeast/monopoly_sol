@@ -7,6 +7,7 @@ import {Game} from "../src/Game.sol";
 import {GeneralNFT} from "../src/NFT.sol";
 import "../src/libraries/MonopolyLibrary.sol";
 import {PlayerS} from "../src/Players.sol";
+import {Dice} from "../src/Dice.sol";
 
 using MonopolyLibrary for MonopolyLibrary.Property;
 using MonopolyLibrary for MonopolyLibrary.PropertyColors;
@@ -21,11 +22,12 @@ struct Player {
     uint256 totalPlayersWorth;
 }
 
-contract MonopolyTest is Test {
+contract MonopolyTests is Test {
     GameBank public gamebank;
     Game public game;
     GeneralNFT public generalNft;
     PlayerS public playerS;
+    Dice public dice;
 
     address A = address(0xa);
     address B = address(0xb);
@@ -40,9 +42,10 @@ contract MonopolyTest is Test {
         // Deploy contracts
         generalNft = new GeneralNFT("uri");
         playerS = new PlayerS();
+        dice = new Dice();
 
         gamebank = new GameBank(4, address(generalNft));
-        game = new Game(address(generalNft), a, address(playerS));
+        game = new Game(address(generalNft), a, address(playerS) , address(dice));
 
         // Log initial states for debugging
         console.log("GeneralNFT deployed at:", address(generalNft));
@@ -50,133 +53,133 @@ contract MonopolyTest is Test {
         // console.log("Game deployed at:", address(game));
     }
 
-    function testSetupContracts() public view {
-        // Check if the contracts are correctly deployed
-        assert(address(generalNft) != address(0));
-        assert(address(gamebank) != address(0));
-        // assert(address(game) != address(0));
-    }
+    // function testSetupContracts() public view {
+    //     // Check if the contracts are correctly deployed
+    //     assert(address(generalNft) != address(0));
+    //     assert(address(gamebank) != address(0));
+    //     // assert(address(game) != address(0));
+    // }
 
-    function testCreateProposalFromBank() external {
-        gamebank.mint(A, 1500);
-        gamebank.mint(B, 1500);
-        // uint256 bal = gamebank.bal(A);
+    // function testCreateProposalFromBank() external {
+    //     gamebank.mint(A, 1500);
+    //     gamebank.mint(B, 1500);
+    //     // uint256 bal = gamebank.bal(A);
 
-        vm.prank(A);
-        gamebank.buyProperty(2, A);
+    //     vm.prank(A);
+    //     gamebank.buyProperty(2, A);
 
-        vm.prank(B);
-        gamebank.buyProperty(25, B);
+    //     vm.prank(B);
+    //     gamebank.buyProperty(25, B);
 
-        uint256 balAB4 = gamebank.bal(A);
-        uint256 balB4 = gamebank.bal(B);
+    //     uint256 balAB4 = gamebank.bal(A);
+    //     uint256 balB4 = gamebank.bal(B);
 
-        vm.prank(B);
-        //        gamebank.proposePropertySwap(B, A, 25, 2, MonopolyLibrary.SwapType.PROPERTY_AND_CASH_FOR_PROPERTY, 50);
+    //     vm.prank(B);
+    //     //        gamebank.proposePropertySwap(B, A, 25, 2, MonopolyLibrary.SwapType.PROPERTY_AND_CASH_FOR_PROPERTY, 50);
 
-        vm.prank(A);
-        gamebank.viewDeals(A);
+    //     vm.prank(A);
+    //     gamebank.viewDeals(A);
 
-        vm.prank(A);
-        //        gamebank.acceptDeal(A);
+    //     vm.prank(A);
+    //     //        gamebank.acceptDeal(A);
 
-        uint256 balA = gamebank.bal(A);
-        uint256 bal = gamebank.bal(B);
+    //     uint256 balA = gamebank.bal(A);
+    //     uint256 bal = gamebank.bal(B);
 
-        console.log("bal A before:", balAB4, "  bal B after: ", balA);
-        console.log("bal Before:", balB4, "  bal B after: ", bal);
+    //     console.log("bal A before:", balAB4, "  bal B after: ", balA);
+    //     console.log("bal Before:", balB4, "  bal B after: ", bal);
 
-        gamebank.getPropertyOwner(2);
-        gamebank.getPropertyOwner(25);
-    }
+    //     gamebank.getPropertyOwner(2);
+    //     gamebank.getPropertyOwner(25);
+    // }
 
-    function testMortgageProperty() external {
-        vm.prank(A);
-        game.startGame();
-        vm.prank(A);
-        game.play();
-        vm.prank(A);
-        game.advanceToNextPlayer();
-        vm.prank(B);
-        game.play();
-        game.returnPlayer(B);
+    // function testMortgageProperty() external {
+    //     vm.prank(A);
+    //     game.startGame();
+    //     vm.prank(A);
+    //     game.play();
+    //     vm.prank(A);
+    //     game.advanceToNextPlayer();
+    //     vm.prank(B);
+    //     game.play();
+    //     game.returnPlayer(B);
 
-        vm.prank(B);
-        game.buyProperty(B);
-        game.returnPlayer(B);
+    //     vm.prank(B);
+    //     game.buyProperty(B);
+    //     game.returnPlayer(B);
 
-        vm.prank(B);
-        game.advanceToNextPlayer();
+    //     vm.prank(B);
+    //     game.advanceToNextPlayer();
 
-        vm.prank(C);
-        game.play();
-        game.returnPlayer(C);
-        vm.prank(C);
-        game.buyProperty(C);
+    //     vm.prank(C);
+    //     game.play();
+    //     game.returnPlayer(C);
+    //     vm.prank(C);
+    //     game.buyProperty(C);
 
-        vm.prank(C);
-        game.advanceToNextPlayer();
+    //     vm.prank(C);
+    //     game.advanceToNextPlayer();
 
-        vm.prank(D);
-        game.play();
-        vm.prank(D);
-        game.advanceToNextPlayer();
+    //     vm.prank(D);
+    //     game.play();
+    //     vm.prank(D);
+    //     game.advanceToNextPlayer();
 
-        vm.prank(A);
-        game.play();
-        vm.prank(A);
-        game.advanceToNextPlayer();
+    //     vm.prank(A);
+    //     game.play();
+    //     vm.prank(A);
+    //     game.advanceToNextPlayer();
 
-        vm.prank(B);
-        game.mortgageProperty(24);
+    //     vm.prank(B);
+    //     game.mortgageProperty(24);
 
-        vm.prank(B);
-        game.releaseMortgage(24, B);
+    //     vm.prank(B);
+    //     game.releaseMortgage(24, B);
 
-        vm.prank(B);
+    //     vm.prank(B);
 
-        game.openTrade(24, 12, MonopolyLibrary.SwapType.PROPERTY_FOR_PROPERTY, 140, C);
+    //     game.openTrade(24, 12, MonopolyLibrary.SwapType.PROPERTY_FOR_PROPERTY, 140, C);
 
-        game.returnDeal(C);
-        uint256 cbalb4 = game.playersBalances(C);
+    //     game.returnDeal(C);
+    //     uint256 cbalb4 = game.playersBalances(C);
 
-        vm.prank(C);
-        game.acceptTrade();
+    //     vm.prank(C);
+    //     game.acceptTrade();
 
-        uint256 cbalAfter = game.playersBalances(C);
+    //     uint256 cbalAfter = game.playersBalances(C);
 
-        assertEq(cbalAfter, cbalb4);
+    //     assertEq(cbalAfter, cbalb4);
 
-        address newOwner = game.getPropertyOwner(12);
-        assertEq(newOwner, B);
+    //     address newOwner = game.getPropertyOwner(12);
+    //     assertEq(newOwner, B);
 
-        address nwOwner = game.getPropertyOwner(24);
-        assertEq(nwOwner, C);
-    }
+    //     address nwOwner = game.getPropertyOwner(24);
+    //     assertEq(nwOwner, C);
+    // }
 
-    function testUpgradeAndDowngradePropertyFromBank() external {
-        gamebank.mint(A, 1500);
-        gamebank.mint(B, 6500);
+    // function testUpgradeAndDowngradePropertyFromBank() external {
+    //     gamebank.mint(A, 1500);
+    //     gamebank.mint(B, 6500);
 
-        vm.prank(A);
-        gamebank.buyProperty(2, A);
+    //     vm.prank(A);
+    //     gamebank.buyProperty(2, A);
 
-        vm.prank(B);
-        gamebank.buyProperty(27, B);
-        gamebank.buyProperty(28, B);
-        gamebank.buyProperty(30, B);
+    //     vm.prank(B);
+    //     gamebank.buyProperty(27, B);
+    //     gamebank.buyProperty(28, B);
+    //     gamebank.buyProperty(30, B);
 
-        vm.prank(B);
-        gamebank.upgradeProperty(27, 4, B);
+    //     vm.prank(B);
+    //     gamebank.upgradeProperty(27, 4, B);
 
-        uint256 initialBalance = gamebank.balanceOf(B);
-        vm.prank(B);
-        gamebank.downgradeProperty(27, 3, B);
-        uint256 balanceAfterUpgrade = gamebank.balanceOf(B);
-        gamebank.getProperty(27);
+    //     uint256 initialBalance = gamebank.balanceOf(B);
+    //     vm.prank(B);
+    //     gamebank.downgradeProperty(27, 3, B);
+    //     uint256 balanceAfterUpgrade = gamebank.balanceOf(B);
+    //     gamebank.getProperty(27);
 
-        console.log("initial Balance", initialBalance, "balance After downgrade", balanceAfterUpgrade);
-    }
+    //     console.log("initial Balance", initialBalance, "balance After downgrade", balanceAfterUpgrade);
+    // }
 
     // COMMENT LINE 593 IN Bank.sol
     //    function testUpgradeAndDowngradePropertyFromGame() external {

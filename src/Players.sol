@@ -37,6 +37,7 @@ contract PlayerS {
      */
     function registerPlayer(address playerAddress, string memory username) external {
         require(!alreadyRegistered[playerAddress], "player already registered");
+        require(playerAddress.code.length == 0, "not an EOA" );
 
         bytes memory _usernameBytes = convertToLowerCase(username);
 
@@ -47,10 +48,6 @@ contract PlayerS {
         playerUsernames[playerAddress] = _usernameBytes;
 
         //emit an event
-    }
-
-    function checkIfPlayerIsRegistered(address _player) external view returns(bool) {
-        return alreadyRegistered[_player];
     }
 
     /**
