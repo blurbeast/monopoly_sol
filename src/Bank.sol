@@ -88,6 +88,7 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
     function _gameProperties() private {
         MonopolyLibrary.Property[] memory allProperties = nftContract.getAllProperties();
         uint256 size = allProperties.length;
+        propertySize = uint8(allProperties.length);
         for (uint8 i = 0; i < size; i++) {
             MonopolyLibrary.Property memory property = allProperties[i];
             _distributePropertyType(property, i);
@@ -574,5 +575,12 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         MonopolyLibrary.PropertySwap storage swap = propertySwap[myDeals];
         currentDeal = swap;
         return currentDeal;
+    }
+
+
+    function getPropertiesOwnedByAPlayer(address _playerAddress) external view returns (MonopolyLibrary.PropertyG[] memory playerProperties) {
+        for(uint8 i = 1; i <= propertySize ; i++) {
+
+        }
     }
 }

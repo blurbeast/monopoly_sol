@@ -36,7 +36,7 @@ contract MonopolyTest is Test {
 
     address E = address(0xe);
 
-    address[] a = [A, B, C, D];
+    address[] allGamePlayers = [A, B, C, D];
 
     function setUp() public {
         // Deploy contracts
@@ -45,7 +45,7 @@ contract MonopolyTest is Test {
         playerS = new PlayerS();
         _registerPlayers();
         gamebank = new GameBank(4, address(generalNft));
-        game = new Game(address(generalNft), a, address(playerS), address(dice));
+        game = new Game(address(generalNft), allGamePlayers, address(playerS), address(dice));
 
         // Log initial states for debugging
         console.log("GeneralNFT deployed at:", address(generalNft));
@@ -60,9 +60,74 @@ contract MonopolyTest is Test {
         playerS.registerPlayer(D, "David");
     }
 
+    function testPlayGame() external {
+        // player cannot play game when the game has not yet started 
+        vm.expectRevert("Game not started yet");
+        game.play(A);
 
-    
+        // game has started
+        game.startGame();
 
+        // the first player to player is the player at index zero 
+        // confirm that 
+        vm.expectRevert("Not your turn");
+        game.play(B);
+
+        //play game now 
+        address currentPlayer = game.getCurrentPlayer();
+        assertEq(currentPlayer, A);
+        game.play(A);
+
+        //zafter play, the turn should move to the next player 
+        game.nextTurn();
+
+        //check that the next player is the player at index 1
+        address nextPlayer = game.getCurrentPlayer();
+
+        assertEq(nextPlayer, B);
+    }
+
+    function testPlayGames() external {
+        //startgame 
+        game.startGame();
+        // play game 
+        game.play(A);
+
+        // run three turns 
+        game.nextTurn();
+        game.nextTurn();
+        game.nextTurn();
+
+        address nextPlayer = game.getCurrentPlayer();
+        assertEq(nextPlayer, D);
+
+        //next turn move to the first player
+        game.nextTurn();
+
+        address currentPlayer = game.getCurrentPlayer();
+        assertEq(currentPlayer, A);
+    }
+
+    function testHandleRentAndProperty() external {
+        //start game 
+        game.startGame();
+
+        //start game 
+        game.play(A);
+
+        vm.expectRevert("Property does not have an owner");
+        game.handleRent(A);
+
+        //buy property
+        game.buyProperty(A);
+
+        MonopolyLibrary.Player memory player = game.returnPlayer(A);
+
+        //get property
+        
+
+
+    }
     // function testSetupContracts() public view {
     //     // Check if the contracts are correctly deployed
     //     assert(address(generalNft) != address(0));

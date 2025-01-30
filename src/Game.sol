@@ -91,12 +91,12 @@ contract Game {
         return true;
     }
 
-    function play() external {
-        MonopolyLibrary.Player storage player = players[msg.sender];
+    function play(address _currentPlayer) external {
+        MonopolyLibrary.Player storage player = players[_currentPlayer];
         require(gameStarted, "Game not started yet");
         // console.log(" player address ",playerAddresses[currentPlayerIndex]);
         // console.log("retrieved address :: ", player.addr);
-        require(playerAddresses[currentPlayerIndex] == player.addr, "Not your turn");
+        require(playerAddresses[currentPlayerIndex] == _currentPlayer, "Not your turn");
 
         // Roll the dice
         (uint8 dice1, uint8 dice2) = rollDices();
@@ -237,7 +237,7 @@ contract Game {
     /**
      * @dev Advance to the next player's turn.
      */
-    function _nextTurn() private {
+    function nextTurn() external {
         require(gameStarted, "Game not started yet");
         require(playerAddresses.length > 0, "No players available");
 
@@ -247,19 +247,17 @@ contract Game {
         // emit TurnChanged(playersPosition[currentPlayerIndex]);
     }
 
-    // function _rollDice() private view returns (uint256) {
-    //     return (uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender, blockhash(block.number - 1)))) % 6) + 1;
-    // }
+  
 
     function rollDices() private view returns (uint8, uint8) {
         uint8 dice1 = uint8(iDice.rollDice());
         uint8 dice2 = uint8(iDice.rollDice());
 
-        // if (dice1 == dice2) {
-        //     uint8 dice3 = uint8(iDice.rollDice());
-        //     uint8 dice4 = uint8(iDice.rollDice());
-        //     return (dice3 + dice1, dice2 + dice4);
-        // }
+        if (dice1 == dice2) {
+            uint8 dice3 = uint8(iDice.rollDice());
+            uint8 dice4 = uint8(iDice.rollDice());
+            return (dice3 + dice1, dice2 + dice4);
+        }
 
         return (dice1, dice2);
     }
@@ -273,17 +271,17 @@ contract Game {
         return playerAddresses[currentPlayerIndex];
     }
 
-    function advanceToNextPlayer() external {
-        // Advance the turn to the next player
-        MonopolyLibrary.Player storage player = players[msg.sender];
-        require(gameStarted, "Game not started yet");
-        // require(playerAddresses[currentPlayerIndex] == player.addr, "Not your turn");
-        _nextTurn();
-        emit TurnChanged(playerAddresses[currentPlayerIndex]);
+    // function advanceToNextPlayer() external {
+    //     // Advance the turn to the next player
+    //     MonopolyLibrary.Player storage player = players[msg.sender];
+    //     require(gameStarted, "Game not started yet");
+    //     // require(playerAddresses[currentPlayerIndex] == player.addr, "Not your turn");
+    //     _nextTurn();
+    //     emit TurnChanged(playerAddresses[currentPlayerIndex]);
 
-        // Emit an event for the move
-        emit PlayerMoved(player.addr, player.playerCurrentPosition);
-    }
+    //     // Emit an event for the move
+    //     emit PlayerMoved(player.addr, player.playerCurrentPosition);
+    // }
 
     //HELPER FUNCTIONS FOR TESTING
 
