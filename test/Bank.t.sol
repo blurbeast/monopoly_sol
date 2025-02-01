@@ -268,10 +268,14 @@ contract BankTest is Test {
     function testGetPropertiesOwnerByAPlayer() external {
         gameBank.buyProperty(2, player1);
         gameBank.buyProperty(6, player1);
+        gameBank.buyProperty(7, player2);
+        gameBank.buyProperty(10, player2);
+        gameBank.buyProperty(16, player1);
+        gameBank.buyProperty(17, player1);
 
         MonopolyLibrary.PropertyG[] memory playerOwnedProperties = gameBank.getPropertiesOwnedByAPlayer(player1);
 
-        assertEq(playerOwnedProperties.length, 2);
+        assertEq(playerOwnedProperties.length, 4);
 
         MonopolyLibrary.PropertyG memory property = playerOwnedProperties[0];
         assertEq(property.name, bytes("Mediterranean Avenue"));

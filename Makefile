@@ -11,3 +11,7 @@ game_test :
 	@echo "Running game test..."
 	forge test --match-contract GameTest
 
+bank_player_owned :
+	@echo "Running bank player owned properties test..."
+	forge t --match-contract BankTest --match-test testGetPropertiesOwnerByAPlayer
+

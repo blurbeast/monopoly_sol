@@ -199,6 +199,9 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
                         ? _propertyForCash(proposalIds, proposedPropertyId, amountInvolved)
                         : _cashForProperty(proposalIds, amountInvolved, biddingPropertyId);
 
+
+        isProposalActive[proposalIds] = true;
+
         // to emit an event here
     }
 
@@ -244,19 +247,22 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         swappedSwapType.propertyForProperty.proposedPropertyId = proposedPropertyId;
         swappedSwapType.propertyForProperty.biddingPropertyId = biddingPropertyId;
     }
-
+    mapping(uint256 => bool) private isProposalActive;
     function makeDecisionOnProposal(address _user, uint256 proposalId, bool isAccepted) external nonReentrant {
+        require(isProposalActive[proposalId], "Proposal already decided");
         MonopolyLibrary.Proposal storage proposal = inGameProposals[proposalId];
         if (isAccepted) {
             acceptProposal(_user, proposalId);
         } else {
             proposal.proposalStatus = MonopolyLibrary.ProposalStatus.REJECTED;
         }
+
+        isProposalActive[proposalId] = false;
     }
 
     // in progress
     // this state track the user to the proposalId to a boolean value
-    mapping(uint8 => mapping(address => bool)) private userProposalExist;
+    // mapping(uint8 => mapping(address => bool)) private userProposalExist;
 
     function acceptProposal(address _user, uint256 proposalId) private {
         MonopolyLibrary.Proposal storage proposal = inGameProposals[proposalId];
@@ -589,7 +595,6 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
             }
         }
 
-        // Resize the array to the actual number of properties owned
         assembly {
             mstore(playerProperties, count)
         }
