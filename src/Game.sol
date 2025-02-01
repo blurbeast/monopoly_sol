@@ -13,7 +13,7 @@ interface INFTContract {
 
 interface IPlayerContract {
     function playerUsernames(address player) external view returns (bytes memory);
-    function alreadyRegistered(address _player) external view returns(bool);
+    function alreadyRegistered(address _player) external view returns (bool);
 }
 
 interface IDice {
@@ -43,7 +43,12 @@ contract Game {
 
     event GameStarted(uint8 numberOfPlayers, address[] players);
 
-    constructor(address _nftContract, address[] memory _playerAddresses, address _playerContract, address _diceContract) {
+    constructor(
+        address _nftContract,
+        address[] memory _playerAddresses,
+        address _playerContract,
+        address _diceContract
+    ) {
         require(_playerContract.code.length > 0, "Not a contract address");
         iPlayerContract = IPlayerContract(_playerContract);
         require(_playerAddresses.length > 1 && _playerAddresses.length < 10, "Exceeds the allowed number of players");
@@ -104,24 +109,22 @@ contract Game {
 
         // Check if player is in jail
         if (player.inJail) {
-        //     // Check if the player rolled doubles
+            //     // Check if the player rolled doubles
             if (dice1 == dice2) {
                 player.inJail = false; // Player is out of jail
                 player.jailAttemptCount = 0; // Reset attempt count
                 player.playerCurrentPosition += totalMove;
-        player.diceRolled = totalMove;
-            }
-            else {
+                player.diceRolled = totalMove;
+            } else {
                 player.jailAttemptCount += 1;
                 if (player.jailAttemptCount > 2) {
                     player.inJail = false; // Player is out of jail
                     player.jailAttemptCount = 0; // Reset attempt count
                 }
             }
-        }
-        else {
+        } else {
             player.playerCurrentPosition += totalMove;
-        player.diceRolled = totalMove;
+            player.diceRolled = totalMove;
         }
 
         // Check if the player passed 'Go'
@@ -247,8 +250,6 @@ contract Game {
 
         // emit TurnChanged(playersPosition[currentPlayerIndex]);
     }
-
-  
 
     // function rollDices() private view returns (uint8, uint8) {
     //     (uint8 dice1, uint8 dice2) = iDice.rollDice();

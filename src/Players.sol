@@ -37,7 +37,7 @@ contract PlayerS {
      */
     function registerPlayer(address playerAddress, string memory username) external {
         require(!alreadyRegistered[playerAddress], "player already registered");
-        require(playerAddress.code.length == 0, "not an EOA" );
+        require(playerAddress.code.length == 0, "not an EOA");
 
         bytes memory _usernameBytes = convertToLowerCase(username);
 

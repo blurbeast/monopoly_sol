@@ -61,24 +61,24 @@ contract MonopolyTest is Test {
     // }
 
     // function testPlayGame() external {
-    //     // player cannot play game when the game has not yet started 
+    //     // player cannot play game when the game has not yet started
     //     vm.expectRevert("Game not started yet");
     //     game.play(A);
 
     //     // game has started
     //     game.startGame();
 
-    //     // the first player to player is the player at index zero 
-    //     // confirm that 
+    //     // the first player to player is the player at index zero
+    //     // confirm that
     //     vm.expectRevert("Not your turn");
     //     game.play(B);
 
-    //     //play game now 
+    //     //play game now
     //     address currentPlayer = game.getCurrentPlayer();
     //     assertEq(currentPlayer, A);
     //     game.play(A);
 
-    //     //zafter play, the turn should move to the next player 
+    //     //zafter play, the turn should move to the next player
     //     game.nextTurn();
 
     //     //check that the next player is the player at index 1
@@ -88,12 +88,12 @@ contract MonopolyTest is Test {
     // }
 
     // function testPlayGames() external {
-    //     //startgame 
+    //     //startgame
     //     game.startGame();
-    //     // play game 
+    //     // play game
     //     game.play(A);
 
-    //     // run three turns 
+    //     // run three turns
     //     game.nextTurn();
     //     game.nextTurn();
     //     game.nextTurn();
@@ -109,10 +109,10 @@ contract MonopolyTest is Test {
     // }
 
     // function testHandleRentAndProperty() external {
-    //     //start game 
+    //     //start game
     //     game.startGame();
 
-    //     //start game 
+    //     //start game
     //     game.play(A);
 
     //     vm.expectRevert("Property does not have an owner");
@@ -124,8 +124,6 @@ contract MonopolyTest is Test {
     //     MonopolyLibrary.Player memory player = game.returnPlayer(A);
 
     //     //get property
-        
-
 
     // }
     // function testSetupContracts() public view {

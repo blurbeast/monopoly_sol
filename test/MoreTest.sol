@@ -45,7 +45,7 @@ contract MonopolyTests is Test {
         dice = new Dice();
 
         gamebank = new GameBank(4, address(generalNft));
-        game = new Game(address(generalNft), a, address(playerS) , address(dice));
+        game = new Game(address(generalNft), a, address(playerS), address(dice));
 
         // Log initial states for debugging
         console.log("GeneralNFT deployed at:", address(generalNft));

@@ -1,14 +1,10 @@
-
-
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
 import {PlayerS} from "../src/Players.sol";
 import {Test, console} from "forge-std/Test.sol";
 
-
 contract PlayersTest is Test {
-
     PlayerS public playerS;
 
     address private playerA = address(0xa);
@@ -32,7 +28,6 @@ contract PlayersTest is Test {
         vm.expectRevert("player already registered");
         playerS.registerPlayer(playerA, "playerB");
 
-
         vm.expectRevert("username is already taken");
         playerS.registerPlayer(playerB, "alice");
 
@@ -40,7 +35,7 @@ contract PlayersTest is Test {
 
         bytes memory username = bytes("alice");
 
-        assertEq( playerS.usernameExists(username) , true);
+        assertEq(playerS.usernameExists(username), true);
 
         bytes memory gottenPlayerUsername = playerS.playerUsernames(playerA);
 
