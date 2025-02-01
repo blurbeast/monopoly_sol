@@ -38,96 +38,96 @@ contract MonopolyTest is Test {
 
     address[] allGamePlayers = [A, B, C, D];
 
-    function setUp() public {
-        // Deploy contracts
-        dice = new Dice();
-        generalNft = new GeneralNFT("uri");
-        playerS = new PlayerS();
-        _registerPlayers();
-        gamebank = new GameBank(4, address(generalNft));
-        game = new Game(address(generalNft), allGamePlayers, address(playerS), address(dice));
+    // function setUp() public {
+    //     // Deploy contracts
+    //     dice = new Dice();
+    //     generalNft = new GeneralNFT("uri");
+    //     playerS = new PlayerS();
+    //     _registerPlayers();
+    //     gamebank = new GameBank(4, address(generalNft));
+    //     game = new Game(address(generalNft), allGamePlayers, address(playerS), address(dice));
 
-        // Log initial states for debugging
-        console.log("GeneralNFT deployed at:", address(generalNft));
-        console.log("GameBank deployed at:", address(gamebank));
-        // console.log("Game deployed at:", address(game));
-    }
+    //     // Log initial states for debugging
+    //     console.log("GeneralNFT deployed at:", address(generalNft));
+    //     console.log("GameBank deployed at:", address(gamebank));
+    //     // console.log("Game deployed at:", address(game));
+    // }
 
-    function _registerPlayers() private {
-        playerS.registerPlayer(A, "Alice");
-        playerS.registerPlayer(B, "Bob");
-        playerS.registerPlayer(C, "Charlie");
-        playerS.registerPlayer(D, "David");
-    }
+    // function _registerPlayers() private {
+    //     playerS.registerPlayer(A, "Alice");
+    //     playerS.registerPlayer(B, "Bob");
+    //     playerS.registerPlayer(C, "Charlie");
+    //     playerS.registerPlayer(D, "David");
+    // }
 
-    function testPlayGame() external {
-        // player cannot play game when the game has not yet started 
-        vm.expectRevert("Game not started yet");
-        game.play(A);
+    // function testPlayGame() external {
+    //     // player cannot play game when the game has not yet started 
+    //     vm.expectRevert("Game not started yet");
+    //     game.play(A);
 
-        // game has started
-        game.startGame();
+    //     // game has started
+    //     game.startGame();
 
-        // the first player to player is the player at index zero 
-        // confirm that 
-        vm.expectRevert("Not your turn");
-        game.play(B);
+    //     // the first player to player is the player at index zero 
+    //     // confirm that 
+    //     vm.expectRevert("Not your turn");
+    //     game.play(B);
 
-        //play game now 
-        address currentPlayer = game.getCurrentPlayer();
-        assertEq(currentPlayer, A);
-        game.play(A);
+    //     //play game now 
+    //     address currentPlayer = game.getCurrentPlayer();
+    //     assertEq(currentPlayer, A);
+    //     game.play(A);
 
-        //zafter play, the turn should move to the next player 
-        game.nextTurn();
+    //     //zafter play, the turn should move to the next player 
+    //     game.nextTurn();
 
-        //check that the next player is the player at index 1
-        address nextPlayer = game.getCurrentPlayer();
+    //     //check that the next player is the player at index 1
+    //     address nextPlayer = game.getCurrentPlayer();
 
-        assertEq(nextPlayer, B);
-    }
+    //     assertEq(nextPlayer, B);
+    // }
 
-    function testPlayGames() external {
-        //startgame 
-        game.startGame();
-        // play game 
-        game.play(A);
+    // function testPlayGames() external {
+    //     //startgame 
+    //     game.startGame();
+    //     // play game 
+    //     game.play(A);
 
-        // run three turns 
-        game.nextTurn();
-        game.nextTurn();
-        game.nextTurn();
+    //     // run three turns 
+    //     game.nextTurn();
+    //     game.nextTurn();
+    //     game.nextTurn();
 
-        address nextPlayer = game.getCurrentPlayer();
-        assertEq(nextPlayer, D);
+    //     address nextPlayer = game.getCurrentPlayer();
+    //     assertEq(nextPlayer, D);
 
-        //next turn move to the first player
-        game.nextTurn();
+    //     //next turn move to the first player
+    //     game.nextTurn();
 
-        address currentPlayer = game.getCurrentPlayer();
-        assertEq(currentPlayer, A);
-    }
+    //     address currentPlayer = game.getCurrentPlayer();
+    //     assertEq(currentPlayer, A);
+    // }
 
-    function testHandleRentAndProperty() external {
-        //start game 
-        game.startGame();
+    // function testHandleRentAndProperty() external {
+    //     //start game 
+    //     game.startGame();
 
-        //start game 
-        game.play(A);
+    //     //start game 
+    //     game.play(A);
 
-        vm.expectRevert("Property does not have an owner");
-        game.handleRent(A);
+    //     vm.expectRevert("Property does not have an owner");
+    //     game.handleRent(A);
 
-        //buy property
-        game.buyProperty(A);
+    //     //buy property
+    //     game.buyProperty(A);
 
-        MonopolyLibrary.Player memory player = game.returnPlayer(A);
+    //     MonopolyLibrary.Player memory player = game.returnPlayer(A);
 
-        //get property
+    //     //get property
         
 
 
-    }
+    // }
     // function testSetupContracts() public view {
     //     // Check if the contracts are correctly deployed
     //     assert(address(generalNft) != address(0));

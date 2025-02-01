@@ -258,7 +258,7 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
     // this state track the user to the proposalId to a boolean value
     mapping(uint8 => mapping(address => bool)) private userProposalExist;
 
-    function acceptProposal(address _user, uint256 proposalId) public nonReentrant {
+    function acceptProposal(address _user, uint256 proposalId) private {
         MonopolyLibrary.Proposal storage proposal = inGameProposals[proposalId];
         MonopolyLibrary.SwappedType memory proposalSwappedType = swappedType[proposalId];
 
@@ -580,7 +580,7 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
 
     function getPropertiesOwnedByAPlayer(address _playerAddress) external view returns (MonopolyLibrary.PropertyG[] memory) {
         MonopolyLibrary.PropertyG[] memory playerProperties = new MonopolyLibrary.PropertyG[](propertySize);
-        uint256 count = 0;
+        uint8 count = 0;
 
         for (uint8 i = 1; i <= propertySize; i++) {
             if (gameProperties[i].owner == _playerAddress) {

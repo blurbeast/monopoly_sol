@@ -243,6 +243,8 @@ contract BankTest is Test {
 
         assertEq(uint8(statuss), 1);
 
+        assertEq(uint8(_swapp), 0);
+
         (address previouslyOwnedByPlayer1) = gameBank.propertyOwner(2);
         (address previouslyOwnedByPlayer2) = gameBank.propertyOwner(6);
 
@@ -256,5 +258,22 @@ contract BankTest is Test {
         assertEq(noOfOwnedAfter, 0);
 
         assertEq(getOwner, player1);
+
+        // proposal cannot be accepted more than once
+
+        vm.expectRevert();
+        gameBank.makeDecisionOnProposal(player2, 1, true);
+    }
+
+    function testGetPropertiesOwnerByAPlayer() external {
+        gameBank.buyProperty(2, player1);
+        gameBank.buyProperty(6, player1);
+
+        MonopolyLibrary.PropertyG[] memory playerOwnedProperties = gameBank.getPropertiesOwnedByAPlayer(player1);
+
+        assertEq(playerOwnedProperties.length, 2);
+
+        MonopolyLibrary.PropertyG memory property = playerOwnedProperties[0];
+        assertEq(property.name, bytes("Mediterranean Avenue"));
     }
 }
