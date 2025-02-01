@@ -2,21 +2,15 @@
 pragma solidity ^0.8.26;
 
 contract Dice {
-    function rollDice() external view returns (uint256) {
-        return
-            (uint256(
-                keccak256(
-                    abi.encodePacked(
-                        block.timestamp,
-                        msg.sender,
-                        blockhash(block.number - 1)
-                    )
-                )
-            ) % 6) + 1;
+    function rollDice() external view returns (uint8, uint8) {
+        return ( _firstDice(), _secondDice());
     }
 
-    // function playDice() external view returns (uint256 dice1, uint256 dice2) {
-    //     dice1 = _rollDice();
-    //     dice2 = _rollDice();
-    // }
+    function _firstDice() private view returns(uint8) {
+        return uint8((block.timestamp % 6) + 1);
+    }
+
+    function _secondDice() private view returns(uint8) {
+         return uint8(((block.timestamp / 7) % 6) + 1);
+    }
 }

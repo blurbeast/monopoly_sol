@@ -17,7 +17,7 @@ interface IPlayerContract {
 }
 
 interface IDice {
-    function rollDice() external view returns (uint256);
+    function rollDice() external view returns (uint8, uint8);
 }
 
 contract Game {
@@ -99,7 +99,7 @@ contract Game {
         require(playerAddresses[currentPlayerIndex] == _currentPlayer, "Not your turn");
 
         // Roll the dice
-        (uint8 dice1, uint8 dice2) = rollDices();
+        (uint8 dice1, uint8 dice2) = iDice.rollDice();
 
         uint8 totalMove = dice1 + dice2;
         player.diceRolled = totalMove;
@@ -249,18 +249,10 @@ contract Game {
 
   
 
-    function rollDices() private view returns (uint8, uint8) {
-        uint8 dice1 = uint8(iDice.rollDice());
-        uint8 dice2 = uint8(iDice.rollDice());
-
-        if (dice1 == dice2) {
-            uint8 dice3 = uint8(iDice.rollDice());
-            uint8 dice4 = uint8(iDice.rollDice());
-            return (dice3 + dice1, dice2 + dice4);
-        }
-
-        return (dice1, dice2);
-    }
+    // function rollDices() private view returns (uint8, uint8) {
+    //     (uint8 dice1, uint8 dice2) = iDice.rollDice();
+    //     return (dice1, dice2);
+    // }
 
     /**
      * @dev Get the current player's address.
