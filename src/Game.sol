@@ -94,33 +94,34 @@ contract Game {
     function play(address _currentPlayer) external {
         MonopolyLibrary.Player storage player = players[_currentPlayer];
         require(gameStarted, "Game not started yet");
-        // console.log(" player address ",playerAddresses[currentPlayerIndex]);
-        // console.log("retrieved address :: ", player.addr);
         require(playerAddresses[currentPlayerIndex] == _currentPlayer, "Not your turn");
 
         // Roll the dice
         (uint8 dice1, uint8 dice2) = iDice.rollDice();
 
         uint8 totalMove = dice1 + dice2;
-        player.diceRolled = totalMove;
+        // player.diceRolled = totalMove;
 
         // Check if player is in jail
         if (player.inJail) {
-            // Check if the player rolled doubles
-            if (dice1 != dice2) {
-                player.jailAttemptCount++;
-
-                // If player has failed 3 times, release them from jail
-                if (player.jailAttemptCount > 1 && player.jailAttemptCount > 2) {
+        //     // Check if the player rolled doubles
+            if (dice1 == dice2) {
+                player.inJail = false; // Player is out of jail
+                player.jailAttemptCount = 0; // Reset attempt count
+                player.playerCurrentPosition += totalMove;
+        player.diceRolled = totalMove;
+            }
+            else {
+                player.jailAttemptCount += 1;
+                if (player.jailAttemptCount > 2) {
                     player.inJail = false; // Player is out of jail
                     player.jailAttemptCount = 0; // Reset attempt count
-                } else {
-                    // Player rolled doubles and gets out of jail
-                    player.inJail = false;
-                    player.jailAttemptCount = 0;
-                    player.playerCurrentPosition += totalMove;
                 }
             }
+        }
+        else {
+            player.playerCurrentPosition += totalMove;
+        player.diceRolled = totalMove;
         }
 
         // Check if the player passed 'Go'
