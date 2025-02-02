@@ -13,11 +13,17 @@ contract GameTest is Test {
     PlayerS private players;
     Dice private dice;
 
+    address private player1 = address(0xa);
+    address private player2 = address(0xb);
+    address private player3 = address(0xc);
+    address private player4 = address(0xd);
+
+
     function setUp() external {
         generalNft = new GeneralNFT("");
         players = new PlayerS();
         dice = new Dice();
         
-        // game = new Game();
+        game = new Game(address(generalNft));
     }
 }
