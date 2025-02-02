@@ -81,6 +81,7 @@ contract Game {
     }
 
     function addPlayer(address _playerAddress) external {
+        require(playerAddresses.length <= numberOfPlayers, "Game is full");
         require(!isPlayer[_playerAddress], "Address already registered");
         createPlayer(_playerAddress);
     }
