@@ -60,7 +60,6 @@ contract Game {
         if (isPrivateGame) {
            require(_numberOfPlayers > 1 && _numberOfPlayers <= 10, "players must be more than one and not more than 10 ");
            playerAddresses = new address[](_numberOfPlayers);
-           playerAddresses.push(_playerAddress);
            numberOfPlayers = _numberOfPlayers;
            gameBank = new GameBank(_numberOfPlayers, _nftContract);
            createPlayer(_playerAddress);
@@ -74,9 +73,15 @@ contract Game {
 
     function createPlayer(address _playerAddress) private {
         isPlayer[_playerAddress] = true ;
+        playerAddresses.push(_playerAddress);
         MonopolyLibrary.Player storage player = players[_playerAddress];
         player.username = string(iPlayerContract.playerUsernames(_playerAddress));
         player.addr = _playerAddress;
+    }
+
+    function addPlayer(address _playerAddress) external {
+        require(!isPlayer[_playerAddress], "Address already registered");
+        createPlayer(_playerAddress);
     }
 
     /**
@@ -86,6 +91,7 @@ contract Game {
      * @notice Emits a `GameStarted` event upon successful execution.
      */
     function startGame() external returns (bool success) {
+        require(numberOfPlayers == playerAddresses.length, "Number of players does not match");
         for (uint8 i = 0; i < playerAddresses.length; i++) {
             require(isPlayer[playerAddresses[i]], "Address is not a registered player");
             // Mint tokens for each player via the GameBank
