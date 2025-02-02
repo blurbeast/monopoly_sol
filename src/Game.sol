@@ -58,11 +58,13 @@ contract Game {
         iDice = IDice(_diceContract);
 
         if (isPrivateGame) {
-           require(_numberOfPlayers > 1 , "players must be more than one");
+           require(_numberOfPlayers > 1 && _numberOfPlayers <= 10, "players must be more than one and not more than 10 ");
            playerAddresses = new address[](_numberOfPlayers);
            playerAddresses.push(_playerAddress);
         }
-        gameBank = new GameBank(8, _nftContract);
+        else{
+            gameBank = new GameBank(4, _nftContract);
+        }
     }
 
     /**
