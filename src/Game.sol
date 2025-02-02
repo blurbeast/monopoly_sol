@@ -61,9 +61,12 @@ contract Game {
            require(_numberOfPlayers > 1 && _numberOfPlayers <= 10, "players must be more than one and not more than 10 ");
            playerAddresses = new address[](_numberOfPlayers);
            playerAddresses.push(_playerAddress);
+           numberOfPlayers = _numberOfPlayers;
+           gameBank = new GameBank(_numberOfPlayers, _nftContract);
         }
         else{
             gameBank = new GameBank(4, _nftContract);
+            numberOfPlayers = 4;
         }
     }
 
