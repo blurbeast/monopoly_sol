@@ -63,6 +63,7 @@ contract Game {
            playerAddresses.push(_playerAddress);
            numberOfPlayers = _numberOfPlayers;
            gameBank = new GameBank(_numberOfPlayers, _nftContract);
+           createPlayer(_playerAddress);
         }
         else{
             gameBank = new GameBank(4, _nftContract);
