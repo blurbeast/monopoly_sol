@@ -70,6 +70,13 @@ contract Game {
         }
     }
 
+    function createPlayer(address _playerAddress) private {
+        isPlayer[_playerAddress] = true ;
+        MonopolyLibrary.Player storage player = players[_playerAddress];
+        player.username = string(iPlayerContract.playerUsernames(_playerAddress));
+        player.addr = _playerAddress;
+    }
+
     /**
      * @dev Initializes the game with the provided players.
      *      Calls the bank contract to mint tokens for each player and disburses funds.
