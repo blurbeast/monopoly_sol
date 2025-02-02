@@ -50,6 +50,8 @@ contract Game {
         address _diceContract
     ) {
         require(_playerContract.code.length > 0, "Not a contract address");
+        require(_diceContract.code.length > 0, "Not a contract address");
+        require(_nftContract.code.length > 0 , "Not a contract address ");
         iPlayerContract = IPlayerContract(_playerContract);
         require(_playerAddresses.length > 1 && _playerAddresses.length < 10, "Exceeds the allowed number of players");
         iDice = IDice(_diceContract);
