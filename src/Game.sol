@@ -47,24 +47,25 @@ contract Game {
         address _nftContract,
         address _playerAddress,
         address _playerContract,
-        address _diceContract, 
+        address _diceContract,
         bool isPrivateGame,
         uint8 _numberOfPlayers
     ) {
         require(_playerContract.code.length > 0, "Not a contract address");
         require(_diceContract.code.length > 0, "Not a contract address");
-        require(_nftContract.code.length > 0 , "Not a contract address ");
+        require(_nftContract.code.length > 0, "Not a contract address ");
         iPlayerContract = IPlayerContract(_playerContract);
         iDice = IDice(_diceContract);
 
         if (isPrivateGame) {
-           require(_numberOfPlayers > 1 && _numberOfPlayers <= 10, "players must be more than one and not more than 10 ");
-           playerAddresses = new address[](_numberOfPlayers);
-           numberOfPlayers = _numberOfPlayers;
-           gameBank = new GameBank(_numberOfPlayers, _nftContract);
-           createPlayer(_playerAddress);
-        }
-        else{
+            require(
+                _numberOfPlayers > 1 && _numberOfPlayers <= 10, "players must be more than one and not more than 10 "
+            );
+            playerAddresses = new address[](_numberOfPlayers);
+            numberOfPlayers = _numberOfPlayers;
+            gameBank = new GameBank(_numberOfPlayers, _nftContract);
+            createPlayer(_playerAddress);
+        } else {
             playerAddresses = new address[](4);
             gameBank = new GameBank(4, _nftContract);
             numberOfPlayers = 4;
@@ -72,7 +73,7 @@ contract Game {
     }
 
     function createPlayer(address _playerAddress) private {
-        isPlayer[_playerAddress] = true ;
+        isPlayer[_playerAddress] = true;
         playerAddresses.push(_playerAddress);
         MonopolyLibrary.Player storage player = players[_playerAddress];
         player.username = string(iPlayerContract.playerUsernames(_playerAddress));
@@ -145,8 +146,6 @@ contract Game {
 
         // Advance the turn to the next player
     }
-
-    
 
     function buyProperty(address _currentPlayer) external {
         require(gameStarted, "Game not started yet");

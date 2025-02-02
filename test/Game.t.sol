@@ -18,7 +18,6 @@ contract GameTest is Test {
     address private player3 = address(0xc);
     address private player4 = address(0xd);
 
-
     function setUp() external {
         generalNft = new GeneralNFT("");
         players = new PlayerS();
@@ -26,7 +25,5 @@ contract GameTest is Test {
         // game = new Game(address(generalNft), player1, address(players), address(dice), false, 4);
     }
 
-    function testCreateGame() external {
-        
-    }
+    function testCreateGame() external {}
 }
