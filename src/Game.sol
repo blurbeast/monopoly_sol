@@ -52,7 +52,6 @@ contract Game {
         require(_playerContract.code.length > 0, "Not a contract address");
         iPlayerContract = IPlayerContract(_playerContract);
         require(_playerAddresses.length > 1 && _playerAddresses.length < 10, "Exceeds the allowed number of players");
-
         iDice = IDice(_diceContract);
         for (uint8 i = 0; i < _playerAddresses.length; i++) {
             bool isRegistered = iPlayerContract.alreadyRegistered(_playerAddresses[i]);
@@ -128,7 +127,7 @@ contract Game {
         }
 
         // Check if the player passed 'Go'
-        if (player.playerCurrentPosition > 40) {
+        if (!player.inJail && player.playerCurrentPosition > 40) {
             player.playerCurrentPosition %= 40; // Reset position to within board range
             gameBank.mint(player.addr, 200); // Reward for passing Go
         }
@@ -138,6 +137,8 @@ contract Game {
 
         // Advance the turn to the next player
     }
+
+    
 
     function buyProperty(address _currentPlayer) external {
         require(gameStarted, "Game not started yet");
@@ -197,7 +198,7 @@ contract Game {
         require(playerAddresses[currentPlayerIndex] == _currentPlayer, "Not your turn");
         uint8 diceRolled = player.diceRolled;
         uint8 propertyId = player.playerCurrentPosition;
-        gameBank.handleRent(msg.sender, propertyId, diceRolled);
+        gameBank.handleRent(_currentPlayer, propertyId, diceRolled);
     }
 
     function mortgageProperty(uint8 propertyID, address _currentPlayer) external {
@@ -222,19 +223,13 @@ contract Game {
 
     function upgradeProperty(uint8 propertyId, uint8 noOfIntendedUpgrade, address _currentPlayer) external {
         require(gameStarted, "Game not started yet");
-        // MonopolyLibrary.Player memory player = players[msg.sender];
-
         require(playerAddresses[currentPlayerIndex] == _currentPlayer, "Not your turn");
-
         gameBank.upgradeProperty(propertyId, noOfIntendedUpgrade, _currentPlayer);
     }
 
     function downgradeProperty(uint8 propertyId, uint8 requestedDowngrades, address _currentPlayer) external {
         require(gameStarted, "Game not started yet");
-        // MonopolyLibrary.Player memory player = players[_currentPlayer];
-
         require(playerAddresses[currentPlayerIndex] == _currentPlayer, "Not your turn");
-
         gameBank.downgradeProperty(propertyId, requestedDowngrades, _currentPlayer);
     }
 
@@ -251,11 +246,6 @@ contract Game {
         // emit TurnChanged(playersPosition[currentPlayerIndex]);
     }
 
-    // function rollDices() private view returns (uint8, uint8) {
-    //     (uint8 dice1, uint8 dice2) = iDice.rollDice();
-    //     return (dice1, dice2);
-    // }
-
     /**
      * @dev Get the current player's address.
      * @return The address of the current player.
@@ -264,18 +254,6 @@ contract Game {
         require(gameStarted, "Game not started yet");
         return playerAddresses[currentPlayerIndex];
     }
-
-    // function advanceToNextPlayer() external {
-    //     // Advance the turn to the next player
-    //     MonopolyLibrary.Player storage player = players[msg.sender];
-    //     require(gameStarted, "Game not started yet");
-    //     // require(playerAddresses[currentPlayerIndex] == player.addr, "Not your turn");
-    //     _nextTurn();
-    //     emit TurnChanged(playerAddresses[currentPlayerIndex]);
-
-    //     // Emit an event for the move
-    //     emit PlayerMoved(player.addr, player.playerCurrentPosition);
-    // }
 
     //HELPER FUNCTIONS FOR TESTING
 
@@ -314,10 +292,6 @@ contract Game {
         rent = nftContract.returnPropertyRent(id, upgradeStatus);
         return rent;
     }
-
-    //    function updateProperty(uint8 propertyId, address owner) public {
-    //        gameBank.updateProperty(propertyId, owner);
-    //    }
 
     function mintMoreTokens(address user) public {
         gameBank.mint(user, 15000);
