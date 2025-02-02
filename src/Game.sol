@@ -66,6 +66,7 @@ contract Game {
            createPlayer(_playerAddress);
         }
         else{
+            playerAddresses = new address[](4);
             gameBank = new GameBank(4, _nftContract);
             numberOfPlayers = 4;
         }

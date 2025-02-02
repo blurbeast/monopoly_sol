@@ -23,7 +23,10 @@ contract GameTest is Test {
         generalNft = new GeneralNFT("");
         players = new PlayerS();
         dice = new Dice();
+        // game = new Game(address(generalNft), player1, address(players), address(dice), false, 4);
+    }
+
+    function testCreateGame() external {
         
-        game = new Game(address(generalNft));
     }
 }
