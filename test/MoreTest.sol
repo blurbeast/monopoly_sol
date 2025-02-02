@@ -40,17 +40,17 @@ contract MonopolyTests is Test {
 
     function setUp() public {
         // Deploy contracts
-        generalNft = new GeneralNFT("uri");
-        playerS = new PlayerS();
-        dice = new Dice();
+        // generalNft = new GeneralNFT("uri");
+        // playerS = new PlayerS();
+        // dice = new Dice();
 
-        gamebank = new GameBank(4, address(generalNft));
-        game = new Game(address(generalNft), a, address(playerS), address(dice));
+        // gamebank = new GameBank(4, address(generalNft));
+        // game = new Game(address(generalNft), a, address(playerS), address(dice));
 
-        // Log initial states for debugging
-        console.log("GeneralNFT deployed at:", address(generalNft));
-        console.log("GameBank deployed at:", address(gamebank));
-        // console.log("Game deployed at:", address(game));
+        // // Log initial states for debugging
+        // console.log("GeneralNFT deployed at:", address(generalNft));
+        // console.log("GameBank deployed at:", address(gamebank));
+        // // console.log("Game deployed at:", address(game));
     }
 
     // function testSetupContracts() public view {

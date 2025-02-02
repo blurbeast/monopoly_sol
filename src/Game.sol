@@ -45,38 +45,23 @@ contract Game {
 
     constructor(
         address _nftContract,
-        address[] memory _playerAddresses,
+        address _playerAddress,
         address _playerContract,
-        address _diceContract
+        address _diceContract, 
+        bool isPrivateGame,
+        uint8 _numberOfPlayers
     ) {
         require(_playerContract.code.length > 0, "Not a contract address");
         require(_diceContract.code.length > 0, "Not a contract address");
         require(_nftContract.code.length > 0 , "Not a contract address ");
         iPlayerContract = IPlayerContract(_playerContract);
-        require(_playerAddresses.length > 1 && _playerAddresses.length < 10, "Exceeds the allowed number of players");
         iDice = IDice(_diceContract);
-        for (uint8 i = 0; i < _playerAddresses.length; i++) {
-            bool isRegistered = iPlayerContract.alreadyRegistered(_playerAddresses[i]);
-            require(isRegistered, "Player not registered");
-            require(!isPlayer[_playerAddresses[i]], "Duplicate player address detected");
-            bytes memory playerUsername = iPlayerContract.playerUsernames(_playerAddresses[i]);
-            isPlayer[_playerAddresses[i]] = true;
-            players[_playerAddresses[i]] = MonopolyLibrary.Player({
-                username: string(playerUsername),
-                addr: _playerAddresses[i],
-                playerCurrentPosition: 0,
-                inJail: false,
-                jailAttemptCount: 0,
-                cash: 0,
-                diceRolled: 0,
-                bankrupt: false
-            });
-            playerAddresses.push(_playerAddresses[i]);
-        }
 
-        gameBank = new GameBank(uint8(playerAddresses.length), _nftContract);
-        numberOfPlayers = uint8(playerAddresses.length);
-        nftContract = INFTContract(_nftContract);
+        if (isPrivateGame) {
+           require(_numberOfPlayers > 1 , "players must be more than one");
+
+        }
+        gameBank = new GameBank(8, _nftContract);
     }
 
     /**
