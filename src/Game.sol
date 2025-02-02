@@ -59,7 +59,8 @@ contract Game {
 
         if (isPrivateGame) {
            require(_numberOfPlayers > 1 , "players must be more than one");
-
+           playerAddresses = new address[](_numberOfPlayers);
+           playerAddresses.push(_playerAddress);
         }
         gameBank = new GameBank(8, _nftContract);
     }
