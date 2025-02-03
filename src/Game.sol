@@ -32,14 +32,14 @@ contract Game {
 
     mapping(address => bool) public isPlayer;
     mapping(address => uint8) playersPosition;
-    mapping(address => MonopolyLibrary.Player) players;
+    mapping(address => MonopolyLibrary.Player) public players;
     uint8 public currentPlayerIndex;
-    bool gameStarted;
+    bool public gameStarted;
 
     event PlayerMoved(address indexed player, uint8 newPosition);
     event TurnChanged(address indexed nextPlayer);
 
-    address[] playerAddresses;
+    address[] public playerAddresses;
 
     event GameStarted(uint8 numberOfPlayers, address[] players);
 
@@ -66,9 +66,9 @@ contract Game {
             gameBank = new GameBank(_numberOfPlayers, _nftContract);
             createPlayer(_playerAddress);
         } else {
-            playerAddresses = new address[](4);
-            gameBank = new GameBank(4, _nftContract);
-            numberOfPlayers = 4;
+            playerAddresses = new address[](_numberOfPlayers);
+            gameBank = new GameBank(_numberOfPlayers, _nftContract);
+            numberOfPlayers = _numberOfPlayers;
         }
     }
 
@@ -156,49 +156,49 @@ contract Game {
         gameBank.buyProperty(propertyId, _currentPlayer);
     }
 
-    function openTrade(
-        uint8 usersPropertyId,
-        uint8 teamMatePropertyID,
-        MonopolyLibrary.SwapType swapType,
-        uint256 biddingAmount,
-        address _teamMateAddress
-    ) external {
-        MonopolyLibrary.Player memory player = players[msg.sender];
+    // function openTrade(
+    //     uint8 usersPropertyId,
+    //     uint8 teamMatePropertyID,
+    //     MonopolyLibrary.SwapType swapType,
+    //     uint256 biddingAmount,
+    //     address _teamMateAddress
+    // ) external {
+    //     MonopolyLibrary.Player memory player = players[msg.sender];
 
-        MonopolyLibrary.PropertyG memory teamMateProperty = getProperty(teamMatePropertyID);
-        require(gameStarted, "Game not started yet");
-        // require(playerAddresses[currentPlayerIndex] == player.addr, "Not your turn");
+    //     MonopolyLibrary.PropertyG memory teamMateProperty = getProperty(teamMatePropertyID);
+    //     require(gameStarted, "Game not started yet");
+    //     // require(playerAddresses[currentPlayerIndex] == player.addr, "Not your turn");
 
-        address teamMateAddress;
-        teamMateAddress = teamMateProperty.owner;
-        if (swapType == MonopolyLibrary.SwapType.CASH_FOR_PROPERTY) {
-            teamMateAddress = _teamMateAddress;
-        }
+    //     address teamMateAddress;
+    //     teamMateAddress = teamMateProperty.owner;
+    //     if (swapType == MonopolyLibrary.SwapType.CASH_FOR_PROPERTY) {
+    //         teamMateAddress = _teamMateAddress;
+    //     }
 
-        //        gameBank.proposePropertySwap(
-        //            msg.sender, teamMateAddress, usersPropertyId, teamMatePropertyID, swapType, biddingAmount
-        //        );
-    }
+    //     //        gameBank.proposePropertySwap(
+    //     //            msg.sender, teamMateAddress, usersPropertyId, teamMatePropertyID, swapType, biddingAmount
+    //     //        );
+    // }
 
-    function counterDeal(
-        uint8 usersPropertyId,
-        uint8 teamMatePropertyID,
-        MonopolyLibrary.SwapType swapType,
-        uint256 biddingAmount
-    ) external {
-        require(gameStarted, "Game not started yet");
-        //        gameBank.counterDeal(msg.sender, usersPropertyId, teamMatePropertyID, swapType, biddingAmount);
-    }
+    // function counterDeal(
+    //     uint8 usersPropertyId,
+    //     uint8 teamMatePropertyID,
+    //     MonopolyLibrary.SwapType swapType,
+    //     uint256 biddingAmount
+    // ) external {
+    //     require(gameStarted, "Game not started yet");
+    //     //        gameBank.counterDeal(msg.sender, usersPropertyId, teamMatePropertyID, swapType, biddingAmount);
+    // }
 
-    function acceptTrade() external {
-        require(gameStarted, "Game not started yet");
-        //        gameBank.acceptDeal(msg.sender);
-    }
+    // function acceptTrade() external {
+    //     require(gameStarted, "Game not started yet");
+    //     //        gameBank.acceptDeal(msg.sender);
+    // }
 
-    function rejectDeal() external {
-        require(gameStarted, "Game not started yet");
-        //        gameBank.rejectDeal(msg.sender);
-    }
+    // function rejectDeal() external {
+    //     require(gameStarted, "Game not started yet");
+    //     //        gameBank.rejectDeal(msg.sender);
+    // }
 
     function handleRent(address _currentPlayer) external {
         require(gameStarted, "Game not started yet");
