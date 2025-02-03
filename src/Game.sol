@@ -62,15 +62,16 @@ contract Game {
             require(
                 _numberOfPlayers > 1 && _numberOfPlayers <= 10, "players must be more than one and not more than 10 "
             );
-            playerAddresses = new address[](_numberOfPlayers);
-            numberOfPlayers = _numberOfPlayers;
-            gameBank = new GameBank(_numberOfPlayers, _nftContract);
+            createBankAndAssignNumberOfPlayers(_numberOfPlayers, _nftContract);
             createPlayer(_playerAddress);
         } else {
-            playerAddresses = new address[](_numberOfPlayers);
-            gameBank = new GameBank(_numberOfPlayers, _nftContract);
-            numberOfPlayers = _numberOfPlayers;
+            createBankAndAssignNumberOfPlayers(_numberOfPlayers, _nftContract);
         }
+    }
+
+    function createBankAndAssignNumberOfPlayers(uint8 _numberOfPlayers, address _nftContract) private {
+        gameBank = new GameBank(_numberOfPlayers, _nftContract);
+        numberOfPlayers = _numberOfPlayers;
     }
 
     function createPlayer(address _playerAddress) private {
@@ -85,9 +86,7 @@ contract Game {
     function addPlayer(address _playerAddress) external {
         require(numberOfAddedPlayers < numberOfPlayers, "Game is full");
         require(!isPlayer[_playerAddress], "Address already registered");
-        console.log("before addition ::: ", numberOfAddedPlayers);
         createPlayer(_playerAddress);
-        console.log("after addition ::: ", numberOfAddedPlayers);
     }
 
     /**
@@ -98,6 +97,7 @@ contract Game {
      */
     function startGame() external returns (bool success) {
         require(numberOfAddedPlayers == numberOfPlayers, "Not all Players in game room ");
+        
         for (uint8 i = 0; i < playerAddresses.length; i++) {
             // Mint tokens for each player via the GameBank
             gameBank.mint(playerAddresses[i], 1500);

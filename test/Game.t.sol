@@ -57,7 +57,7 @@ contract GameTest is Test {
         //now add players
         registerPlayers();
 
-        vm.expectRvert("Not all Players in game room ");
+        vm.expectRevert("Not all Players in game room ");
         game.startGame();
 
         game.addPlayer(player1);
@@ -80,5 +80,10 @@ contract GameTest is Test {
         //confirm the player username
         (string memory afterAddedUsername,,,,,,,) = game.players(player1);
         assertEq(afterAddedUsername, "player 1");
+
+        //confirm the start game
+        game.startGame();
+        bool gameStarted2 = game.gameStarted();
+        assertEq(gameStarted2, true);
     }
 }
