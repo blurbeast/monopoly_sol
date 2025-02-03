@@ -26,6 +26,7 @@ contract Game {
     IPlayerContract private iPlayerContract;
     IDice private iDice;
     uint8 public numberOfPlayers;
+    uint8 public numberOfAddedPlayers;
 
     using MonopolyLibrary for MonopolyLibrary.PropertyG;
     using MonopolyLibrary for MonopolyLibrary.Player;
@@ -78,12 +79,15 @@ contract Game {
         MonopolyLibrary.Player storage player = players[_playerAddress];
         player.username = string(iPlayerContract.playerUsernames(_playerAddress));
         player.addr = _playerAddress;
+        numberOfAddedPlayers += 1;
     }
 
     function addPlayer(address _playerAddress) external {
-        require(playerAddresses.length <= numberOfPlayers, "Game is full");
+        require(numberOfAddedPlayers < numberOfPlayers, "Game is full");
         require(!isPlayer[_playerAddress], "Address already registered");
+        console.log("before addition ::: ", numberOfAddedPlayers);
         createPlayer(_playerAddress);
+        console.log("after addition ::: ", numberOfAddedPlayers);
     }
 
     /**
@@ -93,7 +97,7 @@ contract Game {
      * @notice Emits a `GameStarted` event upon successful execution.
      */
     function startGame() external returns (bool success) {
-        require(numberOfPlayers == playerAddresses.length, "Number of players does not match");
+        require(numberOfAddedPlayers == numberOfPlayers, "Number of players does not match");
         for (uint8 i = 0; i < playerAddresses.length; i++) {
             require(isPlayer[playerAddresses[i]], "Address is not a registered player");
             // Mint tokens for each player via the GameBank

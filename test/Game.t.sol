@@ -18,6 +18,7 @@ contract GameTest is Test {
     address private player2 = address(0xb);
     address private player3 = address(0xc);
     address private player4 = address(0xd);
+    address private player5 = address(0xe);
 
     function setUp() external {
         generalNft = new GeneralNFT("");
@@ -31,6 +32,8 @@ contract GameTest is Test {
         players.registerPlayer(player2, "player 2");
         players.registerPlayer(player3, "player 3");
         players.registerPlayer(player4, "player 4");
+        players.registerPlayer(player5, "player 5");
+
     }
 
     function testCreateGame() external {
@@ -39,8 +42,8 @@ contract GameTest is Test {
         bool gameStarted = game.gameStarted();
         assertEq(gameStarted, false);
 
-        // uint256 playersAdded = game.playerAddresses().length;
-        // assertEq(playersAdded, 0);
+        uint256 playersAdded = game.numberOfAddedPlayers();
+        assertEq(playersAdded, 0);
 
         bool isPlayer = game.isPlayer(player1);
         assertEq(isPlayer, false);
@@ -57,12 +60,17 @@ contract GameTest is Test {
 
         game.addPlayer(player1);
         game.addPlayer(player2);
+        vm.expectRevert("Address already registered");
+        game.addPlayer(player1);
         game.addPlayer(player3);
         game.addPlayer(player4);
+        vm.expectRevert("Game is full");
+        game.addPlayer(player5);
 
-        //confirm the length of the playerAddresses array
-        // address[] memory playersAdded2 = game.playerAddresses();
-        // assertEq(playersAdded2.length, 4);
+
+        //confirm the length of the playerAddresses
+        uint8 playersAdded2 = game.numberOfAddedPlayers();
+        assertEq(playersAdded2, 4);
 
         //confirm the isPlayer function
         bool isPlayer3 = game.isPlayer(player3);
@@ -71,9 +79,5 @@ contract GameTest is Test {
         //confirm the player username
        (string memory afterAddedUsername,,,,,,,) = game.players(player1);
         assertEq(afterAddedUsername, "player 1");
-
-
-
-
     }
 }

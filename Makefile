@@ -8,6 +8,7 @@ bank_test:
 	forge test --match-contract BankTest
 
 game_test :
+	clear
 	@echo "Running game test..."
 	forge test --match-contract GameTest
 
