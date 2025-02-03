@@ -97,9 +97,8 @@ contract Game {
      * @notice Emits a `GameStarted` event upon successful execution.
      */
     function startGame() external returns (bool success) {
-        require(numberOfAddedPlayers == numberOfPlayers, "Number of players does not match");
+        require(numberOfAddedPlayers == numberOfPlayers, "Not all Players in game room ");
         for (uint8 i = 0; i < playerAddresses.length; i++) {
-            require(isPlayer[playerAddresses[i]], "Address is not a registered player");
             // Mint tokens for each player via the GameBank
             gameBank.mint(playerAddresses[i], 1500);
         }

@@ -33,7 +33,6 @@ contract GameTest is Test {
         players.registerPlayer(player3, "player 3");
         players.registerPlayer(player4, "player 4");
         players.registerPlayer(player5, "player 5");
-
     }
 
     function testCreateGame() external {
@@ -58,6 +57,9 @@ contract GameTest is Test {
         //now add players
         registerPlayers();
 
+        vm.expectRvert("Not all Players in game room ");
+        game.startGame();
+
         game.addPlayer(player1);
         game.addPlayer(player2);
         vm.expectRevert("Address already registered");
@@ -66,7 +68,6 @@ contract GameTest is Test {
         game.addPlayer(player4);
         vm.expectRevert("Game is full");
         game.addPlayer(player5);
-
 
         //confirm the length of the playerAddresses
         uint8 playersAdded2 = game.numberOfAddedPlayers();
@@ -77,7 +78,7 @@ contract GameTest is Test {
         assertEq(isPlayer3, true);
 
         //confirm the player username
-       (string memory afterAddedUsername,,,,,,,) = game.players(player1);
+        (string memory afterAddedUsername,,,,,,,) = game.players(player1);
         assertEq(afterAddedUsername, "player 1");
     }
 }
