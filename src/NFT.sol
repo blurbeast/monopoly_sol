@@ -21,7 +21,7 @@ contract GeneralNFT is ERC721URIStorage {
     using MonopolyLibrary for MonopolyLibrary.Property;
     using MonopolyLibrary for MonopolyLibrary.PropertyColors;
     using MonopolyLibrary for MonopolyLibrary.PropertyType;
-    using MonopolyLibrary for MonopolyLibrary.Chance;
+//    using MonopolyLibrary for MonopolyLibrary.Chance;
 
     MonopolyLibrary.Property[] public allProperties;
 
@@ -400,7 +400,7 @@ contract GeneralNFT is ERC721URIStorage {
             uri: "",
             buyAmount: 350,
             propertyType: MonopolyLibrary.PropertyType.Property,
-            color: MonopolyLibrary.PropertyColors.DARKBLUE
+            color: MonopolyLibrary.PropertyColors.BLUE
         });
 
         properties[39] = MonopolyLibrary.Property({
@@ -418,7 +418,7 @@ contract GeneralNFT is ERC721URIStorage {
             uri: "",
             buyAmount: 400,
             propertyType: MonopolyLibrary.PropertyType.Property,
-            color: MonopolyLibrary.PropertyColors.DARKBLUE
+            color: MonopolyLibrary.PropertyColors.BLUE
         });
     }
 
