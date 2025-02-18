@@ -120,6 +120,12 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
 
     // this function is only meant to interact with the bank .
 
+
+    /**
+     * @dev enables players to purchase properties from the bank
+     * @param propertyId The id of the property on the monopoly board
+     * @param buyer Address of the player that is making the purchase
+     */
     function buyProperty(uint8 propertyId, address buyer) external nonReentrant {
         MonopolyLibrary.PropertyG storage property = gameProperties[propertyId];
         require(property.propertyType != MonopolyLibrary.PropertyType.Special, "Invalid property, could not be bought");
@@ -164,6 +170,15 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
     }
 
     // correct i think
+    /**
+     * @dev allows players to propose a trade with other players
+     * @param proposer Address of player that initiate the transcation
+     * @param otherPlayer Address of the player the user want to propose a trade with
+     * @param proposedPropertyId optional id of the property the user wants to buy
+     * @param biddingPropertyId optional id of the users property he wants to put in  the transcation
+     * @param swapType An enum suggesting the type of swap operation the user intends to carry out
+     * @param amountInvolved the amount of the trade to be carried out
+     */
     function makeProposal(
         address proposer,
         address otherPlayer,
@@ -204,17 +219,40 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         // to emit an event here
     }
 
+
+    /**
+     * @dev function that executes the cash for property swap type
+     * @param proposalId Id of the users proposal to be acted upon
+     * @param proposedAmount Amount the user is proposing
+     * @param biddingPropertyId the id of the property the user wants to trade
+     */
     function _cashForProperty(uint256 proposalId, uint256 proposedAmount, uint8 biddingPropertyId) private {
         MonopolyLibrary.SwappedType storage swappedSwapType = swappedType[proposalId];
         swappedSwapType.cashForProperty.proposedAmount = proposedAmount;
         swappedSwapType.cashForProperty.biddingPropertyId = biddingPropertyId;
     }
 
+
+    /**
+     * @dev function that executes the  property for cash swap type swap type
+     * @param proposalId Id of the users proposal to be acted upon
+     * @param propertyId  the id of the property the user wants to buy
+     * @param biddingAmount  Amount the user is proposing 
+     */
+
     function _propertyForCash(uint256 proposalId, uint8 propertyId, uint256 biddingAmount) private {
         MonopolyLibrary.SwappedType storage swappedSwapType = swappedType[proposalId];
         swappedSwapType.propertyForCash.propertyId = propertyId;
         swappedSwapType.propertyForCash.biddingAmount = biddingAmount;
     }
+
+    /**
+     * @dev function that executes the  property and cash for property swap type swap type
+     * @param proposalId Id of the users proposal to be acted upon
+     * @param proposedPropertyId  the id of the property the user wants to buy
+     * @param proposedAmount Amount the user is proposing
+     * @param biddingPropertyId the id of the property the user wants to trade
+     */
 
     function _propertyAndCashForProperty(
         uint256 proposalId,
@@ -228,6 +266,13 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         swappedSwapType.propertyAndCashForProperty.biddingPropertyId = biddingPropertyId;
     }
 
+    /**
+     * @dev function that executes the  property for cash and property swap type swap type
+     * @param proposalId Id of the users proposal to be acted upon
+     * @param proposedPropertyId  the id of the property the user wants to buy
+     * @param biddingAmount  Amount the user is proposing
+     * @param biddingPropertyId the id of the property the user wants to trade
+     */
     function _propertyForCashAndProperty(
         uint256 proposalId,
         uint8 proposedPropertyId,
@@ -241,6 +286,12 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
         swappedSwapType.propertyForCashAndProperty.biddingAmount = biddingAmount;
     }
 
+    /**
+     * @dev function that executes the  property for property swap type swap type
+     * @param proposalId Id of the users proposal to be acted upon
+     * @param proposedPropertyId  the id of the property the user wants to buy
+     * @param biddingPropertyId the id of the property the user wants to trade
+     */
     function _propertyForProperty(uint256 proposalId, uint8 proposedPropertyId, uint8 biddingPropertyId) private {
         MonopolyLibrary.SwappedType storage swappedSwapType = swappedType[proposalId];
         swappedSwapType.propertyForProperty.proposedPropertyId = proposedPropertyId;
@@ -248,6 +299,13 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
     }
 
     mapping(uint256 => bool) private isProposalActive;
+
+    /**
+     * @dev function that users use to either accept or reject proposal
+     * @param _user address of the user that wants to either accept or reject trade
+     * @param proposalId Id of the users proposal to be acted upon
+     * @param isAccepted a boolean that users pass to either accept or reject proposal
+     */
 
     function makeDecisionOnProposal(address _user, uint256 proposalId, bool isAccepted) external nonReentrant {
         require(isProposalActive[proposalId], "Proposal already decided");
@@ -264,6 +322,13 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
     // in progress
     // this state track the user to the proposalId to a boolean value
     // mapping(uint8 => mapping(address => bool)) private userProposalExist;
+
+    
+     /**
+     * @dev function that users use to accept proposal
+     * @param _user address of the user that wants to either accept or reject trade
+     * @param proposalId Id of the users proposal to be accepted
+     */
 
     function acceptProposal(address _user, uint256 proposalId) private {
         MonopolyLibrary.Proposal storage proposal = inGameProposals[proposalId];
