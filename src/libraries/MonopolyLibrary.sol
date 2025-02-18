@@ -49,6 +49,7 @@ library MonopolyLibrary {
         uint256 cash;
         uint8 diceRolled;
         bool bankrupt;
+        uint256 netWorth;
     }
 
     struct PropertyRent {
@@ -169,7 +170,10 @@ library MonopolyLibrary {
     );
 
     event PropertyUpgraded(
-        uint8 indexed propertyId, address indexed user, uint8 upgradesApplied, uint256 newRentAmount
+        uint8 indexed propertyId,
+        address indexed user,
+        uint8 upgradesApplied,
+        uint256 newRentAmount
     );
 
     event PropertyDowngraded(
