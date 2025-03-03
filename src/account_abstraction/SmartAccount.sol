@@ -1,4 +1,47 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
+import "account-abstraction/contracts/interfaces/IAccount.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
+contract SmartAccount is IAccount {
+
+    using ECDSA for bytes32;
+
+    address public owner;
+    address public entryPoint;
+    uint256 public nonce;
+
+    constructor(address _owner, address _entryPoint) {
+        owner = _owner;
+        entryPoint = _entryPoint;
+    }
+
+    function validateUserOp(
+        PackedUserOperation calldata userOp,
+        bytes32 userOpHash,
+        uint256 missingAccountFunds
+    ) external returns (uint256 validationData) {
+        require(userOp.nonce == nonce, "invalid user nonce");
+        bytes32 signedHash = MessageHashUtils.toEthSignedMessageHash(userOpHash);
+        address recoveredSigner = signedHash.recover(userOp.signature);
+
+        if (recoveredSigner != owner) {
+            return 1;
+        }
+        nonce ++;
+
+        return 0;
+    }
+
+    function execute(address _target, bytes memory data, uint256 value) external returns(bool , bytes memory) {
+        (bool success, bytes memory result ) = _target.call{value: value}(data);
+
+        require(success, "could not complete action");
+
+        return (success, result);
+    } 
+
+    function reciever() external payable {}
+}
