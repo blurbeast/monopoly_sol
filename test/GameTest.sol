@@ -3,10 +3,12 @@ pragma solidity ^0.8.13;
 
 import {Test} from "forge-std/Test.sol";
 import {Game} from "../src/Game.sol";
-import "../src/PlayerS.sol";
-import "../src/Dice.sol";
-import "../src/GeneralNFT.sol";
-import "../src/account_abstraction/EntryPoint.sol";
+import {PlayerS} from "../src/Players.sol";
+import {Dice} from "../src/Dice.sol";
+import {GeneralNFT} from "../src/NFT.sol";
+import {EntryPoint} from "../src/account_abstraction/EntryPoint.sol";
+import {Paymaster} from "../src/account_abstraction/Paymaster.sol";
+import {Token} from "../src/account_abstraction/Token.sol";
 
 contract GameTest is Test {
     Game public game;
