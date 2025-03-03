@@ -20,6 +20,10 @@ entry_point :
 	@echo "running test on account_abstraction via EntryPoint contract"
 	forge t --match-contract EntryPointTest
 
-player_entry_point:
+player_smart_account:
 	@echo "player entry point test"
-	forge t --match-contract PlayerEntryPointTest
+	forge t --match-contract PlayerSmartAccountTest
+
+game_entry_point:
+	@echo "running game via entry point"
+	forge t --match-contract GameTest

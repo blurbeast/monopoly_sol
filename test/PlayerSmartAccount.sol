@@ -10,7 +10,7 @@ import "../src/Players.sol";
 
 
 
-contract PlayerEntryPointTest is Test {
+contract PlayerSmartAccountTest is Test {
 
     EntryPoint public entryPoint;
     PlayerS public players;
