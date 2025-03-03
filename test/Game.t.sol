@@ -86,4 +86,42 @@ contract GameTest is Test {
         bool gameStarted2 = game.gameStarted();
         assertEq(gameStarted2, true);
     }
+
+    function testPlayGame() external {
+        // player cannot play game when the game has not yet started
+        game = new Game(address(generalNft), address(0), address(players), address(dice), false, 4);
+        vm.expectRevert("Game not started yet");
+        game.play(player1);
+
+        // register player
+        registerPlayers();
+
+        game.addPlayer(player1);
+        game.addPlayer(player2);
+        vm.expectRevert("Address already registered");
+        game.addPlayer(player1);
+        game.addPlayer(player3);
+        game.addPlayer(player4);
+
+        // game has started
+        game.startGame();
+
+        // the first player to player is the player at index zero
+        // confirm that
+        vm.expectRevert("Not your turn");
+        game.play(player2);
+
+        //play game now
+        address currentPlayer = game.getCurrentPlayer();
+        assertEq(currentPlayer, player1);
+        game.play(player1);
+
+        //zafter play, the turn should move to the next player
+        game.nextTurn();
+
+        //check that the next player is the player at index 1
+        address nextPlayer = game.getCurrentPlayer();
+
+        assertEq(nextPlayer, player2);
+    }
 }
