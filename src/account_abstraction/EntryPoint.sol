@@ -8,7 +8,7 @@ import {ISmartAccount} from "./interfaces/ISmartAccount.sol";
 
 contract EntryPoint {
 
-    function handleUserOp(PackedUserOperation calldata userOp, bytes32 userOpHash) external {
+    function handleOp(PackedUserOperation calldata userOp, bytes32 userOpHash) external returns(bytes memory) {
         IAccount iAccount = IAccount(userOp.sender);
 
         uint256 validationData = iAccount.validateUserOp(userOp, userOpHash, 0);
@@ -23,11 +23,13 @@ contract EntryPoint {
             );
             require(paymasterValidation == 0, "Paymaster validation failed");
 
-            _execute(userOp);
+            (, bytes memory data) = _execute(userOp);
             IPaymaster(paymaster).postOp(IPaymaster.PostOpMode.opSucceeded, context, gasleft() ,0);
+            return data;
         }
         else {
-            _execute(userOp);
+            (, bytes memory data) = _execute(userOp);
+            return data;
         }
     }
 
@@ -38,5 +40,6 @@ contract EntryPoint {
         require(success, "Execution failed");
         return (success, responseData);
     } 
-    function recieve() external payable {}
+
+    receive() external payable {}
 }

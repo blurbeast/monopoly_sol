@@ -1,9 +1,10 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
-import "account-abstraction/contracts/interfaces/IAccount.sol";
+import "lib/account-abstraction/contracts/interfaces/IAccount.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+import {console} from "forge-std/Test.sol";
 
 contract SmartAccount is IAccount {
 
@@ -35,13 +36,14 @@ contract SmartAccount is IAccount {
         return 0;
     }
 
-    function execute(address _target, bytes memory data, uint256 value) external returns(bool , bytes memory) {
+    function execute(address _target,uint256 value, bytes memory data) external returns(bool , bytes memory) {
+        
         (bool success, bytes memory result ) = _target.call{value: value}(data);
 
         require(success, "could not complete action");
 
         return (success, result);
-    } 
+    }
 
-    function reciever() external payable {}
+    receive() external payable {}
 }

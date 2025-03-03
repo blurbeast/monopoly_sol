@@ -3,7 +3,7 @@
 pragma solidity ^0.8.26;
 
 // import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import {ERC20} from "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
+import "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 
 
 contract Token is ERC20 {
@@ -32,9 +32,9 @@ contract Token is ERC20 {
         
         require(_to.code.length > 0, "must be a smart account");
 
-        require(balanceOf(_to) <= 500, "not qualified for a new balance");
+        require(balanceOf(_to) <= 1 ether, "not qualified for a new balance");
 
-        _mint(_to, 1_000_000);
+        _mint(_to, 100 ether);
     }
 
 

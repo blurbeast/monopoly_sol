@@ -16,3 +16,7 @@ bank_player_owned :
 	@echo "Running bank player owned properties test..."
 	forge t --match-contract BankTest --match-test testGetPropertiesOwnerByAPlayer
 
+entry_point :
+	@echo "running test on account_abstraction via EntryPoint contract"
+	forge t --match-contract EntryPointTest
+
