@@ -14,6 +14,8 @@ contract GameTest is Test {
     Dice private dice;
     GeneralNFT private generalNft;
     EntryPoint public entryPoint;
+    Paymaster private paymaster;
+    Token private token;
 
     uint256 private playerAKey = 1111;
     uint256 private playerBKey = 2222;
@@ -25,5 +27,20 @@ contract GameTest is Test {
     address private playerC = vm.addr(playerCKey);
     address private playerD = vm.addr(playerDKey);
 
+    function setUp() external {
+        generalNft = new GeneralNFT("");
+        players = new PlayerS();
+        dice = new Dice();
+        entryPoint = new EntryPoint();
+        token = new Token(playerA);
+        paymaster = new Paymaster(address(entryPoint), address(token));
+    }
+
+    function registerPlayer() private {
+        players.registerPlayer(playerA, "player 1");
+        players.registerPlayer(playerB, "player 2");
+        players.registerPlayer(playerC, "player 3");
+        players.registerPlayer(playerD, "player 4");
+    }
 
 }
