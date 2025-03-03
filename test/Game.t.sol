@@ -51,13 +51,13 @@ contract GameTest is Test {
         assertEq(isPlayer2, false);
 
         // MonopolyLibrary.Player memory player = game.players(player1);
-        (string memory username,,,,,,,) = game.players(player1);
+        (string memory username,,,,,,,,) = game.players(player1);
         assertEq(username, "");
 
         //now add players
         registerPlayers();
 
-        vm.expectRevert("Not all Players in game room ");
+        vm.expectRevert("Not all players registered");
         game.startGame();
 
         game.addPlayer(player1);
@@ -78,7 +78,7 @@ contract GameTest is Test {
         assertEq(isPlayer3, true);
 
         //confirm the player username
-        (string memory afterAddedUsername,,,,,,,) = game.players(player1);
+        (string memory afterAddedUsername,,,,,,,,) = game.players(player1);
         assertEq(afterAddedUsername, "player 1");
 
         //confirm the start game
