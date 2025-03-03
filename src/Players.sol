@@ -1,10 +1,14 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
+import "./account_abstraction/SmartAccount.sol";
+
 contract PlayerS {
     mapping(address => bytes) public playerUsernames;
     mapping(bytes => bool) public usernameExists;
     mapping(address => bool) public alreadyRegistered;
+    mapping(address => address) public playerSmartAccount;
+    address public entryPoint;
 
     mapping(uint256 => Property) public properties;
 
@@ -24,6 +28,11 @@ contract PlayerS {
     event PropertyListedForSale(uint256 propertyId, uint256 propertyPrice, address owner);
 
     constructor() {}
+
+    function setEntryPoint(address _entryPoint) external {
+        require(_entryPoint.code.length > 0 , "not a smart contract");
+        entryPoint = _entryPoint;
+    }
 
     /**
      * @dev this function registers a new player to the game.
@@ -46,6 +55,9 @@ contract PlayerS {
         alreadyRegistered[playerAddress] = true;
         usernameExists[_usernameBytes] = true;
         playerUsernames[playerAddress] = _usernameBytes;
+        
+        SmartAccount smartAccount = new SmartAccount(playerAddress, entryPoint);
+        playerSmartAccount[playerAddress] = address(smartAccount);
 
         //emit an event
     }
