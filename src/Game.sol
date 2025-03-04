@@ -28,6 +28,7 @@ interface IPlayerContract {
     ) external view returns (bytes memory);
 
     function alreadyRegistered(address _player) external view returns (bool);
+    function playerSmartAccount(address _playerAddress) external view returns (address);
 }
 
 interface IDice {
@@ -111,12 +112,14 @@ contract Game {
      */
     function createPlayer(address _playerAddress) private {
         isPlayer[_playerAddress] = true;
-        playerAddresses.push(_playerAddress);
+        address playerSmartAccount = iPlayerContract.playerSmartAccount(_playerAddress);
+        playerAddresses.push(playerSmartAccount);
         MonopolyLibrary.Player storage player = players[_playerAddress];
         player.username = string(
             iPlayerContract.playerUsernames(_playerAddress)
         );
-        player.addr = _playerAddress;
+
+        player.addr = playerSmartAccount;
         numberOfAddedPlayers += 1;
     }
 

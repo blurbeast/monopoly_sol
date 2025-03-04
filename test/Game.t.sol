@@ -116,12 +116,14 @@ contract GameTest is Test {
         // the first player to player is the player at index zero
         // confirm that
         vm.expectRevert("Not your turn");
-        game.play(player2);
+        address ps2 = players.playerSmartAccount(player2);
+        game.play(ps2);
 
         //play game now
+        address ps1 = players.playerSmartAccount(player1);
         address currentPlayer = game.getCurrentPlayer();
-        assertEq(currentPlayer, player1);
-        game.play(player1);
+        assertEq(currentPlayer, ps1);
+        game.play(ps1);
 
         //zafter play, the turn should move to the next player
         game.nextTurn();
@@ -129,7 +131,7 @@ contract GameTest is Test {
         //check that the next player is the player at index 1
         address nextPlayer = game.getCurrentPlayer();
 
-        assertEq(nextPlayer, player2);
+        assertEq(nextPlayer, ps2);
     }
 
     // function testBuyPropertyFromBank() external {
@@ -155,39 +157,43 @@ contract GameTest is Test {
 
         // vm.prank(A);
         game.startGame();
+        address ps1 = players.playerSmartAccount(player1);
+        address ps2 = players.playerSmartAccount(player2);
+        address ps3 = players.playerSmartAccount(player3);
+        address ps4 = players.playerSmartAccount(player4);
         // vm.prank(A);
-        game.play(player1);
+        game.play(ps1);
         // vm.prank(A);
         game.nextTurn();
         // vm.prank(B);
-        game.play(player2);
+        game.play(ps2);
         // game.returnPlayer(B);
-        uint256 balb4 = game.playersBalances(player2);
+        uint256 balb4 = game.playersBalances(ps2);
         // vm.prank(B);
-        game.buyProperty(player2);
-        MonopolyLibrary.Player memory player22 = game.returnPlayer(player2);
+        game.buyProperty(ps2);
+        MonopolyLibrary.Player memory player22 = game.returnPlayer(ps2);
         MonopolyLibrary.Property memory property22 = game.returnPropertyNft(player22.playerCurrentPosition);
-        uint256 balAfter = game.playersBalances(player2);
+        uint256 balAfter = game.playersBalances(ps2);
         // Confirming change of balance
         assertEq(balAfter, (balb4 - property22.buyAmount));
         // checking new Ownership
         address newOwner = game.getPropertyOwner(player22.playerCurrentPosition);
-        assertEq(player2, newOwner);
+        assertEq(ps2, newOwner);
         // vm.prank(B);
         game.nextTurn();
-        uint256 cbalb4 = game.playersBalances(player3);
+        uint256 cbalb4 = game.playersBalances(ps3);
         // vm.prank(C);
-        game.play(player3);
+        game.play(ps3);
         // game.returnPlayer(C);
         // vm.prank(C);
-        vm.expectRevert();
-        game.buyProperty(player3);
+        vm.expectRevert();  
+        game.buyProperty(ps3);
 
-        game.handleRent(player3);
-        MonopolyLibrary.Player memory player33 = game.returnPlayer(player3);
+        game.handleRent(ps3);
+        MonopolyLibrary.Player memory player33 = game.returnPlayer(ps3);
         MonopolyLibrary.Property memory property22Owned = game.returnPropertyNft(player33.playerCurrentPosition);
 
-        assertEq(game.playersBalances(player3), (cbalb4 - property22Owned.rentAmount) );
+        assertEq(game.playersBalances(ps3), (cbalb4 - property22Owned.rentAmount) );
         // uint256 cbalAfter = game.playersBalances(C);
         // assertEq(cbalAfter, cbalb4 - 140);
         // checking new Ownership
