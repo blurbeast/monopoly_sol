@@ -40,6 +40,10 @@ contract GeneralNFT is ERC721URIStorage {
         
     }
 
+    function getProperty(uint8 propertyId) external returns (MonopolyLibrary.Property memory) {
+        return properties[propertyId];
+    }
+
     function mint(address _minter) external {
         require(totalSupply < MAX_SUPPLY, "Max supply reached");
         uint256 tokenId = totalSupply;

@@ -10,9 +10,11 @@ import {console} from "forge-std/Test.sol";
  * @dev Handles the core mechanics of a Monopoly-style game
  */
 interface INFTContract {
-    function returnProperty(
+    function properties(
         uint8 propertyId
     ) external view returns (MonopolyLibrary.Property memory property);
+
+    function getProperty(uint8 propertyId) external returns (MonopolyLibrary.Property memory);
 
     function returnPropertyRent(
         uint8 propertyId,
@@ -77,6 +79,7 @@ contract Game {
 
         iPlayerContract = IPlayerContract(_playerContract);
         iDice = IDice(_diceContract);
+        nftContract = INFTContract(_nftContract);
 
         createBankAndAssignNumberOfPlayers(_numberOfPlayers, _nftContract);
 
@@ -182,6 +185,29 @@ contract Game {
         emit PlayerMoved(player.addr, player.playerCurrentPosition);
     }
 
+    function buyProperty(address _playerAddress) external {
+        require(gameStarted, "Game not started yet");
+        require(
+            playerAddresses[currentPlayerIndex] == _playerAddress,
+            "Not your turn"
+        );
+
+        MonopolyLibrary.Player memory player = players[_playerAddress];
+
+        gameBank.buyProperty(player.playerCurrentPosition, _playerAddress);
+    }
+
+    function handleRent(address _playerAddress) external {
+        require(gameStarted, "Game not started yet");
+        require(
+            playerAddresses[currentPlayerIndex] == _playerAddress,
+            "Not your turn"
+        );
+
+        MonopolyLibrary.Player memory player = players[_playerAddress];
+        gameBank.handleRent(_playerAddress, player.playerCurrentPosition, player.diceRolled);
+    }
+
     /**
      * @dev Moves to the next player's turn
      */
@@ -214,8 +240,23 @@ contract Game {
 
     function returnPropertyNft(
         uint8 propertyId
-    ) public view returns (MonopolyLibrary.Property memory property) {
-        property = nftContract.returnProperty(propertyId);
+    ) public returns (MonopolyLibrary.Property memory property) {
+        // (bytes memory _name,
+        // uint256 _rentAmount,    
+        // bytes memory _uri,
+        // uint256 _buyAmount,
+        // MonopolyLibrary.PropertyType _propertyType,
+        // MonopolyLibrary.PropertyColors _color)= nftContract.properties(propertyId);
+
+        // property.name = _name;
+        // property.rentAmount = _rentAmount;
+        // property.buyAmount = _buyAmount;
+        // property.uri = _uri;
+        // property.propertyType = _propertyType;
+        // property.color = _color;
+
+       property = nftContract.getProperty(propertyId);
+
         return property;
     }
 
