@@ -115,8 +115,9 @@ contract GameTest is Test {
 
         // the first player to player is the player at index zero
         // confirm that
-        vm.expectRevert("Not your turn");
+        // vm.expectRevert("Not your turn");
         address ps2 = players.playerSmartAccount(player2);
+        vm.expectRevert("Not your turn");
         game.play(ps2);
 
         //play game now
@@ -125,10 +126,10 @@ contract GameTest is Test {
         assertEq(currentPlayer, ps1);
         game.play(ps1);
 
-        //zafter play, the turn should move to the next player
+        // //zafter play, the turn should move to the next player
         game.nextTurn();
 
-        //check that the next player is the player at index 1
+        // //check that the next player is the player at index 1
         address nextPlayer = game.getCurrentPlayer();
 
         assertEq(nextPlayer, ps2);
@@ -147,6 +148,7 @@ contract GameTest is Test {
 
     function testBuyPropertyFromGame() external {
         game = new Game(address(generalNft), address(0), address(players), address(dice), false, 4);
+        // vm.deal(address(paymaster), 100 ether);
         
         registerPlayers();
 

@@ -5,7 +5,7 @@ import {ERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol"
 import {ReentrancyGuard} from "lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol";
 
 import "./libraries/MonopolyLibrary.sol";
-import {console} from "forge-std/Test.sol";
+// import {console} from "forge-std/Test.sol";
 
 event RentPaid(address tenant, address landlord, uint256 rentPrice, bytes property);
 
@@ -481,12 +481,12 @@ contract GameBank is ERC20("GameBank", "GB"), ReentrancyGuard {
     mapping(address => uint8) private numberOfOwnedRailways;
 
     function _checkRailStationRent(uint8 propertyId) private view returns (uint256) {
-        console.log("property id is ::: ", propertyId);
+        // console.log("property id is ::: ", propertyId);
         address railOwner = propertyOwner[propertyId];
-        console.log("address of owner is ::: ", railOwner);
+        // console.log("address of owner is ::: ", railOwner);
         // Count how many railway stations are owned by the player
         uint8 ownedRailways = numberOfOwnedRailways[railOwner];
-        console.log("owned number of rail is ::: ", ownedRailways);
+        // console.log("owned number of rail is ::: ", ownedRailways);
 
         return 25 * (2 ** (ownedRailways - 1));
     }

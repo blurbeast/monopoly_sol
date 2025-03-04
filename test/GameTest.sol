@@ -68,9 +68,9 @@ contract GameTest is Test {
     }
 
 
-    function generateUserSignature() internal returns (bytes memory) {
-        PackedUserOperation memory userOp = createPackedUserOperation();
-        bytes32 userOpHash = generateUserOpHash();
+    function generateUserSignature(PackedUserOperation memory userOp ) internal returns (bytes memory) {
+        // PackedUserOperation memory userOp = createPackedUserOperation();
+        bytes32 userOpHash = generateUserOpHash(userOp);
         bytes32 signedHash = MessageHashUtils.toEthSignedMessageHash(userOpHash);
 
         (uint8 v, bytes32 r , bytes32 s) = vm.sign(playerAKey, signedHash);
@@ -78,8 +78,8 @@ contract GameTest is Test {
         return abi.encodePacked(r, s, v);
     }
 
-     function generateUserOpHash() internal returns (bytes32) {
-        PackedUserOperation memory userOp = createPackedUserOperation();
+     function generateUserOpHash(PackedUserOperation memory userOp) internal returns (bytes32) {
+        // PackedUserOperation memory userOp = createPackedUserOperation();
         bytes32 opHash = keccak256(abi.encode(
             userOp.sender,
             userOp.nonce,
@@ -97,11 +97,20 @@ contract GameTest is Test {
     }
 
     function testCreateAndPlay() external {
+        vm.deal(address(paymaster), 100 ether);
         game = new Game(address(generalNft), address(0), address(players), address(dice), false, 4);
         // token.collectToken(players.playerSmartAccount(playerA));
         registerPlayer();
         address playerSmartA = players.playerSmartAccount(playerA);
-        game.addPlayer(playerSmartA);
+        address playerSmartB = players.playerSmartAccount(playerB);
+        address playerSmartC = players.playerSmartAccount(playerC);
+        address playerSmartD = players.playerSmartAccount(playerD);
+
+        assertEq(playerA.balance, 0 ether);
+        assertEq(playerSmartA.balance, 0 ether);
+        assertEq(address(paymaster).balance, 100 ether);
+        assertEq(address(entryPoint).balance, 0 ether);
+        game.addPlayer(playerA);
         game.addPlayer(playerB);
         vm.expectRevert("Address already registered");
         game.addPlayer(playerA);
@@ -117,18 +126,32 @@ contract GameTest is Test {
         token.approve(address(paymaster), 10 ether);
 
         game.startGame();
-        game.play(playerA);
+        // it should be handled by entry point
+        PackedUserOperation memory userOpPlay = createPackedUserOperation();
+        userOpPlay.callData = abi.encode(address(address(game)), 0, abi.encodeWithSignature("play(address)", playerSmartA));
+        bytes32 userOpHashPlay = generateUserOpHash(userOpPlay);
+        bytes memory userSignaturePlay = generateUserSignature(userOpPlay);
+        userOpPlay.signature = userSignaturePlay;
+        entryPoint.handleOp(userOpPlay, userOpHashPlay);
+        // game.play(playerSmartA);
 
         PackedUserOperation memory userOp = createPackedUserOperation();
-        bytes32 userOpHash = generateUserOpHash();
-        bytes memory userSignature = generateUserSignature();
+        bytes32 userOpHash = generateUserOpHash(userOp);
+        bytes memory userSignature = generateUserSignature(userOp);
 
         userOp.signature = userSignature;
         //buy property
         entryPoint.handleOp(userOp, userOpHash);
-        // address newOwner =game.getPropertyOwner(6);
+        address newOwner = game.getPropertyOwner(6);
 
-        // assertEq(newOwner, playerA);                                                                                                                                                                                                
+        assertEq(newOwner, playerSmartA);  
+
+        assertEq(playerA.balance, 0 ether);
+        assertEq(playerSmartA.balance, 0 ether);
+        assertLt(address(paymaster).balance, 100 ether);
+        assertGt(address(entryPoint).balance, 0 ether);         
+
+                                                                                                                                                                                             
     }
 
 }
