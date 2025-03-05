@@ -2,6 +2,8 @@
 ## Overview
 A decentralized Monopoly game implemented as a Solidity smart contract. The game is designed to be played entirely on-chain, enforcing game rules through smart contract logic.
 
+![Screenshot from 2025-02-24 00-41-38](https://github.com/user-attachments/assets/62db6a67-8a16-4f74-9de9-ee3fedf2bf9d)
+
 ### Purpose:
 * Blockchain Gaming Adoption: Drive the adoption of blockchain technology by showcasing its practical application through gaming. 
 * Digital assets engagement: Engagement with unique digital assets such as NFTs to enhance gameplay. 
@@ -36,6 +38,9 @@ Smart Contracts
 * Game.sol: This is the main contract, which handles the game's core mechanics. 
 * NFT.sol: This is another helper contract which manages the NFTs utilized within the game.
 * Players.sol: This is another helper contract that manages the players, the properties, and property transactions within the game.
+
+![Screenshot from 2025-02-24 00-39-56](https://github.com/user-attachments/assets/51f8a2a5-5611-4b71-8697-d553b8903f4d)
+
 
 ### Economy & Tokens
 * Currency: ERC20 Standard
