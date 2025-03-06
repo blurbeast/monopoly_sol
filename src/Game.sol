@@ -10,22 +10,15 @@ import {console} from "forge-std/Test.sol";
  * @dev Handles the core mechanics of a Monopoly-style game
  */
 interface INFTContract {
-    function properties(
-        uint8 propertyId
-    ) external view returns (MonopolyLibrary.Property memory property);
+    function properties(uint8 propertyId) external view returns (MonopolyLibrary.Property memory property);
 
     function getProperty(uint8 propertyId) external returns (MonopolyLibrary.Property memory);
 
-    function returnPropertyRent(
-        uint8 propertyId,
-        uint8 upgradeStatus
-    ) external view returns (uint256 rent);
+    function returnPropertyRent(uint8 propertyId, uint8 upgradeStatus) external view returns (uint256 rent);
 }
 
 interface IPlayerContract {
-    function playerUsernames(
-        address player
-    ) external view returns (bytes memory);
+    function playerUsernames(address player) external view returns (bytes memory);
 
     function alreadyRegistered(address _player) external view returns (bool);
     function playerSmartAccount(address _playerAddress) external view returns (address);
@@ -85,10 +78,7 @@ contract Game {
         createBankAndAssignNumberOfPlayers(_numberOfPlayers, _nftContract);
 
         if (isPrivateGame) {
-            require(
-                _numberOfPlayers > 1 && _numberOfPlayers <= 10,
-                "Invalid number of players"
-            );
+            require(_numberOfPlayers > 1 && _numberOfPlayers <= 10, "Invalid number of players");
             createPlayer(_playerAddress);
         }
     }
@@ -98,10 +88,7 @@ contract Game {
      * @param _numberOfPlayers Number of players
      * @param _nftContract Address of the NFT contract
      */
-    function createBankAndAssignNumberOfPlayers(
-        uint8 _numberOfPlayers,
-        address _nftContract
-    ) private {
+    function createBankAndAssignNumberOfPlayers(uint8 _numberOfPlayers, address _nftContract) private {
         gameBank = new GameBank(_numberOfPlayers, _nftContract);
         numberOfPlayers = _numberOfPlayers;
     }
@@ -115,9 +102,7 @@ contract Game {
         address playerSmartAccount = iPlayerContract.playerSmartAccount(_playerAddress);
         playerAddresses.push(playerSmartAccount);
         MonopolyLibrary.Player storage player = players[_playerAddress];
-        player.username = string(
-            iPlayerContract.playerUsernames(_playerAddress)
-        );
+        player.username = string(iPlayerContract.playerUsernames(_playerAddress));
 
         player.addr = playerSmartAccount;
         numberOfAddedPlayers += 1;
@@ -138,10 +123,7 @@ contract Game {
      * @return success Returns true if the game starts successfully
      */
     function startGame() external returns (bool success) {
-        require(
-            numberOfAddedPlayers == numberOfPlayers,
-            "Not all players registered"
-        );
+        require(numberOfAddedPlayers == numberOfPlayers, "Not all players registered");
         for (uint8 i = 0; i < playerAddresses.length; i++) {
             gameBank.mint(playerAddresses[i], 1500);
         }
@@ -156,10 +138,7 @@ contract Game {
      */
     function play(address _currentPlayer) external {
         require(gameStarted, "Game not started yet");
-        require(
-            playerAddresses[currentPlayerIndex] == _currentPlayer,
-            "Not your turn"
-        );
+        require(playerAddresses[currentPlayerIndex] == _currentPlayer, "Not your turn");
 
         (uint8 dice1, uint8 dice2) = iDice.rollDice();
         uint8 totalMove = dice1 + dice2;
@@ -190,10 +169,7 @@ contract Game {
 
     function buyProperty(address _playerAddress) external {
         require(gameStarted, "Game not started yet");
-        require(
-            playerAddresses[currentPlayerIndex] == _playerAddress,
-            "Not your turn"
-        );
+        require(playerAddresses[currentPlayerIndex] == _playerAddress, "Not your turn");
 
         MonopolyLibrary.Player memory player = players[_playerAddress];
 
@@ -202,10 +178,7 @@ contract Game {
 
     function handleRent(address _playerAddress) external {
         require(gameStarted, "Game not started yet");
-        require(
-            playerAddresses[currentPlayerIndex] == _playerAddress,
-            "Not your turn"
-        );
+        require(playerAddresses[currentPlayerIndex] == _playerAddress, "Not your turn");
 
         MonopolyLibrary.Player memory player = players[_playerAddress];
         gameBank.handleRent(_playerAddress, player.playerCurrentPosition, player.diceRolled);
@@ -216,9 +189,7 @@ contract Game {
      */
     function nextTurn() external {
         require(gameStarted, "Game not started yet");
-        currentPlayerIndex = uint8(
-            (currentPlayerIndex + 1) % playerAddresses.length
-        );
+        currentPlayerIndex = uint8((currentPlayerIndex + 1) % playerAddresses.length);
         emit TurnChanged(playerAddresses[currentPlayerIndex]);
     }
 
@@ -233,19 +204,15 @@ contract Game {
 
     //HELPER FUNCTIONS FOR TESTING
 
-    function returnPlayer(
-        address _playersAddress
-    ) external view returns (MonopolyLibrary.Player memory player) {
+    function returnPlayer(address _playersAddress) external view returns (MonopolyLibrary.Player memory player) {
         player = players[_playersAddress];
         player.cash = gameBank.balanceOf(_playersAddress);
         return player;
     }
 
-    function returnPropertyNft(
-        uint8 propertyId
-    ) public returns (MonopolyLibrary.Property memory property) {
+    function returnPropertyNft(uint8 propertyId) public returns (MonopolyLibrary.Property memory property) {
         // (bytes memory _name,
-        // uint256 _rentAmount,    
+        // uint256 _rentAmount,
         // bytes memory _uri,
         // uint256 _buyAmount,
         // MonopolyLibrary.PropertyType _propertyType,
@@ -258,43 +225,32 @@ contract Game {
         // property.propertyType = _propertyType;
         // property.color = _color;
 
-       property = nftContract.getProperty(propertyId);
+        property = nftContract.getProperty(propertyId);
 
         return property;
     }
 
-    function playersBalances(
-        address _playersAddress
-    ) external view returns (uint256 playersBal) {
+    function playersBalances(address _playersAddress) external view returns (uint256 playersBal) {
         playersBal = gameBank.balanceOf(_playersAddress);
         return playersBal;
     }
 
-    function getProperty(
-        uint8 propertyId
-    ) public view returns (MonopolyLibrary.PropertyG memory property) {
+    function getProperty(uint8 propertyId) public view returns (MonopolyLibrary.PropertyG memory property) {
         property = gameBank.getProperty(propertyId);
         return property;
     }
 
-    function getPropertyOwner(
-        uint8 propertyId
-    ) external view returns (address _propertyOwner) {
+    function getPropertyOwner(uint8 propertyId) external view returns (address _propertyOwner) {
         _propertyOwner = gameBank.getPropertyOwner(propertyId);
         return _propertyOwner;
     }
 
-    function returnDeal(
-        address user
-    ) public view returns (MonopolyLibrary.PropertySwap memory usersDeal) {
+    function returnDeal(address user) public view returns (MonopolyLibrary.PropertySwap memory usersDeal) {
         usersDeal = gameBank.returnProposal(user);
         return usersDeal;
     }
 
-    function getPropertyRent(
-        uint8 id,
-        uint8 upgradeStatus
-    ) public view returns (uint256 rent) {
+    function getPropertyRent(uint8 id, uint8 upgradeStatus) public view returns (uint256 rent) {
         rent = nftContract.returnPropertyRent(id, upgradeStatus);
         return rent;
     }

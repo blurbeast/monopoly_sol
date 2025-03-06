@@ -170,10 +170,7 @@ library MonopolyLibrary {
     );
 
     event PropertyUpgraded(
-        uint8 indexed propertyId,
-        address indexed user,
-        uint8 upgradesApplied,
-        uint256 newRentAmount
+        uint8 indexed propertyId, address indexed user, uint8 upgradesApplied, uint256 newRentAmount
     );
 
     event PropertyDowngraded(

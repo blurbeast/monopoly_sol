@@ -13,6 +13,7 @@ import "lib/account-abstraction/contracts/interfaces/PackedUserOperation.sol";
 import "../src/account_abstraction/interfaces/ISmartAccount.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import "@openzeppelin/contracts/interfaces/IERC20.sol";
+
 contract GameTest is Test {
     Game public game;
     PlayerS public players;
@@ -54,10 +55,11 @@ contract GameTest is Test {
         userOp.sender = playerSmartAccount;
         userOp.nonce = ISmartAccount(playerSmartAccount).nonce();
         // for function setCount in the test contract
-        
-        userOp.callData = abi.encode(address(address(game)), 0, abi.encodeWithSignature("buyProperty(address)", playerSmartAccount));
+
+        userOp.callData =
+            abi.encode(address(address(game)), 0, abi.encodeWithSignature("buyProperty(address)", playerSmartAccount));
         // userOp.callData = abi.encode(address(testContract), 0, abi.encodeWithSignature("incrementCount()"));
-        
+
         userOp.accountGasLimits = bytes32(uint256(100000 << 128 | 100000));
         userOp.preVerificationGas = 21000;
         userOp.gasFees = bytes32(uint256(1e9 << 128 | 1e9));
@@ -67,30 +69,31 @@ contract GameTest is Test {
         return userOp;
     }
 
-
-    function generateUserSignature(PackedUserOperation memory userOp ) internal returns (bytes memory) {
+    function generateUserSignature(PackedUserOperation memory userOp) internal returns (bytes memory) {
         // PackedUserOperation memory userOp = createPackedUserOperation();
         bytes32 userOpHash = generateUserOpHash(userOp);
         bytes32 signedHash = MessageHashUtils.toEthSignedMessageHash(userOpHash);
 
-        (uint8 v, bytes32 r , bytes32 s) = vm.sign(playerAKey, signedHash);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(playerAKey, signedHash);
 
         return abi.encodePacked(r, s, v);
     }
 
-     function generateUserOpHash(PackedUserOperation memory userOp) internal returns (bytes32) {
+    function generateUserOpHash(PackedUserOperation memory userOp) internal returns (bytes32) {
         // PackedUserOperation memory userOp = createPackedUserOperation();
-        bytes32 opHash = keccak256(abi.encode(
-            userOp.sender,
-            userOp.nonce,
-            keccak256(userOp.initCode),
-            keccak256(userOp.callData),
-            userOp.accountGasLimits,
-            userOp.preVerificationGas,
-            userOp.gasFees,
-            keccak256(userOp.paymasterAndData)
-        ));
-        
+        bytes32 opHash = keccak256(
+            abi.encode(
+                userOp.sender,
+                userOp.nonce,
+                keccak256(userOp.initCode),
+                keccak256(userOp.callData),
+                userOp.accountGasLimits,
+                userOp.preVerificationGas,
+                userOp.gasFees,
+                keccak256(userOp.paymasterAndData)
+            )
+        );
+
         bytes32 userOpHash = keccak256(abi.encode(opHash, block.chainid, address(entryPoint)));
 
         return userOpHash;
@@ -117,8 +120,6 @@ contract GameTest is Test {
         game.addPlayer(playerC);
         game.addPlayer(playerD);
 
-
-
         console.log("paymaster address ::: ", address(paymaster));
         vm.prank(playerSmartA);
         token.collectToken(playerSmartA);
@@ -128,7 +129,8 @@ contract GameTest is Test {
         game.startGame();
         // it should be handled by entry point
         PackedUserOperation memory userOpPlay = createPackedUserOperation();
-        userOpPlay.callData = abi.encode(address(address(game)), 0, abi.encodeWithSignature("play(address)", playerSmartA));
+        userOpPlay.callData =
+            abi.encode(address(address(game)), 0, abi.encodeWithSignature("play(address)", playerSmartA));
         bytes32 userOpHashPlay = generateUserOpHash(userOpPlay);
         bytes memory userSignaturePlay = generateUserSignature(userOpPlay);
         userOpPlay.signature = userSignaturePlay;
@@ -144,14 +146,11 @@ contract GameTest is Test {
         entryPoint.handleOp(userOp, userOpHash);
         address newOwner = game.getPropertyOwner(6);
 
-        assertEq(newOwner, playerSmartA);  
+        assertEq(newOwner, playerSmartA);
 
         assertEq(playerA.balance, 0 ether);
         assertEq(playerSmartA.balance, 0 ether);
         assertLt(address(paymaster).balance, 100 ether);
-        assertGt(address(entryPoint).balance, 0 ether);         
-
-                                                                                                                                                                                             
+        assertGt(address(entryPoint).balance, 0 ether);
     }
-
 }

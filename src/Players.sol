@@ -30,7 +30,7 @@ contract PlayerS {
     constructor() {}
 
     function setEntryPoint(address _entryPoint) external {
-        require(_entryPoint.code.length > 0 , "not a smart contract");
+        require(_entryPoint.code.length > 0, "not a smart contract");
         entryPoint = _entryPoint;
     }
 
@@ -55,7 +55,7 @@ contract PlayerS {
         alreadyRegistered[playerAddress] = true;
         usernameExists[_usernameBytes] = true;
         playerUsernames[playerAddress] = _usernameBytes;
-        
+
         SmartAccount smartAccount = new SmartAccount(playerAddress, entryPoint);
         playerSmartAccount[playerAddress] = address(smartAccount);
 

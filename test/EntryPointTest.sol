@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-
-import  "forge-std/Test.sol";
+import "forge-std/Test.sol";
 import "lib/account-abstraction/contracts/interfaces/PackedUserOperation.sol";
 import "../src/account_abstraction/EntryPoint.sol";
 import "../src/account_abstraction/SmartAccount.sol";
@@ -11,25 +10,22 @@ import "../src/account_abstraction/Test.sol";
 import "../src/account_abstraction/Token.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
-
 contract EntryPointTest is Test {
-
     EntryPoint private entryPoint;
-    uint256 constant private privateKey = 0x12345678;
-    address immutable private owner = vm.addr(privateKey);
+    uint256 private constant privateKey = 0x12345678;
+    address private immutable owner = vm.addr(privateKey);
     Paymaster private paymaster;
     SmartAccount private smartAccount;
     TestContract private testContract;
     Token public token;
 
-     function setUp() external {
+    function setUp() external {
         entryPoint = new EntryPoint();
         testContract = new TestContract();
         smartAccount = new SmartAccount(owner, address(entryPoint));
         token = new Token(owner);
         paymaster = new Paymaster(address(entryPoint), address(token));
     }
-
 
     function createPackedUserOperation() internal returns (PackedUserOperation memory) {
         PackedUserOperation memory userOp;
@@ -38,7 +34,7 @@ contract EntryPointTest is Test {
         // for function setCount in the test contract
         userOp.callData = abi.encode(address(testContract), 0, abi.encodeWithSignature("setCount(uint256)", 6));
         // userOp.callData = abi.encode(address(testContract), 0, abi.encodeWithSignature("incrementCount()"));
-        
+
         userOp.accountGasLimits = bytes32(uint256(100000 << 128 | 100000));
         userOp.preVerificationGas = 21000;
         userOp.gasFees = bytes32(uint256(1e9 << 128 | 1e9));
@@ -50,17 +46,19 @@ contract EntryPointTest is Test {
 
     function generateUserOpHash() internal returns (bytes32) {
         PackedUserOperation memory userOp = createPackedUserOperation();
-        bytes32 opHash = keccak256(abi.encode(
-            userOp.sender,
-            userOp.nonce,
-            keccak256(userOp.initCode),
-            keccak256(userOp.callData),
-            userOp.accountGasLimits,
-            userOp.preVerificationGas,
-            userOp.gasFees,
-            keccak256(userOp.paymasterAndData)
-        ));
-        
+        bytes32 opHash = keccak256(
+            abi.encode(
+                userOp.sender,
+                userOp.nonce,
+                keccak256(userOp.initCode),
+                keccak256(userOp.callData),
+                userOp.accountGasLimits,
+                userOp.preVerificationGas,
+                userOp.gasFees,
+                keccak256(userOp.paymasterAndData)
+            )
+        );
+
         bytes32 userOpHash = keccak256(abi.encode(opHash, block.chainid, address(entryPoint)));
 
         return userOpHash;
@@ -71,18 +69,17 @@ contract EntryPointTest is Test {
         bytes32 userOpHash = generateUserOpHash();
         bytes32 signedHash = MessageHashUtils.toEthSignedMessageHash(userOpHash);
 
-        (uint8 v, bytes32 r , bytes32 s) = vm.sign(privateKey, signedHash);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(privateKey, signedHash);
 
         return abi.encodePacked(r, s, v);
     }
 
     function testEntryPoint() external {
-
         token.collectToken(address(smartAccount));
         vm.deal(address(paymaster), 100 ether);
 
         console.log("smart account balance in ether before minting ::: ", address(smartAccount).balance);
-        console.log("owner balance in ether before minting ::: ", owner.balance);   
+        console.log("owner balance in ether before minting ::: ", owner.balance);
 
         assertEq(address(paymaster).balance, 100 ether);
         assertEq(owner.balance, 0);
@@ -103,7 +100,7 @@ contract EntryPointTest is Test {
 
         assertEq(token.allowance(address(smartAccount), address(paymaster)), 100 ether);
 
-        // now perform the action 
+        // now perform the action
 
         PackedUserOperation memory userOp = createPackedUserOperation();
         bytes32 userOpHash = generateUserOpHash();
@@ -116,7 +113,6 @@ contract EntryPointTest is Test {
         entryPoint.handleOp(userOp, userOpHash);
 
         uint256 testContractCount = testContract.count();
-
 
         // for incrementCount function
         // assertEq(testContractCount, 1);
@@ -131,9 +127,8 @@ contract EntryPointTest is Test {
         // assertEq(address(entryPoint).balance, 0 ether);
 
         console.log("smart account balance in ether after operation ::: ", address(smartAccount).balance);
-        console.log("owner balance in ether after operation ::: ", owner.balance);   
-        console.log("paymaster balance in ether after operation ::: ", address(paymaster).balance);   
+        console.log("owner balance in ether after operation ::: ", owner.balance);
+        console.log("paymaster balance in ether after operation ::: ", address(paymaster).balance);
         console.log("entry point balance in ether after operation ::: ", address(entryPoint).balance);
     }
-
 }

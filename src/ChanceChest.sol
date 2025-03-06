@@ -516,7 +516,4 @@ contract MonopolyGame {
 //        gameBank.mint(players[_player].addr, 200);
 //        emit BalanceUpdated(_player, 200);
 //    }
-
-    
-
 }

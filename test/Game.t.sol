@@ -149,7 +149,7 @@ contract GameTest is Test {
     function testBuyPropertyFromGame() external {
         game = new Game(address(generalNft), address(0), address(players), address(dice), false, 4);
         // vm.deal(address(paymaster), 100 ether);
-        
+
         registerPlayers();
 
         game.addPlayer(player1);
@@ -188,14 +188,14 @@ contract GameTest is Test {
         game.play(ps3);
         // game.returnPlayer(C);
         // vm.prank(C);
-        vm.expectRevert();  
+        vm.expectRevert();
         game.buyProperty(ps3);
 
         game.handleRent(ps3);
         MonopolyLibrary.Player memory player33 = game.returnPlayer(ps3);
         MonopolyLibrary.Property memory property22Owned = game.returnPropertyNft(player33.playerCurrentPosition);
 
-        assertEq(game.playersBalances(ps3), (cbalb4 - property22Owned.rentAmount) );
+        assertEq(game.playersBalances(ps3), (cbalb4 - property22Owned.rentAmount));
         // uint256 cbalAfter = game.playersBalances(C);
         // assertEq(cbalAfter, cbalb4 - 140);
         // checking new Ownership

@@ -7,7 +7,6 @@ import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {console} from "forge-std/Test.sol";
 
 contract SmartAccount is IAccount {
-
     using ECDSA for bytes32;
 
     address public owner;
@@ -19,11 +18,10 @@ contract SmartAccount is IAccount {
         entryPoint = _entryPoint;
     }
 
-    function validateUserOp(
-        PackedUserOperation calldata userOp,
-        bytes32 userOpHash,
-        uint256 missingAccountFunds
-    ) external returns (uint256 validationData) {
+    function validateUserOp(PackedUserOperation calldata userOp, bytes32 userOpHash, uint256 missingAccountFunds)
+        external
+        returns (uint256 validationData)
+    {
         require(userOp.nonce == nonce, "invalid user nonce");
         bytes32 signedHash = MessageHashUtils.toEthSignedMessageHash(userOpHash);
         address recoveredSigner = signedHash.recover(userOp.signature);
@@ -31,14 +29,13 @@ contract SmartAccount is IAccount {
         if (recoveredSigner != owner) {
             return 1;
         }
-        nonce ++;
+        nonce++;
 
         return 0;
     }
 
-    function execute(address _target,uint256 value, bytes memory data) external returns(bool , bytes memory) {
-        
-        (bool success, bytes memory result ) = _target.call{value: value}(data);
+    function execute(address _target, uint256 value, bytes memory data) external returns (bool, bytes memory) {
+        (bool success, bytes memory result) = _target.call{value: value}(data);
 
         require(success, "could not complete action");
 
