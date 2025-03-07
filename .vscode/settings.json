@@ -1,5 +1,5 @@
 {
   "wake.compiler.solc.remappings": [
-    "account-abstraction/=lib/account-abstraction/"
+    "@account-abstraction/=lib/account-abstraction/"
   ]
 }

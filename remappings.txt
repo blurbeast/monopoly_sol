@@ -1,1 +1,1 @@
-account-abstraction/=lib/account-abstraction/
+@account-abstraction/=lib/account-abstraction/
