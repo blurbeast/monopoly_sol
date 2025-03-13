@@ -8,6 +8,11 @@ import {PackedUserOperation} from "lib/account-abstraction/contracts/interfaces/
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 contract EntryPoint is ReentrancyGuard {
+
+    bytes32 private constant ACCOUNT_GAS_LIMITS = bytes32(uint256(150000 << 128) | uint256(100000));
+    bytes32 private constant GAS_FEES = bytes32(uint256(20 gwei << 128) | uint256(1 gwei));
+    uint256 private constant PRE_VERIFICATION_GAS = 21000;
+
     function handleOp(PackedUserOperation calldata userOp, bytes32 userOpHash)
         external
         nonReentrant
@@ -55,6 +60,42 @@ contract EntryPoint is ReentrancyGuard {
         require(success, "Execution failed");
         return (success, responseData);
     }
+    
 
+    function getUserOpAndHash(
+        address sender,
+        uint256 nonce,
+        bytes calldata callData,
+        address paymaster
+    ) external view returns (PackedUserOperation memory userOp, bytes32 userOpHash) {
+        // Reduce local variables by using constants directly
+        bytes memory paymasterAndData = paymaster == address(0) ? bytes("") : abi.encodePacked(paymaster);
+
+        userOp = PackedUserOperation({
+            sender: sender,
+            nonce: nonce,
+            initCode: hex"",
+            callData: callData,
+            accountGasLimits: ACCOUNT_GAS_LIMITS,
+            preVerificationGas: PRE_VERIFICATION_GAS,
+            gasFees: GAS_FEES,
+            paymasterAndData: paymasterAndData,
+            signature: hex""
+        });
+
+        bytes memory packed = abi.encode(
+            userOp.sender,
+            userOp.nonce,
+            keccak256(userOp.initCode),
+            keccak256(userOp.callData),
+            userOp.accountGasLimits,
+            userOp.preVerificationGas,
+            userOp.gasFees,
+            keccak256(userOp.paymasterAndData)
+        );
+        userOpHash = keccak256(abi.encodePacked(packed, address(this), block.chainid));
+
+        return (userOp, userOpHash);
+    }
     receive() external payable {}
 }

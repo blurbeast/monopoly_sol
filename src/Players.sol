@@ -56,7 +56,7 @@ contract PlayerS {
         usernameExists[_usernameBytes] = true;
         playerUsernames[playerAddress] = _usernameBytes;
 
-        SmartAccount smartAccount = new SmartAccount(playerAddress, entryPoint);
+        SmartAccount smartAccount = new SmartAccount(playerAddress, entryPoint, bytes(""));
         playerSmartAccount[playerAddress] = address(smartAccount);
 
         //emit an event

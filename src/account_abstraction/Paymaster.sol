@@ -44,7 +44,7 @@ contract Paymaster is IPaymaster {
 
         uint256 refund = address(this).balance >= actualGasCost ? actualGasCost : address(this).balance;
         if (refund > 0) {
-            (bool success,) = msg.sender.call{value: refund}("");
+            (bool success,) = sender.call{value: refund}("");
             require(success, "Refund failed");
         }
     }

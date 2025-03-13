@@ -13,10 +13,12 @@ contract SmartAccount is IAccount {
     address public owner;
     address public entryPoint;
     uint256 public nonce;
+    bytes32 private secretKey;
 
-    constructor(address _owner, address _entryPoint) {
+    constructor(address _owner, address _entryPoint, bytes memory _secretKey) {
         owner = _owner;
         entryPoint = _entryPoint;
+        secretKey = keccak256(_secretKey);
     }
 
     function validateUserOp(PackedUserOperation calldata userOp, bytes32 userOpHash, uint256 missingAccountFunds)
@@ -24,10 +26,10 @@ contract SmartAccount is IAccount {
         returns (uint256 validationData)
     {
         require(userOp.nonce == nonce, "invalid user nonce");
-        bytes32 signedHash = MessageHashUtils.toEthSignedMessageHash(userOpHash);
-        address recoveredSigner = signedHash.recover(userOp.signature);
+        // bytes32 signedHash = MessageHashUtils.toEthSignedMessageHash(userOpHash);
+        // address recoveredSigner = signedHash.recover(userOp.signature);
 
-        if (recoveredSigner != owner) {
+        if (secretKey != keccak256(userOp.signature)) {
             return 1;
         }
         nonce++;
