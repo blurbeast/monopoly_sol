@@ -78,7 +78,9 @@ contract PlayerS {
      *
      *     @return the id of the created game.
      */
-    function createGame() external returns (uint256) {}
+    function createGame() external returns (uint256) {
+        return uint256(0);
+    }
 
     /**
      * @dev player should be able to buy a property.

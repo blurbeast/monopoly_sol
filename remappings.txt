@@ -1,1 +1,4 @@
+echo "forge-std/=lib/forge-std/src/" > remappings.txt
+echo "@openzeppelin/=lib/openzeppelin-contracts/contracts/" >> remappings.txt
 @account-abstraction/=lib/account-abstraction/
+"@openzeppelin/=lib/openzeppelin-contracts/contracts/"

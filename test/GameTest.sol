@@ -11,8 +11,8 @@ import {Paymaster} from "../src/account_abstraction/Paymaster.sol";
 import {Token} from "../src/account_abstraction/Token.sol";
 import "lib/account-abstraction/contracts/interfaces/PackedUserOperation.sol";
 import "../src/account_abstraction/interfaces/ISmartAccount.sol";
-import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
-import "@openzeppelin/contracts/interfaces/IERC20.sol";
+import "lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol";
+import "lib/openzeppelin-contracts/contracts/interfaces/IERC20.sol";
 
 contract GameTest is Test {
     Game public game;

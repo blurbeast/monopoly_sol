@@ -1,11 +1,11 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
+import { ReentrancyGuard } from "../../lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol";
 import {IAccount} from "lib/account-abstraction/contracts/interfaces/IAccount.sol";
 import {IPaymaster} from "lib/account-abstraction/contracts/interfaces/IPaymaster.sol";
 import {ISmartAccount} from "./interfaces/ISmartAccount.sol";
 import {PackedUserOperation} from "lib/account-abstraction/contracts/interfaces/PackedUserOperation.sol";
-import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 contract EntryPoint is ReentrancyGuard {
 
@@ -74,13 +74,13 @@ contract EntryPoint is ReentrancyGuard {
         userOp = PackedUserOperation({
             sender: sender,
             nonce: nonce,
-            initCode: hex"",
+            initCode: "",
             callData: callData,
             accountGasLimits: ACCOUNT_GAS_LIMITS,
             preVerificationGas: PRE_VERIFICATION_GAS,
             gasFees: GAS_FEES,
             paymasterAndData: paymasterAndData,
-            signature: hex""
+            signature: ""
         });
 
         bytes memory packed = abi.encode(

@@ -27,3 +27,18 @@ player_smart_account:
 game_entry_point:
 	@echo "running game via entry point"
 	forge t --match-contract GameTest
+
+deploy_nft_contract:
+	@echo "adding the environment variables to the console"
+	source .env
+	forge script script/NFTContract.s.sol:NFTContract --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
+
+deploy_bank_factory:
+	@echo "deploying the bank factory contract"
+#	source .env
+#	@echo "environment variables added to the console"
+	forge script script/BankFactory.s.sol:BankFactoryScript --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
+
+interact_with_bank:
+	@echo ""
+	forge script script/GameBank.s.sol:GameBankScript --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast

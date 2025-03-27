@@ -13,7 +13,6 @@ contract GameTest is Test {
     GeneralNFT private generalNft;
     PlayerS private players;
     Dice private dice;
-
     address private player1 = address(0xa);
     address private player2 = address(0xb);
     address private player3 = address(0xc);

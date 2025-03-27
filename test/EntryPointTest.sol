@@ -8,7 +8,7 @@ import "../src/account_abstraction/SmartAccount.sol";
 import "../src/account_abstraction/Paymaster.sol";
 import "../src/account_abstraction/Test.sol";
 import "../src/account_abstraction/Token.sol";
-import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+import "lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol";
 
 contract EntryPointTest is Test {
     EntryPoint private entryPoint;

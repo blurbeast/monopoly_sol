@@ -3,7 +3,7 @@ pragma solidity ^0.8.26;
 
 import {GameBank} from "./Bank.sol";
 import "./libraries/MonopolyLibrary.sol";
-import {console} from "forge-std/Test.sol";
+//import {console} from "/lib/forge-std/src/Test.sol";
 
 /**
  * @title Game Contract
@@ -40,7 +40,7 @@ contract Game {
     using MonopolyLibrary for MonopolyLibrary.Player;
 
     mapping(address => bool) public isPlayer;
-    mapping(address => uint8) playersPosition;
+    mapping(address => uint8) public playersPosition;
     mapping(address => MonopolyLibrary.Player) public players;
     uint8 public currentPlayerIndex;
     bool public gameStarted;
