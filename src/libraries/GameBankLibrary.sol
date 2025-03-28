@@ -2,11 +2,10 @@
 pragma solidity ^0.8.26;
 
 import "./MonopolyLibrary.sol";
-import {TokenLibrary} from "./TokenLibrary.sol";
 import "../Bank.sol";
+import { IGameToken } from "../GameToken.sol";
 
 library GameBankLibrary {
-    using TokenLibrary for TokenLibrary.TokenStorage;
 
     event RentPaid(address tenant, address landlord, uint256 rentPrice, bytes property);
     event PropertyMortgaged(uint256 propertyId, uint256 mortgageAmount, address owner);
@@ -42,6 +41,19 @@ library GameBankLibrary {
         s.gameToken = _gameToken;
         gameProperties(s);
         setNumberForColoredPropertyNumber(s);
+        mintToBank(_gameToken, numberOfPlayers);
+    }
+
+    function mintToBank(address gameToken, uint8 numberOfPlayers) internal {
+        IGameToken(gameToken).mint(numberOfPlayers, address (this));
+    }
+
+    function mintToBankGamePlayers(GameBankStorage storage s, address[] memory to, uint256 amount) internal {
+        IGameToken(s.gameToken).mintToPlayers(to, amount, address(this));
+    }
+
+    function playerBankBalance(GameBankStorage storage s, address addr) internal returns (uint256) {
+        return IGameToken(s.gameToken).balanceOf(addr, address(this));
     }
 
     function gameProperties(GameBankStorage storage s) internal {
@@ -72,20 +84,19 @@ library GameBankLibrary {
         s.upgradeUserPropertyColorOwnedNumber[MonopolyLibrary.PropertyColors.BROWN] = 2;
     }
 
-    function mint(GameBankStorage storage s, TokenLibrary.TokenStorage storage tokenStorage, address to, uint256 amount)
+    function mint(GameBankStorage storage s, address to, uint256 amount)
         internal
     {
-        tokenStorage.transfer(address(this), address(this), to, amount);
+        IGameToken(s.gameToken).transfer(address(this), address(this), to, amount);
     }
 
     function buyProperty(
         GameBankStorage storage s,
-        TokenLibrary.TokenStorage storage tokenStorage,
         uint8 propertyId,
         address buyer
     ) internal {
-        uint256 amount = buyPropertyLogic(s, propertyId, buyer, tokenStorage.balanceOf(buyer, address (this)));
-        tokenStorage.transferFrom(address (this), buyer, address (this), address (this), amount);
+        uint256 amount = buyPropertyLogic(s, propertyId, buyer, IGameToken(s.gameToken).balanceOf(buyer, address (this)));
+        IGameToken(s.gameToken).transferFrom(address (this), buyer, address (this), address (this), amount);
     }
 
     function buyPropertyLogic(GameBankStorage storage s, uint8 propertyId, address buyer, uint256 balance)
@@ -317,14 +328,13 @@ library GameBankLibrary {
 
     function handleRentAndEmit(
         GameBankStorage storage s,
-        TokenLibrary.TokenStorage storage tokenStorage,
         address player,
         uint8 propertyId,
         uint8 diceRolled
     ) internal {
         uint256 rentAmount =
-            handleRent(s, player, propertyId, diceRolled, tokenStorage.balanceOf(player, address(this)));
-        tokenStorage.transferFrom(
+            handleRent(s, player, propertyId, diceRolled, IGameToken(s.gameToken).balanceOf(player, address(this)));
+        IGameToken(s.gameToken).transferFrom(
             address(this), player, address(this), s.bankGameProperties[propertyId].owner, rentAmount
         );
         emit RentPaid(player, s.bankGameProperties[propertyId].owner, rentAmount, "");
@@ -370,12 +380,11 @@ library GameBankLibrary {
 
     function mortgagePropertyAndEmit(
         GameBankStorage storage s,
-        TokenLibrary.TokenStorage storage tokenStorage,
         uint8 propertyId,
         address player
     ) internal {
-        uint256 mortgageAmount = mortgageProperty(s, propertyId, player, tokenStorage.balanceOf(player, address(this)));
-        tokenStorage.transfer(address(this), address(this), player, mortgageAmount);
+        uint256 mortgageAmount = mortgageProperty(s, propertyId, player, IGameToken(s.gameToken).balanceOf(player, address(this)));
+        IGameToken(s.gameToken).transfer(address(this), address(this), player, mortgageAmount);
         emit PropertyMortgaged(propertyId, mortgageAmount, player);
     }
 
@@ -393,12 +402,11 @@ library GameBankLibrary {
 
     function releaseMortgageAndTransfer(
         GameBankStorage storage s,
-        TokenLibrary.TokenStorage storage tokenStorage,
         uint8 propertyId,
         address player
     ) internal {
-        uint256 repaymentAmount = releaseMortgage(s, propertyId, player, tokenStorage.balanceOf(player, address(this)));
-        tokenStorage.transferFrom(address(this), player, address(this), address(this), repaymentAmount);
+        uint256 repaymentAmount = releaseMortgage(s, propertyId, player, IGameToken(s.gameToken).balanceOf(player, address(this)));
+        IGameToken(s.gameToken).transferFrom(address(this), player, address(this), address(this), repaymentAmount);
     }
 
     function releaseMortgage(GameBankStorage storage s, uint8 propertyId, address player, uint256 balance)
@@ -416,14 +424,13 @@ library GameBankLibrary {
 
     function upgradePropertyAndEmit(
         GameBankStorage storage s,
-        TokenLibrary.TokenStorage storage tokenStorage,
         uint8 propertyId,
         uint8 _noOfUpgrade,
         address player
     ) internal {
         uint256 amountToPay =
-            upgradeProperty(s, propertyId, _noOfUpgrade, player, tokenStorage.balanceOf(player, address(this)));
-        tokenStorage.transferFrom(address(this), player, address(this), address(this), amountToPay);
+            upgradeProperty(s, propertyId, _noOfUpgrade, player, IGameToken(s.gameToken).balanceOf(player, address(this)));
+        IGameToken(s.gameToken).transferFrom(address(this), player, address(this), address(this), amountToPay);
         emit PropertyUpGraded(propertyId);
     }
 
@@ -453,13 +460,12 @@ library GameBankLibrary {
 
     function downgradePropertyAndEmit(
         GameBankStorage storage s,
-        TokenLibrary.TokenStorage storage tokenStorage,
         uint8 propertyId,
         uint8 noOfDowngrade,
         address player
     ) internal {
         uint256 amountToReceive = downgradeProperty(s, propertyId, noOfDowngrade, player);
-        tokenStorage.transfer(address(this), address(this), player, amountToReceive);
+        IGameToken(s.gameToken).transfer(address(this), address(this), player, amountToReceive);
         emit PropertyDownGraded(propertyId);
     }
 

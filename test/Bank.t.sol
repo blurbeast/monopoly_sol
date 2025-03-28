@@ -46,6 +46,8 @@ contract BankTest is Test {
         assertEq(gameToken.balanceOf(bankAddress, bankAddress ), 5000);
         //        console.log("log is ::: ",gameBank.totalSupply());
 
+        // allow bank to perform transaction on behalf of player
+        gameToken.approve(bankAddress, player1, bankAddress);
         //buy property
         gameBank.buyProperty(2, player1);
         MonopolyLibrary.PropertyG memory property = gameBank.getProperty(2);

@@ -5,7 +5,7 @@ import {ReentrancyGuard} from "lib/openzeppelin-contracts/contracts/utils/Reentr
 import "./libraries/MonopolyLibrary.sol";
 import "./libraries/GameBankLibrary.sol";
 import "./libraries/TokenLibrary.sol";
-import "./GameToken.sol";
+import { IGameToken, GameToken } from "./GameToken.sol";
 
 interface NFTContract {
     function getAllProperties() external view returns (MonopolyLibrary.Property[] memory);
@@ -20,21 +20,19 @@ contract GameBank is ReentrancyGuard {
 
     constructor(uint8 numberOfPlayers, address _nftContract, address gameToken) {
         GameBankLibrary.initialize(s, numberOfPlayers, _nftContract, gameToken);
-        tokenStorage.gameToken = gameToken;
-        GameToken(gameToken).mint(numberOfPlayers, address (this));
     }
 
     function mint(address to, uint256 amount) external {
-        GameToken(tokenStorage.gameToken).mint(0, address(this));
-        GameBankLibrary.mint(s, tokenStorage, to, amount);
+//        GameToken(tokenStorage.gameToken).mint(0, address(this));
+//        GameBankLibrary.mint(s, tokenStorage, to, amount);
     }
 
     function mints(address[] memory to, uint256 amount) external {
-        GameToken(tokenStorage.gameToken).mintToPlayers(to, amount, address(this));
+        GameBankLibrary.mintToBankGamePlayers(s, to, amount);
     }
 
     function buyProperty(uint8 propertyId, address buyer) external nonReentrant {
-        GameBankLibrary.buyProperty(s, tokenStorage, propertyId, buyer, address(this));
+        GameBankLibrary.buyProperty(s, propertyId, buyer);
     }
 
     function makeProposal(
@@ -55,23 +53,23 @@ contract GameBank is ReentrancyGuard {
     }
 
     function handleRent(address player, uint8 propertyId, uint8 diceRolled) external nonReentrant {
-        GameBankLibrary.handleRentAndEmit(s, tokenStorage, player, propertyId, diceRolled);
+        GameBankLibrary.handleRentAndEmit(s, player, propertyId, diceRolled);
     }
 
     function mortgageProperty(uint8 propertyId, address player) external nonReentrant {
-        GameBankLibrary.mortgagePropertyAndEmit(s, tokenStorage, propertyId, player);
+        GameBankLibrary.mortgagePropertyAndEmit(s,  propertyId, player);
     }
 
     function releaseMortgage(uint8 propertyId, address player) external nonReentrant {
-        GameBankLibrary.releaseMortgageAndTransfer(s, tokenStorage, propertyId, player);
+        GameBankLibrary.releaseMortgageAndTransfer(s, propertyId, player);
     }
 
     function upgradeProperty(uint8 propertyId, uint8 _noOfUpgrade, address player) external nonReentrant {
-        GameBankLibrary.upgradePropertyAndEmit(s, tokenStorage, propertyId, _noOfUpgrade, player);
+        GameBankLibrary.upgradePropertyAndEmit(s, propertyId, _noOfUpgrade, player);
     }
 
     function downgradeProperty(uint8 propertyId, uint8 noOfDowngrade, address player) external nonReentrant {
-        GameBankLibrary.downgradePropertyAndEmit(s, tokenStorage, propertyId, noOfDowngrade, player);
+        GameBankLibrary.downgradePropertyAndEmit(s, propertyId, noOfDowngrade, player);
     }
 
     function getNumberOfUserOwnedPropertyOnAColor(address user, MonopolyLibrary.PropertyColors color)
@@ -106,7 +104,8 @@ contract GameBank is ReentrancyGuard {
         return GameBankLibrary.getPropertiesOwnedByAPlayer(s, _playerAddress);
     }
 
-    function bal(address addr) external view returns (uint256) {
-        return tokenStorage.balanceOf(addr, address(this));
+    function bal(address addr) external returns (uint256) {
+        // interface of game token to be moved to the library
+        return GameBankLibrary.playerBankBalance(s, addr);
     }
 }
