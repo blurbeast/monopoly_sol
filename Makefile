@@ -42,3 +42,6 @@ deploy_bank_factory:
 interact_with_bank:
 	@echo ""
 	forge script script/GameBank.s.sol:GameBankScript --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
+confirm_deploy:
+	@echo ""
+	cast code $CONTRACT_ADDRESS --rpc-url $RPC_URL
