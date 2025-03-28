@@ -5,7 +5,7 @@ libs = ["lib"]
 verbosity = 5
 optimizer = true
 
-#[profile.default]
+#[profile.default.remappings]
 remappings = [
     "forge-std/=lib/forge-std/src/",
     "@openzeppelin/=lib/openzeppelin-contracts/contracts/"

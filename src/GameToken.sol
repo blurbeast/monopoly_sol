@@ -24,10 +24,6 @@ contract GameToken {
         s.gameToken = address(this);
     }
 
-//    function state() external view returns(TokenLibrary.TokenStorage memory) {
-//        return s;
-//    }
-
     modifier onlyBankContract(address _address) {
         require(_address.code.length > 0, "Only contract address allowed");
         _;
