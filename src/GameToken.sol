@@ -31,22 +31,13 @@ contract GameToken {
     }
 
     function transfer(address gameId, address owner , address beneficiary, uint256 amount) public {
-        // before transfer check the balance of the owner
-        if (owner.code.length < 1) {
-            // check balance of player
-            uint256 bal = this.balanceOf(owner, gameId);
-            require(bal >= amount, "insufficient balance");
-            playerBalance[gameId][owner] -= amount;
-            playerBalance[gameId][beneficiary] += amount;
-        }else {
-            uint256 bal = this.balanceOf(owner, gameId);
-            require(bal >= amount, "insufficient balance");
-            playerBalance[gameId][owner] -= amount;
-            playerBalance[gameId][beneficiary] += amount;
-        }
+        uint256 bal = this.balanceOf(owner, gameId);
+        require(bal >= amount, "insufficient balance");
+        playerBalance[gameId][owner] -= amount;
+        playerBalance[gameId][beneficiary] += amount;
     }
 
-    function balanceOf(address owner, address contractAddress) public returns(uint256) {
+    function balanceOf(address owner, address contractAddress) public view returns(uint256) {
         return playerBalance[contractAddress][owner];
     }
 
@@ -59,9 +50,8 @@ contract GameToken {
     function transferFrom(address gamesId, address owner, address spender, address beneficiary, uint256 amount) external {
         uint256 allow = allowance[gamesId][owner][spender];
 
-        require(allow >= amount, "");
+        require(allow >= amount, "insufficient allowance");
 
-        playerBalance[gamesId][owner] -= amount;
-        playerBalance[gamesId][beneficiary] += amount;
+        this.transfer(gamesId, owner, beneficiary, amount);
     }
 }
