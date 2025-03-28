@@ -89,7 +89,7 @@ contract Game {
      * @param _nftContract Address of the NFT contract
      */
     function createBankAndAssignNumberOfPlayers(uint8 _numberOfPlayers, address _nftContract) private {
-        gameBank = new GameBank(_numberOfPlayers, _nftContract);
+        gameBank = new GameBank(_numberOfPlayers, _nftContract, address (1));
         numberOfPlayers = _numberOfPlayers;
     }
 
@@ -206,7 +206,8 @@ contract Game {
 
     function returnPlayer(address _playersAddress) external view returns (MonopolyLibrary.Player memory player) {
         player = players[_playersAddress];
-        player.cash = gameBank.balanceOf(_playersAddress);
+//        player.cash = gameBank.balanceOf(_playersAddress);
+        player.cash = 0;
         return player;
     }
 
@@ -231,7 +232,8 @@ contract Game {
     }
 
     function playersBalances(address _playersAddress) external view returns (uint256 playersBal) {
-        playersBal = gameBank.balanceOf(_playersAddress);
+//        playersBal = gameBank.balanceOf(_playersAddress);
+        playersBal = 0;
         return playersBal;
     }
 

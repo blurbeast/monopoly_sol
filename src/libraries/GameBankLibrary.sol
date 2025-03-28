@@ -32,6 +32,8 @@ library GameBankLibrary {
         uint8 propertySize;
         uint256 proposalIds;
         address nftContract;
+        address gameToken;
+        uint8 numberOfPlayer;
     }
 
     function getStorage() internal pure returns (GameBankStorage storage s) {
@@ -43,12 +45,13 @@ library GameBankLibrary {
         return s;
     }
 
-    function initialize(GameBankStorage storage s, uint8 numberOfPlayers, address _nftContract) internal {
+    function initialize(GameBankStorage storage s, uint8 numberOfPlayers, address _nftContract, address _gameToken) internal {
         uint16 decimalPlace = 1000;
         uint256 tolerance = 4;
         require(_nftContract.code.length > 0, "not a contract address");
         s.nftContract = _nftContract;
-        uint256 amountToMint = (numberOfPlayers + tolerance) * decimalPlace;
+        s.numberOfPlayer = numberOfPlayers;
+        s.gameToken = _gameToken;
         gameProperties(s);
         setNumberForColoredPropertyNumber(s);
     }

@@ -12,7 +12,7 @@ contract BankFactoryScript is Script {
 
         // call on the bank factory contract using the new keyword
         //tells it to create an instance or object of the bank factory contract
-        BankFactory factory = new BankFactory();
+        BankFactory factory = new BankFactory(address (0));
 
         console.log("address of the factory contract", address (factory));
 

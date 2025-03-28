@@ -1,57 +1,49 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.10;
-import {ERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
+pragma solidity ^0.8.26;
+
+import { TokenLibrary } from "./libraries/TokenLibrary.sol";
 
 contract GameToken {
-    // since this contract will be generic for all games , we'd create it in such a way to allow user balance at a particular game be used
-    mapping(address => mapping(address => uint256 )) public playerBalance;
-    mapping(address => mapping(address => mapping(address => uint256))) public allowance;
+    using TokenLibrary for TokenLibrary.TokenStorage;
 
-    string public name;
-    string public symbol;
+    TokenLibrary.TokenStorage private s;
+
+    string public name = "Monopoly Token";
+    string public symbol = "MPT";
+
     constructor() {
-        name = "Monopoly Token";
-        symbol = "MPT";
+        s.gameToken = address(this);
     }
 
-     modifier onlyBankContract(address _address) {
-         require(_address.code.length > 0, "only contract address allowed");
-         _;
-     }
+    modifier onlyBankContract(address _address) {
+        require(_address.code.length > 0, "Only contract address allowed");
+        _;
+    }
 
-    function mint(uint8 numberOfP, address contractAddress) onlyBankContract(contractAddress) external {
+    function mint(uint8 numberOfP, address contractAddress) external onlyBankContract(contractAddress) {
         uint256 amount = (numberOfP + 4) * 1000;
-        playerBalance[contractAddress][contractAddress] += amount;
+        s.playerBalance[contractAddress][contractAddress] += amount;
     }
 
-    function mintToPlayers(address[] memory players, uint256 amount, address contractAddress) external {
-        for(uint8 i = 0; i < players.length; i++ ) {
-            this.transfer(contractAddress, contractAddress, players[i], amount);
+    function mintToPlayers(address[] memory players, uint256 amount, address contractAddress) external onlyBankContract(contractAddress) {
+        for (uint8 i = 0; i < players.length; i++) {
+            s.transfer(contractAddress, contractAddress, players[i], amount);
         }
     }
 
-    function transfer(address gameId, address owner , address beneficiary, uint256 amount) public {
-        uint256 bal = this.balanceOf(owner, gameId);
-        require(bal >= amount, "insufficient balance");
-        playerBalance[gameId][owner] -= amount;
-        playerBalance[gameId][beneficiary] += amount;
+    function transfer(address gameId, address owner, address beneficiary, uint256 amount) external {
+        s.transfer(gameId, owner, beneficiary, amount);
     }
 
-    function balanceOf(address owner, address contractAddress) public view returns(uint256) {
-        return playerBalance[contractAddress][owner];
+    function balanceOf(address owner, address contractAddress) external view returns (uint256) {
+        return s.balanceOf(owner, contractAddress);
     }
 
     function approve(address gameId, address owner, address spender) external {
-        //we are approving the total uint256 max
-        // the approve is just adding a kinda layer
-        allowance[gameId][owner][spender] = type(uint256).max;
+        s.approve(gameId, owner, spender);
     }
 
-    function transferFrom(address gamesId, address owner, address spender, address beneficiary, uint256 amount) external {
-        uint256 allow = allowance[gamesId][owner][spender];
-
-        require(allow >= amount, "insufficient allowance");
-
-        this.transfer(gamesId, owner, beneficiary, amount);
+    function transferFrom(address gameId, address owner, address spender, address beneficiary, uint256 amount) external {
+        s.transferFrom(gameId, owner, spender, beneficiary, amount);
     }
 }
