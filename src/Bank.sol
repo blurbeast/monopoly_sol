@@ -13,7 +13,7 @@ interface NFTContract {
 
 contract GameBank is ReentrancyGuard {
     using GameBankLibrary for GameBankLibrary.GameBankStorage;
-    using TokenLibrary for TokenLibrary.TokenStorage;
+//    using TokenLibrary for TokenLibrary.TokenStorage;
 
     GameBankLibrary.GameBankStorage private s;
     TokenLibrary.TokenStorage private tokenStorage;
@@ -21,6 +21,7 @@ contract GameBank is ReentrancyGuard {
     constructor(uint8 numberOfPlayers, address _nftContract, address gameToken) {
         GameBankLibrary.initialize(s, numberOfPlayers, _nftContract, gameToken);
         tokenStorage.gameToken = gameToken;
+        GameToken(gameToken).mint(numberOfPlayers, address (this));
     }
 
     function mint(address to, uint256 amount) external {
@@ -33,7 +34,7 @@ contract GameBank is ReentrancyGuard {
     }
 
     function buyProperty(uint8 propertyId, address buyer) external nonReentrant {
-        GameBankLibrary.buyProperty(s, tokenStorage, propertyId, buyer);
+        GameBankLibrary.buyProperty(s, tokenStorage, propertyId, buyer, address(this));
     }
 
     function makeProposal(

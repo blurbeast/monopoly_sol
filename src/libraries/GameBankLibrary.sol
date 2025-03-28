@@ -84,12 +84,12 @@ library GameBankLibrary {
         uint8 propertyId,
         address buyer
     ) internal {
-        uint256 amount = buyPropertyLogic(s, propertyId, buyer, tokenStorage.balanceOf(buyer, address(this)));
-        tokenStorage.transferFrom(address(this), buyer, address(this), address(this), amount);
+        uint256 amount = buyPropertyLogic(s, propertyId, buyer, tokenStorage.balanceOf(buyer, address (this)));
+        tokenStorage.transferFrom(address (this), buyer, address (this), address (this), amount);
     }
 
     function buyPropertyLogic(GameBankStorage storage s, uint8 propertyId, address buyer, uint256 balance)
-        internal
+        private
         returns (uint256)
     {
         MonopolyLibrary.PropertyG storage property = s.bankGameProperties[propertyId];

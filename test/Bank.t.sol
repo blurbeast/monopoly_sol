@@ -4,62 +4,68 @@ pragma solidity ^0.8.13;
 import "../src/libraries/MonopolyLibrary.sol";
 import {GameBank} from "../src/Bank.sol";
 import {GeneralNFT} from "../src/NFT.sol";
+import { GameToken } from "../src/GameToken.sol";
 import {Test, console} from "forge-std/Test.sol";
 
 // this is the test contract to test all of the functionalities of the bank contract in the source file
 
 contract BankTest is Test {
-//    GameBank private gameBank;
-//    GeneralNFT private generalNft;
-//    address private player1 = address(0xa);
-//    address private player2 = address(0xb);
+    GameBank private gameBank;
+    GeneralNFT private generalNft;
+    address private player1 = address(0xa);
+    address private player2 = address(0xb);
+    GameToken private gameToken;
 //
-//    function setUp() public {
-//        generalNft = new GeneralNFT("");
-//        gameBank = new GameBank(4, address(generalNft));
-//        gameBank.mint(player1, 2000);
-//        gameBank.mint(player2, 2000);
-//    }
+    function setUp() public {
+        generalNft = new GeneralNFT("");
+        gameToken = new GameToken();
+        gameBank = new GameBank(4, address(generalNft), address (gameToken));
+    }
 //
 //    // upon deployment , the balance of the bank should be 8
-//    function testBankBalance() external view {
-//        uint256 bankBalance = gameBank.balanceOf(address(gameBank));
-//        assertEq(bankBalance, 4000);
-//        MonopolyLibrary.PropertyG memory property = gameBank.getProperty(1);
-//        address _owner = property.owner;
-//        assertEq(_owner, address(address(gameBank)));
-//        assertEq(string(property.name), "GO");
-//    }
+    function testBankBalance() external view {
+        address bankAddress = address(gameBank);
+        uint256 bankBalance = gameToken.balanceOf(bankAddress, bankAddress );
+        assertEq(bankBalance, 8000);
+        MonopolyLibrary.PropertyG memory property = gameBank.getProperty(1);
+        address _owner = property.owner;
+        assertEq(_owner, address(address(gameBank)));
+        assertEq(string(property.name), "GO");
+    }
 //
-//    function testBuyProperty() external {
-//        // to buy property , there must be a player
-//        // the player must hold the bank token
-//
-//        // be sure player has a token of the bank
-//        assertEq(gameBank.balanceOf(player1), 2000);
-//        assertEq(gameBank.balanceOf(address(gameBank)), 4000);
-//        //        console.log("log is ::: ",gameBank.totalSupply());
-//
-//        //buy property
-//        gameBank.buyProperty(2, player1);
-//        MonopolyLibrary.PropertyG memory property = gameBank.getProperty(2);
-//
-//        assertEq(player1, property.owner);
-//        gameBank.buyProperty(6, player1);
-//
-//        MonopolyLibrary.PropertyColors color = property.propertyColor;
-//        assertEq(uint8(color), uint8(MonopolyLibrary.PropertyColors.BROWN));
-//
-//        uint8 result = gameBank.getNumberOfUserOwnedPropertyOnAColor(player1, MonopolyLibrary.PropertyColors.PURPLE);
-//
-//        assertEq(result, 1);
-//
-//        assert(gameBank.balanceOf(player1) == 1740);
-//
-//        assertEq(gameBank.balanceOf(address(gameBank)), 4260);
-//
-//        // test that the number of user property color is one
-//    }
+    function testBuyProperty() external {
+        // to buy property , there must be a player
+        // the player must hold the bank token
+        address bankAddress = address(gameBank);
+        address[] memory players = new address[](2);
+        players[0] = (player1);
+        players[1] = (player2);
+        gameBank.mints(players, 1500);
+        // be sure player has a token of the bank
+        assertEq(gameToken.balanceOf(player1, bankAddress), 1500);
+        assertEq(gameToken.balanceOf(bankAddress, bankAddress ), 5000);
+        //        console.log("log is ::: ",gameBank.totalSupply());
+
+        //buy property
+        gameBank.buyProperty(2, player1);
+        MonopolyLibrary.PropertyG memory property = gameBank.getProperty(2);
+
+        assertEq(player1, property.owner);
+        gameBank.buyProperty(6, player1);
+
+        MonopolyLibrary.PropertyColors color = property.propertyColor;
+        assertEq(uint8(color), uint8(MonopolyLibrary.PropertyColors.BROWN));
+
+        uint8 result = gameBank.getNumberOfUserOwnedPropertyOnAColor(player1, MonopolyLibrary.PropertyColors.PURPLE);
+
+        assertEq(result, 1);
+
+        assert(gameToken.balanceOf(player1, bankAddress) == 1240);
+
+        assertEq(gameToken.balanceOf(address(gameBank), bankAddress), 5260);
+
+        // test that the number of user property color is one
+    }
 //
 //    // test that user can pay rent
 //    function testHandleRent() external {
