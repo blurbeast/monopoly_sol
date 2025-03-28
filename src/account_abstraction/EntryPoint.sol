@@ -1,14 +1,13 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
-import { ReentrancyGuard } from "../../lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol";
+import {ReentrancyGuard} from "../../lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol";
 import {IAccount} from "lib/account-abstraction/contracts/interfaces/IAccount.sol";
 import {IPaymaster} from "lib/account-abstraction/contracts/interfaces/IPaymaster.sol";
 import {ISmartAccount} from "./interfaces/ISmartAccount.sol";
 import {PackedUserOperation} from "lib/account-abstraction/contracts/interfaces/PackedUserOperation.sol";
 
 contract EntryPoint is ReentrancyGuard {
-
     bytes32 private constant ACCOUNT_GAS_LIMITS = bytes32(uint256(150000 << 128) | uint256(100000));
     bytes32 private constant GAS_FEES = bytes32(uint256(20 gwei << 128) | uint256(1 gwei));
     uint256 private constant PRE_VERIFICATION_GAS = 21000;
@@ -60,14 +59,12 @@ contract EntryPoint is ReentrancyGuard {
         require(success, "Execution failed");
         return (success, responseData);
     }
-    
 
-    function getUserOpAndHash(
-        address sender,
-        uint256 nonce,
-        bytes calldata callData,
-        address paymaster
-    ) external view returns (PackedUserOperation memory userOp, bytes32 userOpHash) {
+    function getUserOpAndHash(address sender, uint256 nonce, bytes calldata callData, address paymaster)
+        external
+        view
+        returns (PackedUserOperation memory userOp, bytes32 userOpHash)
+    {
         // Reduce local variables by using constants directly
         bytes memory paymasterAndData = paymaster == address(0) ? bytes("") : abi.encodePacked(paymaster);
 
@@ -97,5 +94,6 @@ contract EntryPoint is ReentrancyGuard {
 
         return (userOp, userOpHash);
     }
+
     receive() external payable {}
 }

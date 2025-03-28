@@ -11,17 +11,12 @@ interface NFTContract {
     function getAllProperties() external view returns (MonopolyLibrary.Property[] memory);
 }
 
-contract GameBank  {
+contract GameBank is ReentrancyGuard {
     using GameBankLibrary for GameBankLibrary.GameBankStorage;
     using TokenLibrary for TokenLibrary.TokenStorage;
 
     GameBankLibrary.GameBankStorage private s;
     TokenLibrary.TokenStorage private tokenStorage;
-
-    event RentPaid(address tenant, address landlord, uint256 rentPrice, bytes property);
-    event PropertyMortgaged(uint256 propertyId, uint256 mortgageAmount, address owner);
-    event PropertyUpGraded(uint256 propertyId);
-    event PropertyDownGraded(uint256 propertyId);
 
     constructor(uint8 numberOfPlayers, address _nftContract, address gameToken) {
         GameBankLibrary.initialize(s, numberOfPlayers, _nftContract, gameToken);
@@ -29,17 +24,16 @@ contract GameBank  {
     }
 
     function mint(address to, uint256 amount) external {
-        GameToken(tokenStorage.gameToken).mint(0, address(this)); // Adjust as needed
-        tokenStorage.transfer(address(this), address(this), to, amount);
+        GameToken(tokenStorage.gameToken).mint(0, address(this));
+        GameBankLibrary.mint(s, tokenStorage, to, amount);
     }
 
     function mints(address[] memory to, uint256 amount) external {
         GameToken(tokenStorage.gameToken).mintToPlayers(to, amount, address(this));
     }
 
-    function buyProperty(uint8 propertyId, address buyer) external  {
-        uint256 amount = GameBankLibrary.buyProperty(s, propertyId, buyer, tokenStorage.balanceOf(buyer, address(this)));
-        tokenStorage.transferFrom(address(this), buyer, address(this), address(this), amount);
+    function buyProperty(uint8 propertyId, address buyer) external nonReentrant {
+        GameBankLibrary.buyProperty(s, tokenStorage, propertyId, buyer);
     }
 
     function makeProposal(
@@ -50,44 +44,40 @@ contract GameBank  {
         MonopolyLibrary.SwapType swapType,
         uint256 amountInvolved
     ) external {
-        GameBankLibrary.makeProposal(s, proposer, otherPlayer, proposedPropertyId, biddingPropertyId, swapType, amountInvolved);
+        GameBankLibrary.makeProposal(
+            s, proposer, otherPlayer, proposedPropertyId, biddingPropertyId, swapType, amountInvolved
+        );
     }
 
-    function makeDecisionOnProposal(address _user, uint256 proposalId, bool isAccepted) external  {
+    function makeDecisionOnProposal(address _user, uint256 proposalId, bool isAccepted) external nonReentrant {
         GameBankLibrary.makeDecisionOnProposal(s, _user, proposalId, isAccepted);
     }
 
-    function handleRent(address player, uint8 propertyId, uint8 diceRolled) external  {
-        uint256 rentAmount = GameBankLibrary.handleRent(s, player, propertyId, diceRolled, tokenStorage.balanceOf(player, address(this)));
-        tokenStorage.transferFrom(address(this), player, address(this), s.bankGameProperties[propertyId].owner, rentAmount);
-        emit RentPaid(player, s.bankGameProperties[propertyId].owner, rentAmount, "");
+    function handleRent(address player, uint8 propertyId, uint8 diceRolled) external nonReentrant {
+        GameBankLibrary.handleRentAndEmit(s, tokenStorage, player, propertyId, diceRolled);
     }
 
-    function mortgageProperty(uint8 propertyId, address player) external  {
-        uint256 mortgageAmount = GameBankLibrary.mortgageProperty(s, propertyId, player, tokenStorage.balanceOf(player, address(this)));
-        tokenStorage.transfer(address(this), address(this), player, mortgageAmount);
-        emit PropertyMortgaged(propertyId, mortgageAmount, player);
+    function mortgageProperty(uint8 propertyId, address player) external nonReentrant {
+        GameBankLibrary.mortgagePropertyAndEmit(s, tokenStorage, propertyId, player);
     }
 
-    function releaseMortgage(uint8 propertyId, address player) external {
-        uint256 repaymentAmount = GameBankLibrary.releaseMortgage(s, propertyId, player, tokenStorage.balanceOf(player, address(this)));
-        tokenStorage.transferFrom(address(this), player, address(this), address(this), repaymentAmount);
+    function releaseMortgage(uint8 propertyId, address player) external nonReentrant {
+        GameBankLibrary.releaseMortgageAndTransfer(s, tokenStorage, propertyId, player);
     }
 
-    function upgradeProperty(uint8 propertyId, uint8 _noOfUpgrade, address player) external {
-        uint256 amountToPay = GameBankLibrary.upgradeProperty(s, propertyId, _noOfUpgrade, player, tokenStorage.balanceOf(player, address(this)));
-        tokenStorage.transferFrom(address(this), player, address(this), address(this), amountToPay);
-        emit PropertyUpGraded(propertyId);
+    function upgradeProperty(uint8 propertyId, uint8 _noOfUpgrade, address player) external nonReentrant {
+        GameBankLibrary.upgradePropertyAndEmit(s, tokenStorage, propertyId, _noOfUpgrade, player);
     }
 
-    function downgradeProperty(uint8 propertyId, uint8 noOfDowngrade, address player) external {
-        uint256 amountToReceive = GameBankLibrary.downgradeProperty(s, propertyId, noOfDowngrade, player);
-        tokenStorage.transfer(address(this), address(this), player, amountToReceive);
-        emit PropertyDownGraded(propertyId);
+    function downgradeProperty(uint8 propertyId, uint8 noOfDowngrade, address player) external nonReentrant {
+        GameBankLibrary.downgradePropertyAndEmit(s, tokenStorage, propertyId, noOfDowngrade, player);
     }
 
-    // View functions remain unchanged
-    function getNumberOfUserOwnedPropertyOnAColor(address user, MonopolyLibrary.PropertyColors color) external view returns (uint8) {
+    function getNumberOfUserOwnedPropertyOnAColor(address user, MonopolyLibrary.PropertyColors color)
+        external
+        view
+        returns (uint8)
+    {
         return GameBankLibrary.getNumberOfUserOwnedPropertyOnAColor(s, user, color);
     }
 
@@ -107,7 +97,11 @@ contract GameBank  {
         return s.bankGameProperties[propertyId].owner;
     }
 
-    function getPropertiesOwnedByAPlayer(address _playerAddress) external view returns (MonopolyLibrary.PropertyG[] memory) {
+    function getPropertiesOwnedByAPlayer(address _playerAddress)
+        external
+        view
+        returns (MonopolyLibrary.PropertyG[] memory)
+    {
         return GameBankLibrary.getPropertiesOwnedByAPlayer(s, _playerAddress);
     }
 

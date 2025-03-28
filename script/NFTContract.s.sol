@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.28;
 
-import { GeneralNFT } from "../src/NFT.sol";
+import {GeneralNFT} from "../src/NFT.sol";
 import {Script, console} from "forge-std/Script.sol";
 
 contract NFTContract is Script {
-   GeneralNFT public generalNft;
+    GeneralNFT public generalNft;
 
     function run() external {
         uint256 privateK = vm.envUint("PRIVATE_KEY");
@@ -13,7 +13,7 @@ contract NFTContract is Script {
 
         generalNft = new GeneralNFT("oloba");
 
-        console.log("contract address of bank is ::: ", address (generalNft));
+        console.log("contract address of bank is ::: ", address(generalNft));
 
         vm.stopBroadcast();
     }

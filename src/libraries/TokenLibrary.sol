@@ -8,13 +8,7 @@ library TokenLibrary {
         address gameToken;
     }
 
-    function transfer(
-        TokenStorage storage s,
-        address gameId,
-        address from,
-        address to,
-        uint256 amount
-    ) internal {
+    function transfer(TokenStorage storage s, address gameId, address from, address to, uint256 amount) internal {
         uint256 bal = s.playerBalance[gameId][from];
         require(bal >= amount, "Insufficient balance");
         s.playerBalance[gameId][from] -= amount;
@@ -37,20 +31,11 @@ library TokenLibrary {
         transfer(s, gameId, owner, to, amount);
     }
 
-    function approve(
-        TokenStorage storage s,
-        address gameId,
-        address owner,
-        address spender
-    ) internal {
-        s.allowance[gameId][owner][spender] = type(uint256).max; // Infinite allowance
+    function approve(TokenStorage storage s, address gameId, address owner, address spender) internal {
+        s.allowance[gameId][owner][spender] = type(uint256).max;
     }
 
-    function balanceOf(
-        TokenStorage storage s,
-        address owner,
-        address gameId
-    ) internal view returns (uint256) {
+    function balanceOf(TokenStorage storage s, address owner, address gameId) internal view returns (uint256) {
         return s.playerBalance[gameId][owner];
     }
 }

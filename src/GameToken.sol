@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.26;
 
-import { TokenLibrary } from "./libraries/TokenLibrary.sol";
+import "./libraries/TokenLibrary.sol";
 
 contract GameToken {
     using TokenLibrary for TokenLibrary.TokenStorage;
@@ -25,7 +25,10 @@ contract GameToken {
         s.playerBalance[contractAddress][contractAddress] += amount;
     }
 
-    function mintToPlayers(address[] memory players, uint256 amount, address contractAddress) external onlyBankContract(contractAddress) {
+    function mintToPlayers(address[] memory players, uint256 amount, address contractAddress)
+        external
+        onlyBankContract(contractAddress)
+    {
         for (uint8 i = 0; i < players.length; i++) {
             s.transfer(contractAddress, contractAddress, players[i], amount);
         }
@@ -43,7 +46,9 @@ contract GameToken {
         s.approve(gameId, owner, spender);
     }
 
-    function transferFrom(address gameId, address owner, address spender, address beneficiary, uint256 amount) external {
+    function transferFrom(address gameId, address owner, address spender, address beneficiary, uint256 amount)
+        external
+    {
         s.transferFrom(gameId, owner, spender, beneficiary, amount);
     }
 }

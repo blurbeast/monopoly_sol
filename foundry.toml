@@ -3,6 +3,7 @@ src = "src"
 out = "out"
 libs = ["lib"]
 verbosity = 5
+optimizer = true
 
 #[profile.default]
 remappings = [
