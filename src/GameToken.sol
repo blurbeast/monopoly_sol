@@ -55,4 +55,13 @@ contract GameToken {
         // the approve is just adding a kinda layer
         allowance[gameId][owner][spender] = type(uint256).max;
     }
+
+    function transferFrom(address gamesId, address owner, address spender, address beneficiary, uint256 amount) external {
+        uint256 allow = allowance[gamesId][owner][spender];
+
+        require(allow >= amount, "");
+
+        playerBalance[gamesId][owner] -= amount;
+        playerBalance[gamesId][beneficiary] += amount;
+    }
 }
