@@ -48,6 +48,10 @@ contract GameBank is ReentrancyGuard {
         );
     }
 
+    function getProperties() external returns(MonopolyLibrary.PropertyG[] memory) {
+        return GameBankLibrary.getAllBankProperties(s);
+    }
+
     function makeDecisionOnProposal(address _user, uint256 proposalId, bool isAccepted) external nonReentrant {
         GameBankLibrary.makeDecisionOnProposal(s, _user, proposalId, isAccepted);
     }

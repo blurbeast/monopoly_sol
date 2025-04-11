@@ -507,21 +507,46 @@ library GameBankLibrary {
         return s.propertySwap[user];
     }
 
+    function getAllBankProperties(GameBankStorage storage s) internal view returns(MonopolyLibrary.PropertyG[] memory) {
+        return bankProperties(s);
+    }
+
+    function bankProperties(GameBankStorage storage s) private view returns(MonopolyLibrary.PropertyG[] memory) {
+        MonopolyLibrary.PropertyG[] memory allProperties = new MonopolyLibrary.PropertyG[](s.propertySize);
+        uint8 count = 0;
+        for (uint8 i = 1; i <= s.propertySize; i++) {
+            allProperties[count] = s.bankGameProperties[i];
+            count++;
+        }
+        assembly {
+            mstore(allProperties, count)
+        }
+
+        return allProperties;
+    }
+
     function getPropertiesOwnedByAPlayer(GameBankStorage storage s, address _playerAddress)
         internal
         view
         returns (MonopolyLibrary.PropertyG[] memory)
     {
+//        for (uint8 i = 1; i <= s.propertySize; i++) {
+//            if (s.bankGameProperties[i].owner == _playerAddress) {
+//                playerProperties[count] = s.bankGameProperties[i];
+//                count++;
+//            }
+//        }
+//        assembly {
+//            mstore(playerProperties, count)
+//        }
+        MonopolyLibrary.PropertyG[] memory allProperties = bankProperties(s);
         MonopolyLibrary.PropertyG[] memory playerProperties = new MonopolyLibrary.PropertyG[](s.propertySize);
         uint8 count = 0;
         for (uint8 i = 1; i <= s.propertySize; i++) {
-            if (s.bankGameProperties[i].owner == _playerAddress) {
+            if (allProperties[i].owner == _playerAddress) {
                 playerProperties[count] = s.bankGameProperties[i];
                 count++;
             }
-        }
-        assembly {
-            mstore(playerProperties, count)
         }
         return playerProperties;
     }
