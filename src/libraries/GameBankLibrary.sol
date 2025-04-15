@@ -3,10 +3,9 @@ pragma solidity ^0.8.26;
 
 import "./MonopolyLibrary.sol";
 import "../Bank.sol";
-import { IGameToken } from "../GameToken.sol";
+import {IGameToken} from "../GameToken.sol";
 
 library GameBankLibrary {
-
     event RentPaid(address tenant, address landlord, uint256 rentPrice, bytes property);
     event PropertyMortgaged(uint256 propertyId, uint256 mortgageAmount, address owner);
     event PropertyUpGraded(uint256 propertyId);
@@ -45,7 +44,7 @@ library GameBankLibrary {
     }
 
     function mintToBank(address gameToken, uint8 numberOfPlayers) internal {
-        IGameToken(gameToken).mint(numberOfPlayers, address (this));
+        IGameToken(gameToken).mint(numberOfPlayers, address(this));
     }
 
     function mintToBankGamePlayers(GameBankStorage storage s, address[] memory to, uint256 amount) internal {
@@ -84,19 +83,13 @@ library GameBankLibrary {
         s.upgradeUserPropertyColorOwnedNumber[MonopolyLibrary.PropertyColors.BROWN] = 2;
     }
 
-    function mint(GameBankStorage storage s, address to, uint256 amount)
-        internal
-    {
+    function mint(GameBankStorage storage s, address to, uint256 amount) internal {
         IGameToken(s.gameToken).transfer(address(this), address(this), to, amount);
     }
 
-    function buyProperty(
-        GameBankStorage storage s,
-        uint8 propertyId,
-        address buyer
-    ) internal {
-        uint256 amount = buyPropertyLogic(s, propertyId, buyer, IGameToken(s.gameToken).balanceOf(buyer, address (this)));
-        IGameToken(s.gameToken).transferFrom(address (this), buyer, address (this), address (this), amount);
+    function buyProperty(GameBankStorage storage s, uint8 propertyId, address buyer) internal {
+        uint256 amount = buyPropertyLogic(s, propertyId, buyer, IGameToken(s.gameToken).balanceOf(buyer, address(this)));
+        IGameToken(s.gameToken).transferFrom(address(this), buyer, address(this), address(this), amount);
     }
 
     function buyPropertyLogic(GameBankStorage storage s, uint8 propertyId, address buyer, uint256 balance)
@@ -326,12 +319,9 @@ library GameBankLibrary {
         }
     }
 
-    function handleRentAndEmit(
-        GameBankStorage storage s,
-        address player,
-        uint8 propertyId,
-        uint8 diceRolled
-    ) internal {
+    function handleRentAndEmit(GameBankStorage storage s, address player, uint8 propertyId, uint8 diceRolled)
+        internal
+    {
         uint256 rentAmount =
             handleRent(s, player, propertyId, diceRolled, IGameToken(s.gameToken).balanceOf(player, address(this)));
         IGameToken(s.gameToken).transferFrom(
@@ -378,12 +368,9 @@ library GameBankLibrary {
         return s.propertyOwner[13] == s.propertyOwner[29] ? (diceRolled * 10) : (diceRolled * 4);
     }
 
-    function mortgagePropertyAndEmit(
-        GameBankStorage storage s,
-        uint8 propertyId,
-        address player
-    ) internal {
-        uint256 mortgageAmount = mortgageProperty(s, propertyId, player, IGameToken(s.gameToken).balanceOf(player, address(this)));
+    function mortgagePropertyAndEmit(GameBankStorage storage s, uint8 propertyId, address player) internal {
+        uint256 mortgageAmount =
+            mortgageProperty(s, propertyId, player, IGameToken(s.gameToken).balanceOf(player, address(this)));
         IGameToken(s.gameToken).transfer(address(this), address(this), player, mortgageAmount);
         emit PropertyMortgaged(propertyId, mortgageAmount, player);
     }
@@ -400,12 +387,9 @@ library GameBankLibrary {
         return mortgageAmount;
     }
 
-    function releaseMortgageAndTransfer(
-        GameBankStorage storage s,
-        uint8 propertyId,
-        address player
-    ) internal {
-        uint256 repaymentAmount = releaseMortgage(s, propertyId, player, IGameToken(s.gameToken).balanceOf(player, address(this)));
+    function releaseMortgageAndTransfer(GameBankStorage storage s, uint8 propertyId, address player) internal {
+        uint256 repaymentAmount =
+            releaseMortgage(s, propertyId, player, IGameToken(s.gameToken).balanceOf(player, address(this)));
         IGameToken(s.gameToken).transferFrom(address(this), player, address(this), address(this), repaymentAmount);
     }
 
@@ -422,14 +406,12 @@ library GameBankLibrary {
         return repaymentAmount;
     }
 
-    function upgradePropertyAndEmit(
-        GameBankStorage storage s,
-        uint8 propertyId,
-        uint8 _noOfUpgrade,
-        address player
-    ) internal {
-        uint256 amountToPay =
-            upgradeProperty(s, propertyId, _noOfUpgrade, player, IGameToken(s.gameToken).balanceOf(player, address(this)));
+    function upgradePropertyAndEmit(GameBankStorage storage s, uint8 propertyId, uint8 _noOfUpgrade, address player)
+        internal
+    {
+        uint256 amountToPay = upgradeProperty(
+            s, propertyId, _noOfUpgrade, player, IGameToken(s.gameToken).balanceOf(player, address(this))
+        );
         IGameToken(s.gameToken).transferFrom(address(this), player, address(this), address(this), amountToPay);
         emit PropertyUpGraded(propertyId);
     }
@@ -458,12 +440,9 @@ library GameBankLibrary {
         return amountToPay;
     }
 
-    function downgradePropertyAndEmit(
-        GameBankStorage storage s,
-        uint8 propertyId,
-        uint8 noOfDowngrade,
-        address player
-    ) internal {
+    function downgradePropertyAndEmit(GameBankStorage storage s, uint8 propertyId, uint8 noOfDowngrade, address player)
+        internal
+    {
         uint256 amountToReceive = downgradeProperty(s, propertyId, noOfDowngrade, player);
         IGameToken(s.gameToken).transfer(address(this), address(this), player, amountToReceive);
         emit PropertyDownGraded(propertyId);
@@ -507,11 +486,15 @@ library GameBankLibrary {
         return s.propertySwap[user];
     }
 
-    function getAllBankProperties(GameBankStorage storage s) internal view returns(MonopolyLibrary.PropertyG[] memory) {
+    function getAllBankProperties(GameBankStorage storage s)
+        internal
+        view
+        returns (MonopolyLibrary.PropertyG[] memory)
+    {
         return bankProperties(s);
     }
 
-    function bankProperties(GameBankStorage storage s) private view returns(MonopolyLibrary.PropertyG[] memory) {
+    function bankProperties(GameBankStorage storage s) private view returns (MonopolyLibrary.PropertyG[] memory) {
         MonopolyLibrary.PropertyG[] memory allProperties = new MonopolyLibrary.PropertyG[](s.propertySize);
         uint8 count = 0;
         for (uint8 i = 1; i <= s.propertySize; i++) {
@@ -530,15 +513,15 @@ library GameBankLibrary {
         view
         returns (MonopolyLibrary.PropertyG[] memory)
     {
-//        for (uint8 i = 1; i <= s.propertySize; i++) {
-//            if (s.bankGameProperties[i].owner == _playerAddress) {
-//                playerProperties[count] = s.bankGameProperties[i];
-//                count++;
-//            }
-//        }
-//        assembly {
-//            mstore(playerProperties, count)
-//        }
+        //        for (uint8 i = 1; i <= s.propertySize; i++) {
+        //            if (s.bankGameProperties[i].owner == _playerAddress) {
+        //                playerProperties[count] = s.bankGameProperties[i];
+        //                count++;
+        //            }
+        //        }
+        //        assembly {
+        //            mstore(playerProperties, count)
+        //        }
         MonopolyLibrary.PropertyG[] memory allProperties = bankProperties(s);
         MonopolyLibrary.PropertyG[] memory playerProperties = new MonopolyLibrary.PropertyG[](s.propertySize);
         uint8 count = 0;
@@ -549,5 +532,9 @@ library GameBankLibrary {
             }
         }
         return playerProperties;
+    }
+
+    function getPropertyById(GameBankStorage storage s, uint8 id) internal returns (MonopolyLibrary.PropertyG memory) {
+        return s.bankGameProperties[id];
     }
 }

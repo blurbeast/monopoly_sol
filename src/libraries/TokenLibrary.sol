@@ -25,9 +25,9 @@ library TokenLibrary {
     ) internal {
         uint256 allow = s.allowance[gameId][owner][spender];
         require(allow >= amount, "Insufficient allowance");
-//        if (allow != type(uint256).max) {
-//            s.allowance[gameId][owner][spender] -= amount;
-//        }
+        //        if (allow != type(uint256).max) {
+        //            s.allowance[gameId][owner][spender] -= amount;
+        //        }
         transfer(s, gameId, owner, to, amount);
     }
 

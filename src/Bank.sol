@@ -5,7 +5,7 @@ import {ReentrancyGuard} from "lib/openzeppelin-contracts/contracts/utils/Reentr
 import "./libraries/MonopolyLibrary.sol";
 import "./libraries/GameBankLibrary.sol";
 import "./libraries/TokenLibrary.sol";
-import { IGameToken, GameToken } from "./GameToken.sol";
+import {IGameToken, GameToken} from "./GameToken.sol";
 
 interface NFTContract {
     function getAllProperties() external view returns (MonopolyLibrary.Property[] memory);
@@ -13,7 +13,7 @@ interface NFTContract {
 
 contract GameBank is ReentrancyGuard {
     using GameBankLibrary for GameBankLibrary.GameBankStorage;
-//    using TokenLibrary for TokenLibrary.TokenStorage;
+    //    using TokenLibrary for TokenLibrary.TokenStorage;
 
     GameBankLibrary.GameBankStorage private s;
     TokenLibrary.TokenStorage private tokenStorage;
@@ -23,8 +23,8 @@ contract GameBank is ReentrancyGuard {
     }
 
     function mint(address to, uint256 amount) external {
-//        GameToken(tokenStorage.gameToken).mint(0, address(this));
-//        GameBankLibrary.mint(s, tokenStorage, to, amount);
+        //        GameToken(tokenStorage.gameToken).mint(0, address(this));
+        //        GameBankLibrary.mint(s, tokenStorage, to, amount);
     }
 
     function mints(address[] memory to, uint256 amount) external {
@@ -48,7 +48,7 @@ contract GameBank is ReentrancyGuard {
         );
     }
 
-    function getProperties() external returns(MonopolyLibrary.PropertyG[] memory) {
+    function getProperties() external returns (MonopolyLibrary.PropertyG[] memory) {
         return GameBankLibrary.getAllBankProperties(s);
     }
 
@@ -61,7 +61,7 @@ contract GameBank is ReentrancyGuard {
     }
 
     function mortgageProperty(uint8 propertyId, address player) external nonReentrant {
-        GameBankLibrary.mortgagePropertyAndEmit(s,  propertyId, player);
+        GameBankLibrary.mortgagePropertyAndEmit(s, propertyId, player);
     }
 
     function releaseMortgage(uint8 propertyId, address player) external nonReentrant {

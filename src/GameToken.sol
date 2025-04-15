@@ -9,7 +9,8 @@ interface IGameToken {
     function transfer(address gameId, address owner, address beneficiary, uint256 amount) external;
     function balanceOf(address owner, address contractAddress) external view returns (uint256);
     function approve(address gameId, address owner, address spender) external;
-    function transferFrom(address gameId, address owner, address spender, address beneficiary, uint256 amount) external;
+    function transferFrom(address gameId, address owner, address spender, address beneficiary, uint256 amount)
+        external;
 }
 
 contract GameToken {
